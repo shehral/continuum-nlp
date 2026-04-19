@@ -161,18 +161,21 @@ export default function DecisionDetailPage({
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {decision.entities.map((e) => (
-                      <Badge
-                        key={e.id}
-                        variant="outline"
-                        className={getEntityStyle(e.type)?.className}
-                      >
-                        {e.name}
-                        <span className="ml-1 opacity-60 text-[10px]">
-                          {e.type}
-                        </span>
-                      </Badge>
-                    ))}
+                    {decision.entities.map((e) => {
+                      const style = getEntityStyle(e.type)
+                      return (
+                        <Badge
+                          key={e.id}
+                          variant="outline"
+                          className={`${style.bg} ${style.text} ${style.border}`}
+                        >
+                          {e.name}
+                          <span className="ml-1 opacity-60 text-[10px]">
+                            {e.type}
+                          </span>
+                        </Badge>
+                      )
+                    })}
                   </div>
                 </CardContent>
               </Card>
