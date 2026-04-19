@@ -128,7 +128,7 @@ class Settings(BaseSettings):
 
     # App
     debug: bool = False
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = ["http://localhost:3000", "http://34.57.46.203:3000"]
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
