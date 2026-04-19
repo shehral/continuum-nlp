@@ -1,0 +1,23 @@
+{
+  "id": "conv-075",
+  "domain": "mobile",
+  "topic": "Push notification services comparison",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to add push notifications to our cross-platform app (React Native). Firebase Cloud Messaging or something else?"
+    },
+    {
+      "role": "assistant",
+      "content": "FCM (Firebase Cloud Messaging) is the most common but not the only option:\n\n**FCM** (Google):\n- Free, unlimited\n- Android native + iOS via APNs bridge\n- Topic-based messaging, analytics\n- Requires Firebase SDK (adds bundle size)\n- Google dependency\n\n**OneSignal**:\n- Free tier (10k subscribers)\n- Nice dashboard, segmentation, A/B testing\n- REST API for backend integration\n- Simpler setup than raw FCM\n\n**Expo Notifications** (if using Expo):\n- Built into Expo SDK\n- Handles FCM + APNs under the hood\n- Push token management handled for you\n- `expo-notifications` package\n\n**Amazon SNS + Pinpoint**:\n- AWS-native, pay per message\n- Good if you're already on AWS\n- More complex setup\n\nFor React Native + Expo: **Expo Notifications**. Simplest path — handles the platform differences for you."
+    },
+    {
+      "role": "user",
+      "content": "We're not on Expo, bare RN workflow. FCM it is then?"
+    },
+    {
+      "role": "assistant",
+      "content": "For bare React Native, **react-native-firebase** (`@react-native-firebase/messaging`) is the way:\n\n```bash\nnpm install @react-native-firebase/app @react-native-firebase/messaging\n```\n\nSetup:\n1. Create Firebase project, download `google-services.json` (Android) and `GoogleService-Info.plist` (iOS)\n2. Configure APNs key for iOS in Firebase Console\n3. Request permissions and get FCM token:\n\n```typescript\nimport messaging from '@react-native-firebase/messaging';\n\nawait messaging().requestPermission();\nconst token = await messaging().getToken();\n// Send token to your backend\n\n// Background handler\nmessaging().setBackgroundMessageHandler(async (msg) => {\n  console.log('Background message:', msg);\n});\n```\n\nBackend sending (Python):\n```python\nimport firebase_admin\nfrom firebase_admin import messaging\nmessaging.send(messaging.Message(\n    notification=messaging.Notification(title=\"Hello\", body=\"World\"),\n    token=device_token\n))\n```\n\nFCM handles both Android and iOS (bridges to APNs). One API for both platforms."
+    }
+  ]
+}

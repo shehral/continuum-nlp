@@ -1,0 +1,23 @@
+{
+  "id": "conv-017",
+  "domain": "devops",
+  "topic": "Terraform vs Pulumi for IaC",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Setting up infrastructure as code. Terraform or Pulumi? We're on AWS."
+    },
+    {
+      "role": "assistant",
+      "content": "Both are solid for AWS. Key difference is language:\n\n**Terraform (HCL)**:\n- Declarative HCL language (domain-specific)\n- Largest provider ecosystem\n- Mature state management\n- OpenTofu as open-source alternative\n- Every DevOps person knows it\n\n**Pulumi**:\n- Use real programming languages (TypeScript, Python, Go, C#)\n- Better for complex logic (loops, conditionals, abstractions)\n- Shares providers with Terraform under the hood\n- Built-in testing with standard test frameworks\n- Smaller community but growing\n\nWhat languages does your team know?"
+    },
+    {
+      "role": "user",
+      "content": "We're a typescript shop. The HCL syntax looks weird to us. But I'm worried about Pulumi's maturity."
+    },
+    {
+      "role": "assistant",
+      "content": "Pulumi with TypeScript is genuinely excellent for a TS team. Example:\n\n```typescript\nconst bucket = new aws.s3.Bucket('my-bucket', {\n  website: { indexDocument: 'index.html' }\n});\nexport const url = bucket.websiteEndpoint;\n```\n\nCompare Terraform:\n```hcl\nresource \"aws_s3_bucket\" \"my_bucket\" {\n  bucket = \"my-bucket\"\n}\nresource \"aws_s3_bucket_website_configuration\" \"my_bucket\" { ... }\n```\n\nPulumi maturity concerns are valid but mostly addressed:\n- AWS provider is complete (same as Terraform's)\n- State management via Pulumi Cloud (free tier) or self-managed S3 backend\n- Used by companies like Snowflake, Mercedes, Lemonade\n\nFor a TS team, I'd go Pulumi. The ability to write real functions, use npm packages, and test with Jest/Vitest is a massive productivity win over HCL."
+    }
+  ]
+}

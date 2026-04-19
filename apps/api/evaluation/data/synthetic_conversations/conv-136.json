@@ -1,0 +1,15 @@
+{
+  "id": "conv-136",
+  "domain": "data-engineering",
+  "topic": "Apache Beam vs Spark for unified batch/stream",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have both batch and stream processing. Currently Spark for batch and Flink for streaming. Can we unify? Heard about Apache Beam."
+    },
+    {
+      "role": "assistant",
+      "content": "Apache Beam is designed for unified batch + stream:\n\n- Write once, run on multiple runners (Spark, Flink, Dataflow)\n- Same code for batch and streaming\n- SDK in Java, Python, Go\n\n**Trade-offs**: Abstraction adds complexity, Python SDK has performance overhead vs native PySpark, smaller community.\n\n**Alternative: Just use Spark Structured Streaming** - unified DataFrame API, but higher streaming latency than Flink.\n\nFor your situation:\n- Latency <100ms matters: Keep Flink for streaming, Spark for batch\n- Seconds latency is fine: Consolidate to **Spark Structured Streaming**\n- Multi-runner portability matters: **Apache Beam**\n- On GCP: **Beam + Dataflow**"
+    }
+  ]
+}

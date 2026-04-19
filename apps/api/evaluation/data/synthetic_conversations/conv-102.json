@@ -1,0 +1,23 @@
+{
+  "id": "conv-102",
+  "domain": "web-development",
+  "topic": "Angular vs Vue vs React for enterprise app",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a large enterprise app (500+ screens). Angular, Vue, or React? Team of 30 frontend devs with mixed experience."
+    },
+    {
+      "role": "assistant",
+      "content": "For a large enterprise app with 30 devs:\n\n**Angular**:\n- Most opinionated (enforces structure)\n- Built-in: routing, forms, HTTP client, DI, RxJS\n- TypeScript-first from day one\n- Best for large teams (consistent patterns)\n- Steeper learning curve\n- Google-backed, used by Google internally\n\n**React**:\n- Most flexible, largest ecosystem\n- You choose everything (routing, state, forms)\n- More hiring pool than Angular/Vue\n- Risk: 30 devs making different architectural choices\n- Need strong conventions (Next.js helps)\n\n**Vue 3**:\n- Middle ground — more opinionated than React, less than Angular\n- Composition API is excellent\n- Nuxt 3 for full-stack framework\n- Smaller hiring pool in US/EU\n- Great documentation\n\nFor 30 devs and 500+ screens: **Angular** or **React + Next.js** with strict conventions. Angular's built-in structure prevents the chaos that React allows at scale. Next.js closes the gap with App Router conventions."
+    },
+    {
+      "role": "user",
+      "content": "We're leaning React because of hiring. How do we enforce consistency across 30 devs?"
+    },
+    {
+      "role": "assistant",
+      "content": "Enforcing React consistency at scale:\n\n**1. Framework**: Next.js App Router (enforces file structure, data fetching patterns)\n\n**2. Code generation**:\n- `plop` or `hygen` for component templates\n- Every component follows the same structure: component, tests, stories, types\n\n**3. Linting & Formatting**:\n- ESLint with strict rules + custom rules for project patterns\n- Prettier for formatting (no debates)\n- `eslint-plugin-react-compiler` for React 19\n- Lint-staged + Husky for pre-commit hooks\n\n**4. Shared patterns (documented + enforced)**:\n- Component library: shadcn/ui + custom design system\n- State management: Zustand for client, TanStack Query for server\n- Forms: React Hook Form + Zod validation\n- Testing: Vitest + Playwright\n\n**5. Architecture Decision Records (ADRs)**:\n- Document every \"how we do X\" decision\n- New devs read ADRs on day one\n\n**6. Monorepo with Turborepo**:\n- Shared packages for types, UI components, utilities\n- Enforce boundaries between features\n\n**7. PR reviews**: Require 2 approvals, one from a tech lead who enforces patterns."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-142",
+  "domain": "devops",
+  "topic": "GitOps for database migrations",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We do GitOps for app deployments (ArgoCD) but database migrations are still manual. How do we automate?"
+    },
+    {
+      "role": "assistant",
+      "content": "Database migrations in GitOps approaches:\n\n**1. Init container / Job**: K8s Job runs migrations before app starts. ArgoCD Sync Waves: migration Job runs at wave -1 before Deployment at wave 0.\n**2. Helm pre-upgrade hook**: Migration runs as a helm hook.\n**3. Operator-based**: SchemaHero - K8s operator for declarative schema management."
+    },
+    {
+      "role": "user",
+      "content": "How do we handle rollbacks? If a migration fails, ArgoCD rolls back the app but the DB is already migrated."
+    },
+    {
+      "role": "assistant",
+      "content": "Strategies:\n\n**1. Forward-only migrations** (recommended): Never write destructive migrations. Use expand-contract pattern. Old code works because schema is backwards-compatible. This is what GitHub, Shopify do.\n\n**2. Database branching**: Neon has branch/merge for databases. Create a DB branch for each deployment, switch back on failure.\n\n**Practical workflow**:\n1. PR includes app code + migration\n2. CI validates migration against test DB\n3. ArgoCD deploys: Wave -1 runs migration, Wave 0 deploys app\n4. If app fails health check, ArgoCD rolls back app - previous version works because migration was backwards-compatible\n\nKey principle: **make every migration backwards-compatible**. Then rollback is just deploying the old app code."
+    }
+  ]
+}

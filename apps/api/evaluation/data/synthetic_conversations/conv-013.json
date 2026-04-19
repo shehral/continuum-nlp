@@ -1,0 +1,23 @@
+{
+  "id": "conv-013",
+  "domain": "systems",
+  "topic": "Rust vs Go for a CLI tool",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a CLI tool that processes large log files (multiple GB). Rust or Go? Need it to be fast and distributable as a single binary."
+    },
+    {
+      "role": "assistant",
+      "content": "Both produce single binaries and are fast. Key tradeoffs:\n\n**Rust**:\n- Faster for CPU-bound processing (no GC pauses)\n- `clap` for CLI args is excellent\n- `rayon` for easy parallelism\n- Memory-safe without GC\n- Steeper learning curve (borrow checker)\n\n**Go**:\n- Faster development time\n- `cobra` for CLI, very ergonomic\n- Goroutines for easy concurrency\n- Cross-compilation is trivial (`GOOS=linux GOARCH=arm64 go build`)\n- GC pauses might matter for multi-GB processing\n\nFor log file processing specifically: if you're doing text parsing/regex, Rust's `regex` crate is 2-5x faster than Go's `regexp`. If you're doing network I/O alongside, Go's goroutines are simpler."
+    },
+    {
+      "role": "user",
+      "content": "Mostly text parsing and aggregation. Team knows neither language well. Which is faster to learn?"
+    },
+    {
+      "role": "assistant",
+      "content": "**Go is significantly faster to learn**. Most developers are productive in Go within a week. Rust's learning curve (ownership, lifetimes, borrow checker) takes weeks to months.\n\nHowever, for a CLI tool processing multi-GB log files:\n- Go will be 'fast enough' (hundreds of MB/sec with `bufio.Scanner`)\n- Development time difference: maybe 2 weeks in Go vs 4 weeks in Rust\n- For comparison, `ripgrep` (Rust) is ~3x faster than Go-based grep alternatives\n\nMy recommendation: **Go** unless raw speed is a hard requirement. Use `cobra` for CLI, `bufio` for streaming reads, and goroutines if you want parallel processing across files."
+    }
+  ]
+}

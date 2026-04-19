@@ -1,0 +1,23 @@
+{
+  "id": "conv-147",
+  "domain": "backend",
+  "topic": "OpenAPI spec-first vs code-first API design",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a new API. Should we write the OpenAPI spec first and generate code, or write code first and generate the spec?"
+    },
+    {
+      "role": "assistant",
+      "content": "**Spec-first**: API contract is source of truth. Frontend/backend work in parallel. Best for large teams.\n**Code-first**: Spec always in sync. Faster for small teams. Type system is source of truth.\n\nFor FastAPI: Code-first. Pydantic models -> OpenAPI spec automatically.\nFor TypeScript: Code-first with tsoa or Hono + Zod OpenAPI.\nFor large team with separate frontend/backend: Spec-first."
+    },
+    {
+      "role": "user",
+      "content": "We use FastAPI. How do we share the generated spec with our frontend team?"
+    },
+    {
+      "role": "assistant",
+      "content": "FastAPI auto-generates the spec at `/openapi.json`. Pipeline:\n\n1. Export spec in CI (extract from app.openapi())\n2. Generate TypeScript client: `npx @hey-api/openapi-ts -i openapi.json -o src/api`\n3. Run in CI to auto-generate on every backend change\n4. Breaking change detection: `npx oasdiff breaking openapi-main.json openapi-pr.json`\n\nThis gives you: FastAPI's code-first DX + auto-generated type-safe frontend client + breaking change detection."
+    }
+  ]
+}

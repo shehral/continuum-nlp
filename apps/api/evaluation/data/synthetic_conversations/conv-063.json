@@ -1,0 +1,23 @@
+{
+  "id": "conv-063",
+  "domain": "devops",
+  "topic": "Pulumi vs AWS CDK for TypeScript infrastructure",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're a TypeScript team on AWS. Pulumi or AWS CDK for IaC? Both use TS."
+    },
+    {
+      "role": "assistant",
+      "content": "Both let you write TypeScript IaC. Key differences:\n\n**AWS CDK**:\n- AWS-only (by design)\n- Higher-level constructs (L2/L3 abstractions)\n- CloudFormation under the hood\n- Free (uses CF for state)\n- AWS-blessed, first-party support\n- Large construct library (aws-cdk-lib)\n\n**Pulumi**:\n- Multi-cloud (AWS, GCP, Azure, Kubernetes, Cloudflare)\n- Thinner abstraction over cloud APIs\n- Own state management (Pulumi Cloud or S3)\n- Better testing story (unit tests with real assertions)\n- Community packages (awsx for higher-level constructs)\n\nIf you're 100% AWS: **CDK** has richer abstractions and zero cost.\nIf multi-cloud is possible: **Pulumi** for portability.\nIf you want better testing: **Pulumi** (CDK testing requires synthesizing CF templates)."
+    },
+    {
+      "role": "user",
+      "content": "What about CF limits? I've heard CDK generates massive CloudFormation templates that hit size limits."
+    },
+    {
+      "role": "assistant",
+      "content": "The CloudFormation 500-resource limit per stack is a real problem with CDK at scale. Solutions:\n\n1. **Split stacks** — CDK supports nested stacks and cross-stack references\n2. **Use L1 constructs** — L2/L3 constructs generate more CF resources than you'd expect\n3. **CDK Migrate** — Import existing resources to avoid recreating them\n\nPulumi doesn't have this issue — it calls AWS APIs directly, no CF intermediary. No stack size limits, faster deployments (parallel resource creation), and better error messages (no CF rollback delays).\n\nThe CF bottleneck is the #1 reason teams switch from CDK to Pulumi. A CDK deployment that takes 20 minutes due to CF stack updates might take 3 minutes with Pulumi's direct API calls.\n\nIf you're building significant infrastructure (50+ resources), Pulumi's architecture advantage becomes meaningful."
+    }
+  ]
+}

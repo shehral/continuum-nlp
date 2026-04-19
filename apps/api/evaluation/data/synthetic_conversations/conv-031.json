@@ -1,0 +1,23 @@
+{
+  "id": "conv-031",
+  "domain": "backend",
+  "topic": "Monorepo vs polyrepo for microservices",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have 8 microservices, currently in separate repos. Thinking of moving to a monorepo. Good idea or nightmare?"
+    },
+    {
+      "role": "assistant",
+      "content": "Depends on your team size and tooling tolerance:\n\n**Monorepo benefits**:\n- Atomic cross-service changes (one PR updates API + client)\n- Shared code without publishing packages\n- Consistent tooling, linting, CI\n- Easier dependency management\n\n**Monorepo challenges**:\n- CI/CD needs --affected logic (only build what changed)\n- Repo gets large (needs sparse checkout or virtual FS)\n- Permission management is harder\n- Requires tooling: Turborepo, Nx, Bazel, or Pants\n\n**Polyrepo benefits**:\n- Clear ownership boundaries\n- Independent deploy cycles\n- Simpler CI per service\n\nFor 8 services with a single team: **monorepo makes sense**. For 8 services with 8 independent teams: keep polyrepo.\n\nWhat's your team structure?"
+    },
+    {
+      "role": "user",
+      "content": "One team of 12 devs. We use typescript for all services. What tool for the monorepo?"
+    },
+    {
+      "role": "assistant",
+      "content": "For a TypeScript monorepo with 12 devs:\n\n**Turborepo** is the best fit:\n- Built for JS/TS ecosystems\n- Task caching (local + remote via Vercel)\n- `--affected` flag for building only changed packages\n- Works with pnpm workspaces\n- Simple `turbo.json` config\n\nStructure:\n```\nmonorepo/\n├── apps/\n│   ├── service-a/     # Each microservice\n│   ├── service-b/\n│   └── web-app/\n├── packages/\n│   ├── shared-types/  # Shared TypeScript types\n│   ├── db-client/     # Shared database client\n│   └── logger/        # Shared logging\n├── turbo.json\n├── pnpm-workspace.yaml\n└── package.json\n```\n\nUse **pnpm** as the package manager (faster than npm/yarn for monorepos, strict dependency hoisting)."
+    }
+  ]
+}

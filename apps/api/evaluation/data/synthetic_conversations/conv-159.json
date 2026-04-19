@@ -1,0 +1,23 @@
+{
+  "id": "conv-159",
+  "domain": "systems",
+  "topic": "Building a distributed key-value store",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a distributed key-value store as a learning project in Go. What consensus algorithm should I use? Raft or Paxos?"
+    },
+    {
+      "role": "assistant",
+      "content": "For a learning project: **Raft**, without question.\n\n**Raft**:\n- Designed to be understandable (that was the explicit goal)\n- Leader election + log replication + safety\n- Etcd, CockroachDB, TiKV all use Raft\n- Great Go implementations: `hashicorp/raft`, `etcd/raft`\n- Paper is readable in an afternoon\n\n**Paxos**:\n- Theoretically elegant but notoriously hard to understand\n- Multi-Paxos (practical version) has many variants\n- Fewer reference implementations\n- Google Spanner uses a variant\n\n**For your Go KV store**, use `hashicorp/raft`:\n1. Implement the `FSM` (Finite State Machine) interface for your KV operations\n2. Raft handles leader election, log replication, snapshotting\n3. You focus on the KV logic, not consensus internals\n\nAlternative: Look at `dragonboat` (Go) - high-performance multi-group Raft library."
+    },
+    {
+      "role": "user",
+      "content": "How does hashicorp/raft work at a high level?"
+    },
+    {
+      "role": "assistant",
+      "content": "hashicorp/raft provides the consensus layer. You provide the state machine:\n\n```go\n// Your FSM implements three methods:\ntype KVStore struct {\n    data map[string]string\n    mu   sync.RWMutex\n}\n\n// Apply - called when Raft commits a log entry\nfunc (k *KVStore) Apply(log *raft.Log) interface{} {\n    var cmd Command\n    json.Unmarshal(log.Data, &cmd)\n    k.mu.Lock()\n    defer k.mu.Unlock()\n    switch cmd.Op {\n    case \"set\":\n        k.data[cmd.Key] = cmd.Value\n    case \"delete\":\n        delete(k.data, cmd.Key)\n    }\n    return nil\n}\n\n// Snapshot - for compacting the log\nfunc (k *KVStore) Snapshot() (raft.FSMSnapshot, error) { ... }\n\n// Restore - rebuild state from snapshot\nfunc (k *KVStore) Restore(rc io.ReadCloser) error { ... }\n```\n\n**Write path**: Client -> Leader -> `raft.Apply(command)` -> Raft replicates to majority -> `FSM.Apply()` called on all nodes -> Response to client.\n\n**Read path**: Can read from leader (strong consistency) or any node (eventual consistency).\n\nYou get: leader election, log replication, membership changes, snapshotting. All for free. You just implement the state machine."
+    }
+  ]
+}

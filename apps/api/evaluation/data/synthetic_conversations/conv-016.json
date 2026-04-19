@@ -1,0 +1,23 @@
+{
+  "id": "conv-016",
+  "domain": "backend",
+  "topic": "Express.js vs Fastify vs Hono for Node API",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a lightweight node.js API server. Express feels dated. Looking at Fastify and Hono. What's the current best practice?"
+    },
+    {
+      "role": "assistant",
+      "content": "All three work, but they have different sweet spots:\n\n**Express.js**:\n- Still the most used, huge middleware ecosystem\n- v5 finally released, better async error handling\n- Slower than alternatives (but rarely a bottleneck)\n\n**Fastify**:\n- 2-3x faster than Express\n- Schema-based validation (JSON Schema)\n- Plugin architecture, encapsulation\n- TypeScript support is good\n- Drop-in Express compatibility layer\n\n**Hono**:\n- Ultralight (~14KB), runs everywhere (Node, Deno, Bun, Workers, Lambda)\n- Fastest of the three\n- Built-in middleware (CORS, JWT, etc.)\n- Web Standards API (Request/Response)\n- Great TypeScript support with RPC-like client\n\nFor a new project: **Hono** if you want modern and portable, **Fastify** if you want mature and fast."
+    },
+    {
+      "role": "user",
+      "content": "We might deploy to cloudflare workers eventually. Does that matter?"
+    },
+    {
+      "role": "assistant",
+      "content": "That's a big deal - **Hono** is the clear winner for Cloudflare Workers:\n\n- Designed for edge runtimes from the start\n- Same code runs on Workers, Node, Deno, Bun without changes\n- No Node.js-specific APIs (uses Web Standards)\n- Built-in adapters for every runtime\n\nFastify and Express are Node.js-specific and won't run on Workers without significant adaptation. You'd need to rewrite the HTTP layer.\n\nHono + Workers gives you:\n- Sub-millisecond cold starts\n- Global deployment (300+ edge locations)\n- D1 (SQLite at edge) or Turso for database\n- KV and R2 for storage\n\nThe DX is great: `wrangler dev` for local development, `wrangler deploy` for production."
+    }
+  ]
+}

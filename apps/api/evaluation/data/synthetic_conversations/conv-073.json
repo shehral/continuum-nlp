@@ -1,0 +1,23 @@
+{
+  "id": "conv-073",
+  "domain": "mobile",
+  "topic": "Swift Concurrency vs Combine for async iOS",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Refactoring our iOS app's networking layer. Currently using Combine but Swift Concurrency (async/await) seems simpler. Should we migrate?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, migrate to **Swift Concurrency**:\n\n**Swift Concurrency (async/await)**:\n- First-class language feature (not a framework)\n- Structured concurrency with task groups\n- Actor isolation for thread safety\n- Much more readable than Combine chains\n- Apple is investing heavily here\n\n**Combine**:\n- Reactive streams (publisher/subscriber pattern)\n- Good for continuous data streams (keyboard input, real-time updates)\n- Complex operator chains are hard to debug\n- Apple has deprioritized new Combine features\n\nFor networking: async/await is dramatically simpler:\n```swift\n// Combine\nURLSession.shared.dataTaskPublisher(for: url)\n    .map(\\.data)\n    .decode(type: User.self, decoder: JSONDecoder())\n    .receive(on: DispatchQueue.main)\n    .sink(receiveCompletion: ..., receiveValue: ...)\n    .store(in: &cancellables)\n\n// async/await\nlet (data, _) = try await URLSession.shared.data(from: url)\nlet user = try JSONDecoder().decode(User.self, from: data)\n```"
+    },
+    {
+      "role": "user",
+      "content": "We use Combine for SwiftUI bindings too. Can we keep those?"
+    },
+    {
+      "role": "assistant",
+      "content": "SwiftUI has moved away from Combine too:\n\n- **@Observable** (iOS 17+) replaces `ObservableObject` + `@Published` — no Combine needed\n- **AsyncSequence** replaces Combine publishers for streaming data\n- **SwiftUI .task modifier** replaces Combine `.onReceive`\n\n```swift\n// Old (Combine)\nclass UserViewModel: ObservableObject {\n    @Published var users: [User] = []\n}\n\n// New (Observation)\n@Observable class UserViewModel {\n    var users: [User] = []  // No @Published needed\n}\n```\n\nMigration path:\n1. Replace networking Combine chains with async/await (biggest win)\n2. Replace ObservableObject with @Observable (iOS 17+)\n3. Keep Combine only for genuinely reactive streams (WebSockets, real-time data)\n\nThe Apple ecosystem is clearly moving to structured concurrency. Combine isn't deprecated but it's in maintenance mode."
+    }
+  ]
+}

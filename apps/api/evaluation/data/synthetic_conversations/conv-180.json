@@ -1,0 +1,15 @@
+{
+  "id": "conv-180",
+  "domain": "mobile",
+  "topic": "React Native performance optimization",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our React Native app is janky - drops frames during scrolling and navigation transitions. How do we fix it?"
+    },
+    {
+      "role": "assistant",
+      "content": "RN performance optimization checklist:\n\n**1. Enable the new architecture** (React Native 0.76+):\n- Fabric renderer (better rendering pipeline)\n- TurboModules (lazy native module loading)\n- Hermes engine (should already be default)\n\n**2. Fix common jank causes**:\n\n**FlatList optimization**:\n```tsx\n<FlatList\n  data={items}\n  renderItem={renderItem}  // Use useCallback!\n  keyExtractor={item => item.id}\n  removeClippedSubviews={true}\n  maxToRenderPerBatch={10}\n  windowSize={5}\n  getItemLayout={(data, index) => ({  // Skip measurement\n    length: ITEM_HEIGHT,\n    offset: ITEM_HEIGHT * index,\n    index,\n  })}\n/>\n```\n\n**3. Use `react-native-reanimated` for animations**:\n- Runs on UI thread (not JS thread)\n- 60fps smooth animations\n- Replace Animated API with Reanimated\n\n**4. Avoid re-renders**:\n- `React.memo()` on list items\n- `useCallback` for event handlers passed as props\n- Profile with React DevTools (highlight re-renders)\n\n**5. Use Flashlist instead of FlatList**:\n- Drop-in replacement by Shopify\n- Recycles views (like native RecyclerView)\n- 5-10x faster than FlatList for long lists\n\n**Debugging**: Use Flipper or React Native DevTools to identify JS thread bottlenecks vs UI thread bottlenecks."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-098",
+  "domain": "ml",
+  "topic": "MLOps: model deployment with BentoML vs Ray Serve",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to deploy multiple ML models in production (NLP + CV). BentoML or Ray Serve?"
+    },
+    {
+      "role": "assistant",
+      "content": "Different strengths:\n\n**BentoML**:\n- Package models into standardized 'Bentos' (containers)\n- Framework-agnostic (PyTorch, TF, sklearn, XGBoost, etc.)\n- Adaptive batching for throughput optimization\n- BentoCloud for managed deployment\n- Simple API:\n```python\n@bentoml.service\nclass MyService:\n    model = bentoml.pytorch.get(\"my_model:latest\")\n    \n    @bentoml.api\n    async def predict(self, input: np.ndarray) -> dict:\n        return self.model(input)\n```\n\n**Ray Serve**:\n- Part of Ray ecosystem (distributed computing)\n- Composable model graphs (chain models, A/B test)\n- Horizontal scaling across a cluster\n- Integrates with Ray Train, Ray Data\n- Better for complex inference pipelines\n\nFor simple model serving: **BentoML** (simpler, faster to deploy).\nFor complex pipelines (NLP → CV → post-processing): **Ray Serve** (composable deployments)."
+    },
+    {
+      "role": "user",
+      "content": "We need to chain models: text classification → entity extraction → image generation. That sounds like Ray Serve?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, multi-model chaining is Ray Serve's sweet spot:\n\n```python\nfrom ray import serve\n\n@serve.deployment\nclass TextClassifier:\n    def predict(self, text): ...\n\n@serve.deployment\nclass EntityExtractor:\n    def extract(self, text, category): ...\n\n@serve.deployment\nclass ImageGenerator:\n    def generate(self, prompt): ...\n\n@serve.deployment\nclass Pipeline:\n    def __init__(self, classifier, extractor, generator):\n        self.classifier = classifier\n        self.extractor = extractor\n        self.generator = generator\n    \n    async def __call__(self, request):\n        text = request.json()[\"text\"]\n        category = await self.classifier.predict.remote(text)\n        entities = await self.extractor.extract.remote(text, category)\n        image = await self.generator.generate.remote(entities)\n        return {\"category\": category, \"entities\": entities, \"image\": image}\n```\n\nEach model scales independently. If image generation is the bottleneck, scale just that deployment. Ray handles load balancing, health checks, and rolling updates.\n\nDeploy on a Ray cluster (KubeRay on K8s) for production. Each model can have different resource requirements (CPU for text, GPU for image gen)."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "conv-194",
+  "domain": "data-engineering",
+  "topic": "Exploring lakehouse with DuckDB for local analytics",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Can DuckDB replace our need for a cloud data warehouse? We're a small team with ~100GB of data."
+    },
+    {
+      "role": "assistant",
+      "content": "For 100GB, DuckDB is surprisingly viable:\n\n**What DuckDB can do**:\n- Query Parquet files directly on S3 (no loading step)\n- Join across CSV, Parquet, JSON, and even Postgres\n- Full SQL support (window functions, CTEs, pivots)\n- Process 100GB on a laptop with 16GB RAM (out-of-core processing)\n- Runs in Python, Node.js, R, CLI, or as a library\n\n**DuckDB as a \"data warehouse\"**:\n```python\nimport duckdb\n\n# Query S3 directly\nresult = duckdb.sql(\"\"\"\n    SELECT date_trunc('month', created_at) as month,\n           sum(amount) as revenue\n    FROM 's3://our-bucket/orders/*.parquet'\n    WHERE created_at >= '2025-01-01'\n    GROUP BY 1\n    ORDER BY 1\n\"\"\")\n```\n\n**When DuckDB replaces a warehouse**:\n- <500GB of data\n- Small team (1-5 analysts)\n- Batch analytics (not real-time dashboards with concurrent users)\n- Can run queries locally or on a single server\n\n**When you still need Snowflake/BigQuery**:\n- Concurrent users hitting dashboards (DuckDB is single-user)\n- >500GB requiring distributed processing\n- Need governance, access control, audit logging\n- Real-time data (DuckDB is batch-oriented)\n\nFor a small team with 100GB: **DuckDB + dbt-duckdb + Parquet on S3** can be your entire analytics stack at $0/month compute cost."
+    }
+  ]
+}

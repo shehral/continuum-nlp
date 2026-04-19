@@ -1,0 +1,23 @@
+{
+  "id": "conv-081",
+  "domain": "systems",
+  "topic": "Zig vs Rust for systems programming",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Interested in systems programming. Everyone talks about Rust but I've seen Zig mentioned. How do they compare?"
+    },
+    {
+      "role": "assistant",
+      "content": "Both are modern systems languages but with very different philosophies:\n\n**Rust**:\n- Memory safety via ownership/borrow checker (compile-time guarantees)\n- Rich type system (enums, traits, generics)\n- Large ecosystem (crates.io, 140k+ packages)\n- Steep learning curve (borrow checker)\n- Zero-cost abstractions\n- Used by: Firefox, Cloudflare, Discord, Linux kernel\n\n**Zig**:\n- Manual memory management (no borrow checker, no GC)\n- Comptime (compile-time code execution) — powerful metaprogramming\n- C interop without FFI bindings (import C headers directly)\n- Simpler language (smaller spec than Rust)\n- Can be used as a C/C++ compiler/build system\n- Used by: Bun, TigerBeetle, Uber (for cross-compilation)\n\nKey philosophical difference: Rust prevents bugs at compile time. Zig provides tools to find bugs but trusts the programmer more."
+    },
+    {
+      "role": "user",
+      "content": "What would Zig be better for specifically?"
+    },
+    {
+      "role": "assistant",
+      "content": "Zig excels at:\n\n1. **Cross-compilation** — `zig cc` is the best C/C++ cross-compiler. Build for any target from any host. This is why Uber uses it.\n\n2. **C library replacement** — Zig can drop into C codebases seamlessly. Import `stdio.h` directly, link with C libraries without bindings.\n\n3. **Performance-critical code with manual control** — No hidden allocations, no hidden control flow. Explicit allocator passing:\n```zig\nvar list = std.ArrayList(u8).init(allocator);\ndefer list.deinit();\n```\n\n4. **Embedded systems** — Smaller runtime than Rust, no libstd requirement, fine-grained control.\n\n5. **Build systems** — Zig's build system (`build.zig`) replaces CMake/Meson for C/C++ projects.\n\nZig is worse for: web services (use Rust/Go), application development (smaller ecosystem), anything where you want the compiler to catch memory bugs for you."
+    }
+  ]
+}

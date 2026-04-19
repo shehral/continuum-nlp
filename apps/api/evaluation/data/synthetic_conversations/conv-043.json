@@ -1,0 +1,23 @@
+{
+  "id": "conv-043",
+  "domain": "backend",
+  "topic": "SQLAlchemy vs SQLModel for Python ORM",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a FastAPI app. Should I use SQLAlchemy or SQLModel for the ORM? I see SQLModel was made by the same guy who made FastAPI."
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, Tiangolo created both. Here's the tradeoff:\n\n**SQLModel**:\n- Combines SQLAlchemy + Pydantic in one model\n- Less boilerplate (one class for DB model + API schema)\n- Designed for FastAPI integration\n- Younger, fewer advanced features\n- Limited async support\n\n**SQLAlchemy 2.0**:\n- Industry standard, extremely mature\n- Full async support with `asyncpg`\n- Advanced features: CTEs, window functions, custom types\n- Separate models from schemas (more code but clearer)\n- Better for complex domains\n\nFor a simple CRUD API: **SQLModel** is faster to develop.\nFor anything complex or async-first: **SQLAlchemy 2.0** with separate Pydantic schemas."
+    },
+    {
+      "role": "user",
+      "content": "We need async since we're doing websockets. SQLAlchemy then?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, **SQLAlchemy 2.0 + async** is the way:\n\n```python\nfrom sqlalchemy.ext.asyncio import create_async_engine, AsyncSession\nfrom sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column\n\nengine = create_async_engine(\"postgresql+asyncpg://...\")\n\nclass Base(DeclarativeBase):\n    pass\n\nclass User(Base):\n    __tablename__ = \"users\"\n    id: Mapped[int] = mapped_column(primary_key=True)\n    name: Mapped[str] = mapped_column(String(100))\n```\n\nKey pieces:\n- `asyncpg` as the PostgreSQL driver (fastest async driver)\n- `AsyncSession` for async database operations\n- `Alembic` for migrations (works with async too)\n- Separate Pydantic v2 models for request/response schemas\n\nThis is exactly the stack Continuum uses - it handles WebSocket + async DB operations well."
+    }
+  ]
+}

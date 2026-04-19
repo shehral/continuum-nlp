@@ -1,0 +1,23 @@
+{
+  "id": "conv-094",
+  "domain": "cloud-architecture",
+  "topic": "Disaster recovery: RTO/RPO strategies on AWS",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We need a DR strategy for our production system. Currently single-region. What are the options and what do they cost?"
+    },
+    {
+      "role": "assistant",
+      "content": "AWS DR strategies, ordered by cost and RTO/RPO:\n\n**1. Backup & Restore** (cheapest)\n- RPO: Hours | RTO: Hours\n- Cross-region S3 backups, RDS automated snapshots\n- Restore from backup in DR region on failure\n- Cost: ~$50-100/month (storage only)\n\n**2. Pilot Light**\n- RPO: Minutes | RTO: 30-60 minutes\n- Core infra running in DR region (DB replica, minimal compute)\n- Scale up on failover\n- Cost: ~20% of production\n\n**3. Warm Standby**\n- RPO: Seconds | RTO: Minutes\n- Scaled-down copy of production running in DR region\n- Route 53 health checks trigger failover\n- Cost: ~50% of production\n\n**4. Active-Active** (most expensive)\n- RPO: ~0 | RTO: ~0\n- Full production in both regions\n- Route 53 latency routing splits traffic\n- Cost: ~100%+ of production\n\nFor most startups/SMBs: **Pilot Light** is the sweet spot. You get sub-hour recovery without doubling your bill."
+    },
+    {
+      "role": "user",
+      "content": "We're a B2B SaaS with 99.9% SLA. Pilot Light enough?"
+    },
+    {
+      "role": "assistant",
+      "content": "99.9% SLA = max 8.7 hours downtime/year. Pilot Light's 30-60 min RTO gives you significant margin.\n\nPilot Light setup for your B2B SaaS:\n\n**Always running in DR region**:\n- RDS read replica (async replication, ~seconds lag)\n- ElastiCache Redis replica\n- Core infra: VPC, security groups, IAM roles\n- Container images in ECR (replicated)\n\n**Spun up on failover**:\n- ECS tasks / EC2 instances (from launch templates)\n- ALB + target groups\n- DNS switch via Route 53 health check failover\n\n**Automation** (critical):\n- CloudFormation/Terraform for DR infra (tested monthly)\n- Lambda-triggered failover runbook\n- Promote RDS read replica to primary\n- Route 53 DNS failover (automated via health checks)\n\n**Cost estimate**: ~$200-400/month for pilot light (mainly RDS replica + minimal compute)\n\n**Key**: Test failover quarterly. A DR plan that hasn't been tested doesn't work. Run \"game days\" where you simulate failure and measure actual RTO."
+    }
+  ]
+}

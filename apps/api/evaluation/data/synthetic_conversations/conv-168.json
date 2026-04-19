@@ -1,0 +1,15 @@
+{
+  "id": "conv-168",
+  "domain": "web-development",
+  "topic": "Form handling: React Hook Form vs Conform",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building forms in Next.js App Router. React Hook Form or Conform? We need server-side validation."
+    },
+    {
+      "role": "assistant",
+      "content": "For Next.js App Router with Server Actions:\n\n**React Hook Form + Zod**:\n- Most popular (client-side focused)\n- Excellent DX with `useForm`, field-level validation\n- Server validation requires manual integration with Server Actions\n- Large ecosystem (shadcn/ui Form component uses it)\n\n**Conform**:\n- Built for Server Actions and progressive enhancement\n- Works without JavaScript (forms submit normally)\n- Server-side validation is first-class\n- Integrates with Zod schemas\n- Smaller community\n\nFor App Router with Server Actions: **Conform** aligns better because:\n- Progressive enhancement (works without JS)\n- Server validation is native, not bolted on\n- Integrates with `useFormState` / `useActionState`\n\nFor client-heavy SPAs or if using shadcn/ui Form: **React Hook Form** (better ecosystem, shadcn integration).\n\nPractical choice: If you're using shadcn/ui, stick with React Hook Form (shadcn's Form component is built on it). If you're building custom forms with Server Actions, Conform is cleaner."
+    }
+  ]
+}

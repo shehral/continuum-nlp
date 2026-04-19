@@ -1,0 +1,23 @@
+{
+  "id": "conv-150",
+  "domain": "data-engineering",
+  "topic": "Data contracts between teams",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our data pipeline keeps breaking because upstream teams change their schemas without telling us. How do we enforce data contracts?"
+    },
+    {
+      "role": "assistant",
+      "content": "Data contracts are formal agreements between producer and consumer defining schema, SLAs, quality expectations, and ownership.\n\n**Tools**:\n1. **Soda** - Data quality checks in YAML\n2. **DataHub / OpenMetadata** - Data catalog with schema versioning and change notifications\n3. **Protobuf/Avro + Schema Registry** - Enforces schema evolution rules for streaming\n4. **dbt contracts** (dbt 1.5+) - Enforced column types and constraints on models"
+    },
+    {
+      "role": "user",
+      "content": "We use Kafka + Snowflake. What's the practical setup?"
+    },
+    {
+      "role": "assistant",
+      "content": "For Kafka + Snowflake:\n\n**Kafka side**: Confluent Schema Registry with Avro/Protobuf schemas. Schema evolution rules (BACKWARD, FORWARD, FULL) enforced at publish time. Breaking change = rejected.\n\n**Snowflake side**: dbt contracts on staging models enforce column types. Soda checks after each load verify freshness, completeness, uniqueness.\n\n**Alerting**: Soda/dbt failures -> Slack/PagerDuty -> upstream team fixes their producer. The contract makes responsibility clear."
+    }
+  ]
+}

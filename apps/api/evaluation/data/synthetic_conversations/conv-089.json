@@ -1,0 +1,15 @@
+{
+  "id": "conv-089",
+  "domain": "security",
+  "topic": "Container image scanning in CI",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We need to scan our Docker images for vulnerabilities in CI. Trivy, Grype, or Snyk Container?"
+    },
+    {
+      "role": "assistant",
+      "content": "Quick comparison:\n\n**Trivy** (Aqua Security):\n- Free, open-source\n- Scans: container images, filesystems, git repos, IaC, K8s\n- Fast (local DB, no API calls)\n- SBOM generation\n- Best all-around scanner\n\n**Grype** (Anchore):\n- Free, open-source\n- SBOM-powered (pairs with Syft for SBOM generation)\n- Fast, similar to Trivy\n- Focused purely on vulnerability scanning\n\n**Snyk Container**:\n- Freemium (100 tests/month free)\n- Best fix suggestions (tells you which base image to use)\n- IDE integration\n- License compliance checking\n- More expensive at scale\n\nFor CI: **Trivy**. It's free, fast, and covers the most ground:\n\n```yaml\n# GitHub Actions\n- name: Scan image\n  uses: aquasecurity/trivy-action@master\n  with:\n    image-ref: 'myapp:latest'\n    severity: 'CRITICAL,HIGH'\n    exit-code: '1'  # Fail CI on critical/high vulns\n```\n\nAdd `--ignore-unfixed` to skip vulnerabilities without patches (reduces noise)."
+    }
+  ]
+}

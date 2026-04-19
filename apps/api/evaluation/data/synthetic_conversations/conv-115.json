@@ -1,0 +1,23 @@
+{
+  "id": "conv-115",
+  "domain": "systems",
+  "topic": "Lock-free data structures in Rust",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a concurrent queue for our Rust service. Lock-free or just use a Mutex? Processing 1M+ messages/sec."
+    },
+    {
+      "role": "assistant",
+      "content": "At 1M+ msg/sec, lock contention matters. Options:\n\n**Lock-based (simpler)**:\n- `tokio::sync::mpsc` — Multi-producer, single-consumer channel. Async-ready.\n- `crossbeam::channel` — Fastest bounded MPMC channel. Sync.\n- `std::sync::Mutex<VecDeque>` — Simple but high contention at scale.\n\n**Lock-free**:\n- `crossbeam::queue::ArrayQueue` — Bounded, lock-free MPMC queue\n- `crossbeam::queue::SegQueue` — Unbounded, lock-free MPMC queue\n- `flume` — Fast, lock-free MPSC/MPMC channels\n\n**For 1M+ msg/sec recommendations**:\n\n1. **Single consumer**: `tokio::sync::mpsc` (async) or `crossbeam::channel` (sync). Both handle 10M+ msg/sec.\n\n2. **Multiple consumers**: `crossbeam::channel` (bounded) or `flume`. Both MPMC, both fast.\n\n3. **Custom lock-free**: Only if profiling shows channel overhead matters. The well-tested crates above are almost always sufficient.\n\nBenchmark reality: `crossbeam::channel` with bounded capacity handles 20M+ messages/sec on modern hardware. The bottleneck at 1M msg/sec is almost certainly NOT the queue — it's your message processing logic."
+    },
+    {
+      "role": "user",
+      "content": "Good point. We should profile first. What's the best way to profile a Rust service?"
+    },
+    {
+      "role": "assistant",
+      "content": "Profiling Rust services:\n\n**CPU profiling**:\n1. **`perf` + `flamegraph`** (Linux, best option):\n```bash\ncargo install flamegraph\ncargo flamegraph --bin myservice -- --args\n```\nGenerates an SVG flame graph showing where CPU time is spent.\n\n2. **`samply`** (macOS + Linux):\n```bash\ncargo install samply\ncargo build --release\nsamply record ./target/release/myservice\n```\nOpens Firefox Profiler with detailed call stacks.\n\n**Memory profiling**:\n1. **DHAT** (via `dhat` crate):\n```rust\n#[global_allocator]\nstatic ALLOC: dhat::Alloc = dhat::Alloc;\nfn main() {\n    let _profiler = dhat::Profiler::new_heap();\n    // ... your code ...\n}\n```\nShows allocation hotspots, leaks, short-lived allocations.\n\n2. **jemalloc profiling** (for production):\n- Enable jemalloc with profiling: `_RJEM_MALLOC_CONF=prof:true`\n\n**Async profiling** (tokio):\n- `tokio-console` — Real-time dashboard for async tasks, shows task polling times, wake counts.\n```bash\ncargo install tokio-console\n# Add to your app: console-subscriber dependency\ntokio-console\n```\n\nStart with `flamegraph` for CPU bottlenecks, `tokio-console` for async issues."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-006",
+  "domain": "devops",
+  "topic": "GitHub Actions vs CircleCI for CI/CD",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to set up CI/CD. Currently nothing automated. Considering GHA or CircleCI. We're on GitHub already."
+    },
+    {
+      "role": "assistant",
+      "content": "Since you're on GitHub, **GitHub Actions** is the natural choice:\n\n**GitHub Actions (GHA)**:\n- Native integration (no external service)\n- Free tier: 2,000 min/month for private repos\n- Huge marketplace of actions\n- Matrix builds, reusable workflows\n- OIDC for secure cloud deployments\n\n**CircleCI**:\n- More powerful caching and parallelism\n- Better Docker layer caching\n- Orbs (reusable configs) are mature\n- Free tier: 6,000 min/month\n\nCircleCI's advantage is really in large-scale builds with complex caching needs. For most teams, GHA is simpler and 'just works' with GitHub."
+    },
+    {
+      "role": "user",
+      "content": "We have a monorepo with a nextjs frontend and python backend. Build times are already like 8 mins locally. Will GHA handle that?"
+    },
+    {
+      "role": "assistant",
+      "content": "8 minutes is fine for GitHub Actions. To optimize:\n\n1. **Parallel jobs** - Run frontend and backend CI in parallel (separate jobs in same workflow)\n2. **Caching** - Cache `node_modules` (via `actions/cache` or `pnpm`'s built-in caching), cache `.venv` for Python deps\n3. **Turborepo** - If you switch to Turborepo for the monorepo, its remote caching can dramatically speed up builds\n4. **Skip unchanged** - Use path filters to only run frontend CI when `apps/web/**` changes\n\nRealistic expectation: 3-4 min CI runs with proper caching and parallelism on GHA."
+    }
+  ]
+}

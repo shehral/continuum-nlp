@@ -1,0 +1,15 @@
+{
+  "id": "conv-185",
+  "domain": "systems",
+  "topic": "Choosing a message serialization format",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a serialization format for our service-to-service messages. JSON is too slow. Protobuf, MessagePack, or something else?"
+    },
+    {
+      "role": "assistant",
+      "content": "Serialization format comparison:\n\n**JSON**: Human-readable, universal, slowest, largest. Good for: external APIs, debugging.\n\n**Protocol Buffers (Protobuf)**: Schema-defined (.proto), binary, fast, compact. Code generation. Good for: gRPC, typed service communication. Most popular binary format.\n\n**MessagePack**: Binary JSON (no schema needed), fast, compact. Drop-in JSON replacement. Good for: when you want faster JSON without schema management.\n\n**FlatBuffers**: Zero-copy access, no parsing needed. Good for: performance-critical paths, games.\n\n**Cap'n Proto**: Zero-copy like FlatBuffers + RPC framework. Good for: low-latency IPC.\n\n**Avro**: Schema in header, good for Kafka/data pipelines. Self-describing. Good for: streaming data with schema evolution.\n\n**CBOR**: Binary JSON, IETF standard. Good for: IoT, constrained environments.\n\n**Decision guide**:\n- Need schema + code generation? -> **Protobuf**\n- Want faster JSON without schema? -> **MessagePack**\n- Kafka/streaming pipeline? -> **Avro** (with Schema Registry)\n- Extreme performance (games/IPC)? -> **FlatBuffers**\n- External API? -> **JSON** (human readability wins)\n\nFor most service-to-service: **Protobuf**. It's the industry standard for typed, compact, fast serialization."
+    }
+  ]
+}

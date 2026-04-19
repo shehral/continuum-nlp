@@ -1,0 +1,23 @@
+{
+  "id": "conv-072",
+  "domain": "mobile",
+  "topic": "Capacitor vs React Native for existing web app",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have a React web app and want to ship it as a mobile app. Capacitor or rewrite in React Native?"
+    },
+    {
+      "role": "assistant",
+      "content": "For wrapping an existing web app:\n\n**Capacitor** (Ionic team):\n- Wraps your existing web app in a native WebView\n- Minimal code changes — your React app runs as-is\n- Native APIs via plugins (camera, push, filesystem)\n- Web + iOS + Android from one codebase\n- Performance is WebView-limited (fine for most apps)\n\n**React Native rewrite**:\n- Native UI components (not WebView)\n- Better performance for complex animations/gestures\n- Significant rewrite required\n- Can share business logic but not UI components\n\nFor going to market fast: **Capacitor**. Ship your web app as a mobile app in days, not months. You can always build a native version later for screens that need better performance.\n\nCapacitor is basically Cordova done right — modern, actively maintained, and works with any web framework."
+    },
+    {
+      "role": "user",
+      "content": "What native features does Capacitor support? We need push notifications, camera, and biometric auth."
+    },
+    {
+      "role": "assistant",
+      "content": "All supported:\n\n```bash\nnpm install @capacitor/push-notifications @capacitor/camera\nnpm install @capgo/capacitor-native-biometric\n```\n\n**Push Notifications**: FCM (Android) + APNs (iOS) via `@capacitor/push-notifications`\n**Camera**: Photo + video capture, gallery picker via `@capacitor/camera`\n**Biometrics**: Face ID, Touch ID, fingerprint via community plugin\n\nOther common plugins:\n- `@capacitor/geolocation` — GPS\n- `@capacitor/filesystem` — Local file storage\n- `@capacitor/haptics` — Vibration feedback\n- `@capacitor/app` — App lifecycle, deep links\n- `@capacitor/keyboard` — Keyboard events\n\nCapacitor has ~30 official plugins and hundreds of community plugins. If a plugin doesn't exist, you can write one in Swift (iOS) or Kotlin (Android) and expose it to JS."
+    }
+  ]
+}

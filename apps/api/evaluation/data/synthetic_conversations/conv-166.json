@@ -1,0 +1,15 @@
+{
+  "id": "conv-166",
+  "domain": "devops",
+  "topic": "Infrastructure testing with Terratest vs Checkov",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We want to test our Terraform code before applying. Terratest or Checkov?"
+    },
+    {
+      "role": "assistant",
+      "content": "They solve different problems - you likely want both:\n\n**Checkov** (static analysis):\n- Scans Terraform files WITHOUT applying them\n- Checks for security misconfigurations (public S3 buckets, open security groups)\n- 1000+ built-in policies (CIS, SOC2, HIPAA benchmarks)\n- Fast (seconds)\n- No cloud access needed\n- Run in CI on every PR\n\n**Terratest** (integration testing):\n- Actually provisions infrastructure, runs tests, destroys\n- Verifies resources work correctly (can I connect to this DB?)\n- Written in Go\n- Slow (minutes to hours)\n- Needs cloud credentials\n- Run nightly or on specific PRs\n\n**Use both**:\n1. **Checkov** on every PR (fast, catches security issues)\n2. **Terratest** nightly (slow, verifies actual infrastructure behavior)\n\nAlternatives:\n- **tflint** - Terraform linter (catches errors, enforces naming conventions)\n- **OPA/Conftest** - Custom policy checks using Rego language\n- **terraform validate** + `terraform plan` review (simplest starting point)\n\nMinimum viable IaC testing: `terraform validate` + **Checkov** in CI. Add Terratest when your infra complexity warrants it."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "conv-169",
+  "domain": "backend",
+  "topic": "Exploring Rust for Python-heavy team",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our Python API has hot paths that are too slow even with caching. Team is considering rewriting parts in Rust via PyO3. Worth it?"
+    },
+    {
+      "role": "assistant",
+      "content": "PyO3 (Rust extensions for Python) is excellent for this:\n\n**When Rust + PyO3 makes sense**:\n- CPU-bound hot paths (JSON parsing, data transformation, crypto)\n- Inner loops processing millions of items\n- Specific functions, not entire services\n- The 80/20 rule: 20% of code causes 80% of slowness\n\n**When it doesn't make sense**:\n- I/O-bound code (database queries, HTTP calls) - Rust won't help\n- Code that changes frequently (Rust compile times slow iteration)\n- Simple business logic (Python is fast enough)\n\n**PyO3 example**:\n```rust\nuse pyo3::prelude::*;\n\n#[pyfunction]\nfn process_records(records: Vec<(String, f64)>) -> Vec<(String, f64)> {\n    records.into_iter()\n        .filter(|(_, score)| *score > 0.5)\n        .map(|(name, score)| (name.to_uppercase(), score * 100.0))\n        .collect()\n}\n\n#[pymodule]\nfn fast_processor(m: &Bound<'_, PyModule>) -> PyResult<()> {\n    m.add_function(wrap_pyfunction!(process_records, m)?)?;\n    Ok(())\n}\n```\n\nPython usage: `from fast_processor import process_records`\n\nTypical speedup: 10-100x for CPU-bound operations. Companies like Pydantic (v2), Polars, and Ruff all use this pattern."
+    }
+  ]
+}

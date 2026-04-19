@@ -1,0 +1,15 @@
+{
+  "id": "conv-152",
+  "domain": "web-development",
+  "topic": "Zod vs Valibot vs ArkType for TypeScript validation",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Using Zod for validation in our typescipt app but the bundle size is 13KB. Alternatives?"
+    },
+    {
+      "role": "assistant",
+      "content": "Lighter validation alternatives:\n\n**Zod** (13KB): De facto standard. Great DX, huge ecosystem. Used by tRPC, React Hook Form, shadcn.\n\n**Valibot** (~1KB per schema): Modular, tree-shakeable. Only imports what you use. 90% smaller for simple schemas.\n\n**ArkType** (~5KB): Type-level validation using TS syntax. Fastest runtime performance. Newest.\n\n**Comparison**:\n```typescript\n// Zod\nconst UserSchema = z.object({ name: z.string(), age: z.number().min(0) });\n\n// Valibot\nconst UserSchema = v.object({ name: v.string(), age: v.pipe(v.number(), v.minValue(0)) });\n\n// ArkType\nconst User = type({ name: \"string\", \"age\": \"number >= 0\" });\n```\n\nIf bundle size matters (edge workers, mobile web): **Valibot**.\nIf ecosystem matters (tRPC, React Hook Form integration): **Zod**.\nIf you want the fastest runtime: **ArkType**."
+    }
+  ]
+}

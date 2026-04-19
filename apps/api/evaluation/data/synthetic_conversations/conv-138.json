@@ -1,0 +1,23 @@
+{
+  "id": "conv-138",
+  "domain": "systems",
+  "topic": "Exploration of RISC-V for embedded systems",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hearing a lot about RISC-V. Is it ready for production embedded systems? We currently use ARM Cortex-M."
+    },
+    {
+      "role": "assistant",
+      "content": "RISC-V is ready for some embedded use cases:\n\n**Production-ready**: Simple microcontrollers (ESP32-C3/C6), IoT sensors, custom accelerators.\n**ARM still wins**: Toolchain maturity, RTOS support depth, peripheral ecosystem, security certifications.\n**RISC-V advantages**: No licensing fees, custom extensions, simpler ISA.\n\nFor a new product: proven supply chain + tooling -> **ARM**. Customization + no licensing -> **RISC-V**."
+    },
+    {
+      "role": "user",
+      "content": "We're using Rust for firmware. Does RISC-V have good Rust support?"
+    },
+    {
+      "role": "assistant",
+      "content": "Rust on RISC-V has solid support:\n\n**Tier 2 targets**: riscv32imac-unknown-none-elf, riscv64gc-unknown-none-elf\n\n**Key crates**: `riscv` (low-level access), `riscv-rt` (runtime), `esp-hal` (ESP32-C3/C6 HAL), `embassy` (async embedded framework)\n\nRust + RISC-V is strong for new embedded projects. The ESP32-C3/C6 path is production-ready today. Espressif is investing heavily in both Rust and RISC-V."
+    }
+  ]
+}

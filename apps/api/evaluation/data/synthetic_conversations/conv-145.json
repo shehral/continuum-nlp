@@ -1,0 +1,23 @@
+{
+  "id": "conv-145",
+  "domain": "cloud-architecture",
+  "topic": "Serverless database options comparison",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Looking at serverless database options. Neon, PlanetScale, Turso, or CockroachDB Serverless? We want Postgres-compatible."
+    },
+    {
+      "role": "assistant",
+      "content": "**Neon**: Real PostgreSQL, branching, scale to zero, $19/month Pro.\n**PlanetScale**: MySQL-based (Vitess), schema branching, horizontal sharding. Postgres layer in beta.\n**Turso**: libSQL/SQLite-based, edge replicas, not full Postgres.\n**CockroachDB Serverless**: Distributed SQL, multi-region, Postgres wire protocol.\n\nFor Postgres compatibility + serverless: **Neon** (it IS Postgres, not just compatible)."
+    },
+    {
+      "role": "user",
+      "content": "Neon's branching sounds cool. How does it work in practice?"
+    },
+    {
+      "role": "assistant",
+      "content": "Neon branching: copy-on-write fork of your database at a point in time. Creating a branch is instant (no data copy).\n\n**Use cases**:\n1. **Preview environments**: Every PR gets its own database with production data via GitHub Actions integration.\n2. **Safe migration testing**: Branch from production, run migration, verify, apply.\n3. **Development**: Each developer gets their own branch. Reset anytime.\n\n**Cost**: Branches are free (copy-on-write storage). Compute only runs when connected. Idle branch = $0.\n\nThis replaces seed scripts, database dumps, and Docker Postgres containers for development."
+    }
+  ]
+}

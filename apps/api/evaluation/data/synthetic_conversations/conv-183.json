@@ -1,0 +1,15 @@
+{
+  "id": "conv-183",
+  "domain": "data-engineering",
+  "topic": "Real-time feature store for ML",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our ML model needs real-time features (user's last 5 actions in the past hour). How do we serve these at low latency?"
+    },
+    {
+      "role": "assistant",
+      "content": "Real-time feature computation and serving:\n\n**Architecture**:\n```\nUser Action -> Kafka -> Feature Compute (Flink/Spark) -> Redis (online store)\n                                                              |\n                                                        ML Model (reads features)\n```\n\n**Options for real-time feature computation**:\n\n1. **Flink** - Best for complex windowed aggregations (\"sum of purchases in last 1 hour\"). True streaming.\n\n2. **Spark Structured Streaming** - If you already use Spark. Higher latency (seconds vs milliseconds).\n\n3. **Redis + application logic** - For simple features:\n```python\n# On each user action\nawait redis.lpush(f\"user:{user_id}:actions\", json.dumps(action))\nawait redis.ltrim(f\"user:{user_id}:actions\", 0, 4)  # Keep last 5\nawait redis.expire(f\"user:{user_id}:actions\", 3600)  # 1 hour TTL\n\n# At inference time\nrecent_actions = await redis.lrange(f\"user:{user_id}:actions\", 0, 4)\n```\n\n4. **Feature store** (Feast, Tecton):\n- Feast with Redis online store handles this pattern\n- Abstracts the compute + serve layer\n\nFor \"last 5 actions in past hour\": **Redis directly** is simplest. No Flink or feature store needed. Just maintain a capped list per user in Redis. Sub-millisecond reads at serving time.\n\nAdd a proper feature store when you have 50+ features with complex aggregations."
+    }
+  ]
+}

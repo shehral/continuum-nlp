@@ -1,0 +1,15 @@
+{
+  "id": "conv-121",
+  "domain": "security",
+  "topic": "Supply chain security for npm packages",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Worried about supply chain attacks on our npm dependencies after the polyfill.io incident. How do we protect ourselves?"
+    },
+    {
+      "role": "assistant",
+      "content": "Supply chain security for npm is multi-layered:\n\n**1. Lockfile integrity**:\n- Always commit `pnpm-lock.yaml` / `package-lock.json`\n- Use `--frozen-lockfile` in CI (prevents silent dependency changes)\n- Review lockfile diffs in PRs\n\n**2. Dependency scanning**:\n- `npm audit` / `pnpm audit` on every CI run\n- **Socket.dev** - Detects malicious packages proactively (typosquatting, install scripts, network access)\n- **Snyk** / **Dependabot** - Known vulnerability scanning\n\n**3. Restrict install scripts**:\n```\n# .npmrc\nignore-scripts=true\n```\nThen allowlist specific packages that need scripts.\n\n**4. Pin and audit**:\n- Use exact versions (no `^` or `~`)\n- Review new dependencies before adding\n\n**5. Provenance verification** (npm v9+):\n- `npm audit signatures` - verify packages are published from CI, not a compromised developer machine"
+    }
+  ]
+}

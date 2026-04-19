@@ -1,0 +1,23 @@
+{
+  "id": "conv-113",
+  "domain": "data-engineering",
+  "topic": "CDC with Debezium for real-time data sync",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to sync data from our postgressql OLTP database to our analytics warehouse in real-time. Debezium? Or something simpler?"
+    },
+    {
+      "role": "assistant",
+      "content": "Debezium is the standard for CDC (Change Data Capture) from Postgres:\n\n**Debezium**:\n- Reads Postgres WAL (Write-Ahead Log) for changes\n- Captures INSERT, UPDATE, DELETE in real-time\n- Publishes to Kafka topics (one per table)\n- Exactly-once semantics possible\n- Handles schema changes\n- Widely deployed, battle-tested\n\n**Simpler alternatives**:\n- **Postgres logical replication** — Built-in, no external tool. But limited to Postgres-to-Postgres.\n- **pgloader** — Bulk copy, not real-time.\n- **Airbyte CDC** — Airbyte has a Postgres CDC source that uses Debezium under the hood. Simpler UI.\n- **Estuary Flow** — Real-time CDC platform, simpler than running Debezium yourself.\n\n**If you already have Kafka**: Use Debezium directly.\n**If you don't have Kafka and want simple**: Use **Airbyte** with CDC mode — it handles the Debezium complexity for you."
+    },
+    {
+      "role": "user",
+      "content": "We don't have Kafka. Is there a way to use Debezium without it?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, **Debezium Server** runs standalone without Kafka:\n\n```json\n// application.properties\ndebezium.source.connector.class=io.debezium.connector.postgresql.PostgresConnector\ndebezium.source.database.hostname=localhost\ndebezium.source.database.port=5432\ndebezium.source.database.dbname=mydb\ndebezium.source.database.user=debezium\ndebezium.source.plugin.name=pgoutput\n\n// Sink to various destinations (no Kafka needed)\ndebezium.sink.type=http       # HTTP webhook\ndebezium.sink.type=kinesis    # AWS Kinesis\ndebezium.sink.type=pubsub     # Google Pub/Sub\ndebezium.sink.type=redis      # Redis Streams\n```\n\nDebezium Server sinks:\n- **HTTP** — Send change events to any HTTP endpoint\n- **Redis Streams** — If you already have Redis\n- **Kinesis** — AWS-native streaming\n- **Pub/Sub** — GCP-native\n- **Pulsar** — Alternative to Kafka\n\nFor your case (Postgres → analytics warehouse):\n1. Debezium Server → **Redis Streams** → Consumer writes to warehouse\n2. Debezium Server → **HTTP** → Your API ingests into warehouse\n3. Or just use **Airbyte** with CDC mode (handles everything, no Debezium config needed)\n\nSimplest path: **Airbyte CDC** → Snowflake/BigQuery/ClickHouse."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-011",
+  "domain": "data-engineering",
+  "topic": "Apache Kafka vs RabbitMQ for event streaming",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a message broker for our microservices. Debating kafka vs rabbitmq. We have about 10 services that need to communicate async."
+    },
+    {
+      "role": "assistant",
+      "content": "Key differences:\n\n**Apache Kafka**:\n- Log-based: messages are persisted and replayable\n- High throughput (millions/sec)\n- Consumer groups for parallel processing\n- Great for event sourcing and audit trails\n- More complex to operate (ZooKeeper/KRaft, partition management)\n\n**RabbitMQ**:\n- Traditional message queue: messages consumed and deleted\n- Lower latency for simple request/reply patterns\n- Flexible routing (exchanges, bindings, dead letter queues)\n- Simpler to set up and operate\n- Lower throughput ceiling\n\nWhat's your message volume and do you need replay capability?"
+    },
+    {
+      "role": "user",
+      "content": "Maybe 10k messages/sec peak. We do need audit trails for compliance. Also considering using NATS - have you used it?"
+    },
+    {
+      "role": "assistant",
+      "content": "10k/sec with audit trail requirements points to **Kafka**. NATS is interesting though:\n\n**NATS JetStream**:\n- Lightweight alternative to Kafka\n- Built-in persistence and replay (JetStream)\n- Much simpler to operate than Kafka\n- Go-based, single binary\n- Lower resource usage\n\nFor 10k msg/sec, honestly all three work. The decision:\n- **Kafka** if you need the ecosystem (Kafka Streams, ksqlDB, Kafka Connect) and your team can handle the ops\n- **NATS** if you want Kafka-like features with simpler operations\n- **RabbitMQ** if you mostly need point-to-point messaging with some pub/sub\n\nGiven your compliance/audit needs and 10 microservices, I'd go **Kafka** with a managed service (Confluent Cloud or AWS MSK) to reduce ops burden."
+    }
+  ]
+}

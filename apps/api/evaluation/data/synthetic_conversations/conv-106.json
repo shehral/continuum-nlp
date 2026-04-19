@@ -1,0 +1,23 @@
+{
+  "id": "conv-106",
+  "domain": "backend",
+  "topic": "Connection pooling: PgBouncer vs pgcat vs Supavisor",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our postgressql connections keep maxing out. 500 concurrent API requests and Postgres can't handle it. Need a connection pooler."
+    },
+    {
+      "role": "assistant",
+      "content": "Your Postgres `max_connections` (default 100) is the bottleneck. Connection poolers multiplex many clients onto fewer DB connections:\n\n**PgBouncer**:\n- Industry standard, battle-tested\n- Lightweight C program (~2MB RAM)\n- Transaction-level pooling (recommended) or session-level\n- Simple config, low overhead\n- Single-threaded (can become a bottleneck at extreme scale)\n\n**PgCat** (by Instacart):\n- Rust-based, multi-threaded\n- Sharding, load balancing, mirroring\n- Query routing to replicas\n- Prometheus metrics built-in\n- Better for high throughput than PgBouncer\n\n**Supavisor** (by Supabase):\n- Elixir-based, multi-tenant\n- Built for cloud-scale (thousands of databases)\n- Named prepared statements support\n- Connection limits per tenant\n\nFor your 500 concurrent requests: **PgBouncer** with transaction-level pooling. Set `pool_size=25` and it'll multiplex 500 app connections onto 25 DB connections.\n\nIf you need read replica routing too: **PgCat**."
+    },
+    {
+      "role": "user",
+      "content": "We're using SQLAlchemy async with asyncpg. How does PgBouncer fit in?"
+    },
+    {
+      "role": "assistant",
+      "content": "PgBouncer sits between your app and Postgres:\n\n```\nApp (SQLAlchemy + asyncpg) → PgBouncer (:6432) → PostgreSQL (:5432)\n```\n\nConfig change is minimal — point SQLAlchemy at PgBouncer:\n```python\n# Before (direct to Postgres)\nengine = create_async_engine(\"postgresql+asyncpg://user:pass@localhost:5432/db\")\n\n# After (through PgBouncer)\nengine = create_async_engine(\n    \"postgresql+asyncpg://user:pass@localhost:6432/db\",\n    pool_size=50,       # App-side pool (connects to PgBouncer)\n    max_overflow=10,\n    pool_pre_ping=True, # Verify connections are alive\n)\n```\n\nPgBouncer config (`pgbouncer.ini`):\n```ini\n[databases]\nmydb = host=localhost port=5432 dbname=mydb\n\n[pgbouncer]\nlisten_port = 6432\npool_mode = transaction\nmax_client_conn = 1000\ndefault_pool_size = 25\n```\n\n**Important gotcha with asyncpg**: PgBouncer in transaction mode doesn't support prepared statements. Add `statement_cache_size=0` to asyncpg:\n```python\nengine = create_async_engine(\n    \"postgresql+asyncpg://...@localhost:6432/db\",\n    connect_args={\"statement_cache_size\": 0}\n)\n```\n\nOr use PgBouncer's `DISABLE PREPARED STATEMENTS` setting."
+    }
+  ]
+}

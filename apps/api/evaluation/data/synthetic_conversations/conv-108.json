@@ -1,0 +1,23 @@
+{
+  "id": "conv-108",
+  "domain": "devops",
+  "topic": "Kubernetes networking: Cilium vs Calico vs Flannel",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Setting up networking for our new k8s cluster. Cilium, Calico, or Flannel? We need network policies."
+    },
+    {
+      "role": "assistant",
+      "content": "If you need network policies, Flannel is out (no native support). Between Cilium and Calico:\n\n**Cilium**:\n- eBPF-based (kernel-level networking, no iptables)\n- Best performance at scale\n- L7 network policies (HTTP, gRPC, Kafka-aware)\n- Hubble for network observability (flow logs, service map)\n- Service mesh capability (no sidecar)\n- Growing fastest, CNCF graduated\n\n**Calico**:\n- iptables or eBPF mode\n- Mature, widely deployed\n- L3/L4 network policies (standard K8s + extended)\n- BGP peering for hybrid cloud\n- Simpler to operate than Cilium\n- Tigera (commercial) for enterprise features\n\n**Flannel**:\n- Simplest overlay network\n- No network policies (pair with Calico for policies)\n- Best for simple clusters where performance doesn't matter\n- Declining in popularity\n\nRecommendation: **Cilium** for new clusters. The eBPF foundation gives better performance, the L7 policies are unique, and Hubble's observability is genuinely useful for debugging."
+    },
+    {
+      "role": "user",
+      "content": "We're on EKS. Does that change anything?"
+    },
+    {
+      "role": "assistant",
+      "content": "EKS has specific considerations:\n\n**Default**: EKS uses the **AWS VPC CNI** plugin (pods get real VPC IPs). This means:\n- Pods are directly addressable from other VPC resources\n- Security groups work at the pod level\n- IP address exhaustion is a real concern (each pod = 1 IP from your subnet)\n\n**Options on EKS**:\n\n1. **AWS VPC CNI + Calico** for network policies:\n- AWS recommendation\n- VPC CNI handles networking, Calico adds network policies\n- `kubectl apply -f calico-operator.yaml`\n\n2. **Cilium replacing VPC CNI**:\n- Replace the VPC CNI entirely with Cilium's CNI\n- Get eBPF performance + L7 policies + Hubble\n- Lose VPC-native pod IPs (pods use overlay)\n- More complex EKS setup\n\n3. **Cilium chaining with VPC CNI**:\n- Keep VPC CNI for networking, Cilium for policies\n- Best of both (VPC IPs + eBPF policies)\n- Supported configuration since Cilium 1.14\n\nFor EKS: **VPC CNI + Cilium chaining** is the sweet spot. You keep VPC-native networking (no IP address issues with prefix delegation) and get Cilium's policy engine + Hubble observability."
+    }
+  ]
+}

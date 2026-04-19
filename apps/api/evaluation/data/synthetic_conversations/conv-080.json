@@ -1,0 +1,23 @@
+{
+  "id": "conv-080",
+  "domain": "data-engineering",
+  "topic": "Great Expectations vs Soda for data quality",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Data quality is becoming a problem — bad data from upstream sources breaks our dashboards. Great Expectations or Soda?"
+    },
+    {
+      "role": "assistant",
+      "content": "Both validate data quality but with different approaches:\n\n**Great Expectations (GX)**:\n- Python-first, extensive expectation library (300+ built-in)\n- Data Docs — auto-generated HTML documentation\n- Checkpoint system for pipeline integration\n- Open-source, self-hosted\n- Complex setup (JSON configs, stores, datasources)\n- Steep learning curve\n\n**Soda**:\n- YAML/SodaCL — simpler, SQL-like checks:\n```yaml\nchecks for orders:\n  - row_count > 0\n  - missing_count(email) = 0\n  - duplicate_count(order_id) = 0\n  - avg(amount) between 10 and 1000\n```\n- Soda Cloud for monitoring dashboard\n- Anomaly detection (ML-based)\n- Easier to adopt\n\nFor quick adoption: **Soda** (SodaCL is readable by non-engineers, faster to implement).\nFor comprehensive validation: **Great Expectations** (more powerful, more complex)."
+    },
+    {
+      "role": "user",
+      "content": "We just want to catch null values, duplicates, and freshness issues. Soda sounds simpler."
+    },
+    {
+      "role": "assistant",
+      "content": "Soda is perfect for that:\n\n```yaml\n# checks/orders.yml\nchecks for orders:\n  - row_count > 0\n  - missing_count(customer_id) = 0\n  - missing_count(amount) = 0\n  - duplicate_count(order_id) = 0\n  - freshness(created_at) < 2h\n  - schema:\n      fail:\n        when required column missing: [order_id, customer_id, amount, created_at]\n```\n\nRun checks:\n```bash\nsoda scan -d your_warehouse -c configuration.yml checks/orders.yml\n```\n\nIntegrate into your pipeline:\n- **dbt**: `soda-dbt` integration runs checks after dbt models\n- **Airflow**: `SodaScanOperator` in your DAG\n- **Dagster**: Run as an asset check\n\nSoda Cloud (free tier: 25 checks) gives you a dashboard with historical check results and Slack/PagerDuty alerts when checks fail. No code required for the dashboard."
+    }
+  ]
+}

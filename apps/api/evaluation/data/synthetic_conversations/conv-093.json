@@ -1,0 +1,23 @@
+{
+  "id": "conv-093",
+  "domain": "cloud-architecture",
+  "topic": "Event-driven architecture with EventBridge vs SNS",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Designing an event-driven system on AWS. EventBridge or SNS+SQS? We have 15 microservices that need to react to events."
+    },
+    {
+      "role": "assistant",
+      "content": "Both work for event-driven architectures but at different abstraction levels:\n\n**Amazon EventBridge**:\n- Content-based filtering (route events by any field in the event body)\n- Schema registry + discovery\n- SaaS integrations (Zendesk, Datadog, PagerDuty send events directly)\n- Archive and replay events\n- Scheduled events (cron replacement)\n- $1/million events\n\n**SNS + SQS**:\n- Simple pub/sub (SNS) + reliable queue (SQS)\n- Filter by message attributes only (not body content)\n- Higher throughput ceiling (millions/sec)\n- Simpler mental model\n- Cheaper at very high volume\n\nFor 15 microservices with complex routing: **EventBridge**. Its content-based filtering means you define rules like \"route to order-service when event.type == 'ORDER_PLACED' AND event.amount > 1000\" without any code changes.\n\nFor simple fan-out (one event → many consumers): **SNS + SQS** is simpler and cheaper."
+    },
+    {
+      "role": "user",
+      "content": "Can we combine them? Use EventBridge for routing and SQS for consumption?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, that's actually the recommended pattern:\n\n```\nProducer → EventBridge (routing rules) → SQS queues → Consumers\n```\n\nWhy SQS between EventBridge and consumers:\n- **Buffering** — SQS handles bursts, consumers process at their own pace\n- **Retry/DLQ** — Failed messages go to Dead Letter Queue\n- **Visibility timeout** — Prevents duplicate processing\n- **Backpressure** — Consumer controls poll rate\n\nSetup:\n```json\n{\n  \"Source\": [\"orders-service\"],\n  \"DetailType\": [\"OrderPlaced\"],\n  \"Detail\": {\n    \"amount\": [{\"numeric\": [\">\", 100]}]\n  }\n}\n```\nTarget: SQS queue for each consuming service.\n\nThis gives you EventBridge's routing intelligence + SQS's reliability. Each microservice owns its SQS queue and processes events independently.\n\nAdd EventBridge **Archive** for replay capability — useful for debugging and reprocessing after bug fixes."
+    }
+  ]
+}

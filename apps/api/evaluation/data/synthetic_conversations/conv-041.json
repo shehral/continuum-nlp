@@ -1,0 +1,23 @@
+{
+  "id": "conv-041",
+  "domain": "web-development",
+  "topic": "Shadcn/ui vs Radix vs Chakra UI for components",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a component library for our react app. Looking at shadcn/ui, Radix, or Chakra UI. Using tailwindcss already."
+    },
+    {
+      "role": "assistant",
+      "content": "Since you're already on Tailwind:\n\n**shadcn/ui** (recommended):\n- Not a dependency - copies component source into your project\n- Built on Radix primitives + Tailwind\n- Full control to customize\n- CLI: `npx shadcn@latest add button dialog`\n- Dark mode, theming via CSS variables\n\n**Radix UI**:\n- Unstyled primitives (you add all styles)\n- Maximum flexibility, minimum opinions\n- Best accessibility (WAI-ARIA)\n- More work to make things look good\n\n**Chakra UI**:\n- Pre-styled, opinionated\n- Style props system (not Tailwind)\n- Conflicts with Tailwind (two styling systems)\n- V3 exists but smaller ecosystem than shadcn\n\n**Clear winner**: shadcn/ui. It uses Radix under the hood, works with your Tailwind setup, and the copy-paste model means zero dependency bloat."
+    },
+    {
+      "role": "user",
+      "content": "How many components does shadcn have? We need tables, forms, modals, tabs, menus..."
+    },
+    {
+      "role": "assistant",
+      "content": "shadcn/ui has 50+ components covering everything you listed:\n\n**Layout**: Card, Sheet (drawer), Dialog (modal), Drawer, Tabs, Accordion, Collapsible\n**Forms**: Input, Textarea, Select, Checkbox, Radio, Switch, Slider, DatePicker, Combobox, Form (react-hook-form integration)\n**Data**: Table, DataTable (with TanStack Table), Badge, Avatar, Calendar\n**Navigation**: Menubar, DropdownMenu, ContextMenu, NavigationMenu, Breadcrumb, Pagination, Command (search palette)\n**Feedback**: Alert, AlertDialog, Toast, Progress, Skeleton, Tooltip, HoverCard\n\nFor tables specifically, shadcn's DataTable component wraps **TanStack Table** with sorting, filtering, and pagination. It's excellent.\n\nInstall what you need: `npx shadcn@latest add table dialog tabs form input select`"
+    }
+  ]
+}

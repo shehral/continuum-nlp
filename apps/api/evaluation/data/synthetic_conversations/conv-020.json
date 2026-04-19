@@ -1,0 +1,23 @@
+{
+  "id": "conv-020",
+  "domain": "data-engineering",
+  "topic": "Spark vs DuckDB for analytics",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We process about 50GB of CSV and parquet files daily for analytics. Currently using PySpark on EMR. A coworker suggested DuckDB. Is that realistic?"
+    },
+    {
+      "role": "assistant",
+      "content": "For 50GB, DuckDB is absolutely realistic and likely a better fit:\n\n**Apache Spark (PySpark)**:\n- Designed for distributed processing (TB+ scale)\n- EMR cluster costs add up fast\n- Complex setup, JVM overhead\n- Great for 500GB+, overkill for 50GB\n\n**DuckDB**:\n- In-process analytical database (like SQLite for analytics)\n- Processes 50GB on a single machine easily\n- Reads Parquet and CSV natively\n- SQL interface, Python API\n- Zero infrastructure - runs in your Python process\n\nDuckDB on a machine with 32GB RAM can process 50GB of Parquet files in minutes. No cluster needed."
+    },
+    {
+      "role": "user",
+      "content": "Wow that's compelling. We're spending $800/month on EMR. Can duckdb handle joins across multiple large files?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, DuckDB handles multi-file joins efficiently:\n\n```python\nimport duckdb\n\nresult = duckdb.sql(\"\"\"\n    SELECT o.order_id, c.name, p.product_name\n    FROM 'data/orders/*.parquet' o\n    JOIN 'data/customers.csv' c ON o.customer_id = c.id\n    JOIN 'data/products.parquet' p ON o.product_id = p.id\n    WHERE o.date >= '2026-01-01'\n\"\"\")\n```\n\nDuckDB uses columnar execution, vectorized processing, and automatic parallelism across CPU cores. For 50GB of Parquet, expect:\n- Simple aggregations: 5-30 seconds\n- Complex joins: 1-5 minutes\n- Total monthly cost: $0 (runs on existing compute)\n\nVs your $800/month EMR cluster, the savings are obvious. You could run DuckDB on a $50/month EC2 instance or even locally."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-122",
+  "domain": "security",
+  "topic": "Zero trust architecture for microservices",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our security team wants us to implement 'zero trust' for our microservices. What does that actually mean in practice?"
+    },
+    {
+      "role": "assistant",
+      "content": "Zero trust for microservices means: never trust, always verify. Every request is authenticated and authorized, even internal ones.\n\n**Practical implementation layers**:\n\n**1. Service Identity** (who is this service?)\n- mTLS between all services (each service has a certificate)\n- SPIFFE/SPIRE for automatic identity issuance\n- Service mesh (Istio/Linkerd) handles this transparently\n\n**2. Authentication** (prove your identity)\n- Every service-to-service call carries a JWT or mTLS cert\n- No shared API keys or network-based trust\n- Short-lived credentials (rotate frequently)\n\n**3. Authorization** (what can this service do?)\n- OPA (Open Policy Agent) for fine-grained policy\n\n**4. Network segmentation**\n- Kubernetes network policies (Cilium/Calico)\n- Deny all by default, allow specific service-to-service paths\n\n**5. Observability**\n- Log every service-to-service call\n- Detect anomalous patterns"
+    },
+    {
+      "role": "user",
+      "content": "That's a lot. Where do we start? We're on Kubernetes."
+    },
+    {
+      "role": "assistant",
+      "content": "Phased approach for K8s:\n\n**Phase 1 (Week 1-2): Network policies** - Quickest security win\n- Install Cilium or Calico\n- Default deny all ingress/egress\n- Allow only known service-to-service paths\n\n**Phase 2 (Week 3-4): Service mesh for mTLS**\n- Install **Linkerd** (simpler than Istio)\n- Automatic mTLS between all services (zero code changes)\n\n**Phase 3 (Month 2): Authorization policies**\n- Linkerd authorization policies or Istio AuthorizationPolicy\n- Or standalone OPA\n\n**Phase 4 (Month 3): Observability + anomaly detection**\n- Hubble (Cilium) or Linkerd's dashboard\n\nStart with Phase 1 - network policies give you 80% of the security value with 20% of the effort."
+    }
+  ]
+}

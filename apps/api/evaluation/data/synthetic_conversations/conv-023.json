@@ -1,0 +1,23 @@
+{
+  "id": "conv-023",
+  "domain": "devops",
+  "topic": "ArgoCD vs FluxCD for GitOps",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Setting up GitOps for our k8s clusters. ArgoCD or Flux? We have 3 clusters (dev, staging, prod)."
+    },
+    {
+      "role": "assistant",
+      "content": "Both are CNCF graduated projects. Key differences:\n\n**ArgoCD**:\n- Beautiful web UI for visualization\n- Application-centric model\n- Sync waves and hooks for ordering\n- SSO integration (OIDC, SAML, LDAP)\n- More popular (larger community)\n\n**Flux v2**:\n- No UI (CLI-first, add Weave GitOps for UI)\n- Modular (separate controllers for source, kustomize, helm)\n- Better multi-tenancy with RBAC\n- Notification system built-in\n- Lighter footprint\n\nFor 3 clusters with a team that values visual dashboards: **ArgoCD**. For a platform team that prefers CLI and automation: **Flux**."
+    },
+    {
+      "role": "user",
+      "content": "We want the UI. How does ArgoCD handle multi-cluster?"
+    },
+    {
+      "role": "assistant",
+      "content": "ArgoCD handles multi-cluster well:\n\n1. **Hub-spoke model**: Install ArgoCD on one cluster (management), register other clusters as targets\n2. **ApplicationSet**: Auto-generate apps across clusters from templates\n3. **AppProject**: Isolate environments (dev can only deploy to dev cluster)\n\n```yaml\napiVersion: argoproj.io/v1alpha1\nkind: ApplicationSet\nspec:\n  generators:\n    - clusters:\n        selector:\n          matchLabels:\n            env: production\n  template:\n    spec:\n      destination:\n        server: '{{server}}'\n```\n\nTip: Use the **App of Apps** pattern - one root Application that manages all other Applications. This gives you a single source of truth for your entire deployment topology."
+    }
+  ]
+}

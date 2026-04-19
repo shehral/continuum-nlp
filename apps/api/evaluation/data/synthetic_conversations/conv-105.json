@@ -1,0 +1,23 @@
+{
+  "id": "conv-105",
+  "domain": "backend",
+  "topic": "Exploring Python 3.13 features",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Python 3.13 is out. Anything worth upgrading for? We're on 3.11."
+    },
+    {
+      "role": "assistant",
+      "content": "Key features across 3.12 and 3.13 you'd get:\n\n**Python 3.12**:\n- Type parameter syntax: `def first[T](lst: list[T]) -> T:` (no more `TypeVar`)\n- f-string improvements (nested quotes, backslashes)\n- `@override` decorator for methods\n- Per-interpreter GIL (experimental) — each sub-interpreter gets its own GIL\n- 5% faster than 3.11\n\n**Python 3.13**:\n- **Free-threaded mode** (no GIL) — `python3.13t` binary. Experimental but real multi-threading.\n- **JIT compiler** (experimental) — copy-and-patch JIT for hot code paths\n- Better error messages (even better than 3.12)\n- `typing.TypeIs` for type narrowing (better than `TypeGuard`)\n- iOS and Android are now Tier 3 platforms\n\nThe GIL removal is the headline feature but it's experimental — don't use it in production yet. Many C extensions aren't thread-safe without the GIL."
+    },
+    {
+      "role": "user",
+      "content": "The no-GIL stuff sounds exciting for our CPU-bound tasks. Is it usable?"
+    },
+    {
+      "role": "assistant",
+      "content": "For production: not yet. Here's the reality:\n\n**Free-threaded Python (3.13t)**:\n- Works but ~10-40% slower in single-threaded code (overhead of fine-grained locking)\n- Many C extensions crash or produce incorrect results (numpy, pandas need updates)\n- Must install `pip install --config-settings=free-threaded=true package`\n- Not all packages have free-threaded wheels on PyPI yet\n\n**What to do instead for CPU-bound work in 2026**:\n1. **multiprocessing** — Still the reliable option. Each process has its own GIL.\n2. **ProcessPoolExecutor** — Clean API for parallel CPU work\n3. **Cython / Numba** — Release the GIL in compiled code (`with nogil:`)\n4. **Rust extensions** (PyO3) — Write CPU-hot path in Rust, call from Python\n5. **Ray** — Distributed computing across cores/machines\n\nTimeline: Free-threaded Python will be production-ready in Python 3.15-3.16 (2027-2028). The ecosystem needs time to catch up.\n\nFor now: upgrade to 3.12 for the type syntax improvements and 5% speed boost. Wait on 3.13t for production."
+    }
+  ]
+}

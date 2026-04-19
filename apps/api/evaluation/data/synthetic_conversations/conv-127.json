@@ -1,0 +1,23 @@
+{
+  "id": "conv-127",
+  "domain": "web-development",
+  "topic": "Exploring Tailwind CSS v4 changes",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Tailwind CSS v4 is out. What changed from v3? We have a large codebase on v3."
+    },
+    {
+      "role": "assistant",
+      "content": "Tailwind v4 is a significant rewrite:\n\n**Major changes**:\n1. **No more `tailwind.config.js`** - Configuration moves to CSS with `@theme` directive\n2. **Oxide engine** - New Rust-based engine. 10x faster builds.\n3. **Automatic content detection** - No more `content: ['./src/**/*.tsx']`\n4. **CSS-first configuration** - `@theme` replaces `theme.extend` in JS config\n5. **New features**: Container queries, 3D transforms, `not-*` variants\n\n**Breaking changes**: Some deprecated utilities removed, plugin API changed, `@apply` works differently with `@theme` values."
+    },
+    {
+      "role": "user",
+      "content": "Seems like a big migration. Is there a codemod?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, Tailwind provides an upgrade tool:\n\n```bash\nnpx @tailwindcss/upgrade\n```\n\nThis handles: converting config to `@theme`, updating deprecated classes, removing the PostCSS plugin.\n\n**What it doesn't handle**: Custom plugins using the JS API, complex `theme()` usage, dynamic class generation.\n\n**Migration strategy**:\n1. Run the upgrade tool on a branch\n2. Fix build errors\n3. Visual regression test (screenshot comparison with Playwright)\n4. Update custom plugins\n\nFor projects using shadcn/ui: wait for shadcn to officially support v4 before migrating."
+    }
+  ]
+}

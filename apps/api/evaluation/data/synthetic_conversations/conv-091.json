@@ -1,0 +1,23 @@
+{
+  "id": "conv-091",
+  "domain": "cloud-architecture",
+  "topic": "Serverless vs containers for API at scale",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our API is on Lambda but we're hitting cold start issues and costs are climbing at 500k requests/day. Switch to ECS/Fargate?"
+    },
+    {
+      "role": "assistant",
+      "content": "At 500k req/day, you're in the zone where containers often make more sense:\n\n**Lambda at 500k req/day**:\n- ~$150-300/month (depends on duration/memory)\n- Cold starts: 100ms-2s (worse with VPC, large packages)\n- Auto-scales to zero (great for variable traffic)\n- 15-min max execution time\n\n**ECS Fargate at 500k req/day**:\n- ~$100-200/month (2 x 0.5vCPU/1GB tasks, always-on)\n- No cold starts (containers are running)\n- Predictable latency\n- No execution time limits\n- You manage scaling (target tracking auto-scaling)\n\n**Cost crossover**: Lambda is cheaper below ~200k req/day. Above that, containers win because you're paying for always-warm capacity anyway.\n\nFor your situation: **ECS Fargate** with auto-scaling. Eliminates cold starts, reduces costs, and you can use standard frameworks (FastAPI, Express) instead of Lambda-specific handlers."
+    },
+    {
+      "role": "user",
+      "content": "What about ECS on EC2 vs Fargate? Trying to minimize costs."
+    },
+    {
+      "role": "assistant",
+      "content": "ECS on EC2 is 30-50% cheaper than Fargate if you manage the instances:\n\n**ECS Fargate**:\n- No EC2 management, just define tasks\n- Pay per vCPU-second + GB-second\n- Simpler but more expensive\n- Best for: variable workloads, small teams\n\n**ECS on EC2**:\n- You manage the EC2 instances (AMIs, patches, capacity)\n- Use Spot instances for 60-90% savings\n- Capacity Providers auto-scale EC2 fleet\n- More complex but much cheaper at scale\n\n**ECS on EC2 with Spot** at your scale:\n- 2x t3.medium Spot: ~$15/month (vs ~$100 Fargate)\n- Add on-demand instance for baseline reliability\n- Spot interruption handled by ECS draining\n\nFor cost minimization: **ECS on EC2 with Spot instances** + one on-demand instance for stability. At 500k req/day, this could be as low as $30-50/month total.\n\nBut factor in ops time: if an hour of your team's time costs more than the Fargate premium, use Fargate."
+    }
+  ]
+}

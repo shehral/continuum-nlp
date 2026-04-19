@@ -1,0 +1,23 @@
+{
+  "id": "conv-082",
+  "domain": "systems",
+  "topic": "gRPC vs Cap'n Proto vs FlatBuffers for IPC",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a system with multiple processes that need to communicate fast. gRPC, Cap'n Proto, or FlatBuffers? Latency is critical (sub-microsecond desired)."
+    },
+    {
+      "role": "assistant",
+      "content": "For sub-microsecond IPC, gRPC is too slow (HTTP/2 overhead). You need zero-copy serialization:\n\n**FlatBuffers** (Google):\n- Zero-copy reads — access data directly from the buffer without parsing\n- ~100ns access time\n- No allocation during read\n- Schema-defined (`.fbs` files)\n- Used in games, Android, embedded systems\n\n**Cap'n Proto** (creator of Protobuf):\n- Zero-copy, zero-parse like FlatBuffers\n- Built-in RPC framework\n- Time-travel RPC (pipelined calls reduce round-trips)\n- Schema evolution\n- More opinionated than FlatBuffers\n\n**gRPC**:\n- HTTP/2 based (~1ms minimum latency)\n- Protobuf serialization (requires parsing)\n- Best for network services, not local IPC\n\nFor local IPC with sub-microsecond: **shared memory + FlatBuffers** (or Cap'n Proto). No serialization, no syscalls, no copying. Write FlatBuffer to shared memory segment, signal the reader."
+    },
+    {
+      "role": "user",
+      "content": "We're using C++ and Rust. Does FlatBuffers work well with both?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, FlatBuffers has strong support for both:\n\n**C++**: First-class support (Google uses it in production)\n```cpp\n// Generated from schema\nauto msg = GetMessage(buf);\nfloat price = msg->price();  // Zero-copy access, no parsing\n```\n\n**Rust**: `flatbuffers` crate, good but slightly less ergonomic:\n```rust\nlet msg = root_as_message(buf).unwrap();\nlet price = msg.price();\n```\n\nFor your mixed C++/Rust IPC:\n1. Define schema in `.fbs` file\n2. Generate code for both languages: `flatc --cpp --rust schema.fbs`\n3. Use shared memory (`mmap` or `shm_open`) as the transport\n4. Write FlatBuffers from one process, read from another — zero copy, zero parse\n\nAlternative worth considering: **rkyv** (Rust-only, zero-copy deserialization, even faster than FlatBuffers in Rust). But since you need C++ interop, FlatBuffers is the right choice."
+    }
+  ]
+}

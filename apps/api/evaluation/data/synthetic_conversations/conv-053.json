@@ -1,0 +1,23 @@
+{
+  "id": "conv-053",
+  "domain": "web-development",
+  "topic": "htmx vs React SPA for internal tool",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building an internal admin tool. Do I really need React for this? A coworker suggested htmx. Seems way simpler."
+    },
+    {
+      "role": "assistant",
+      "content": "For an internal admin tool, htmx is a legitimate and often better choice:\n\n**htmx**:\n- Server renders HTML, htmx swaps fragments via AJAX\n- No build step, no node_modules, no bundler\n- Works with any backend (Python, Go, Ruby, PHP)\n- ~14KB, zero dependencies\n- Hypermedia-driven — the server is the source of truth\n\n**When htmx works great**: CRUD apps, admin panels, dashboards with moderate interactivity, forms-heavy tools\n\n**When you still need React**: Complex client-side state, offline support, drag-and-drop UIs, real-time collaborative editing\n\nFor an admin tool: htmx + your existing backend + a CSS framework like Tailwind or DaisyUI. Ship in days, not weeks."
+    },
+    {
+      "role": "user",
+      "content": "Our backend is FastAPI (python). How does htmx work with that?"
+    },
+    {
+      "role": "assistant",
+      "content": "FastAPI + htmx is a great combo. Use Jinja2 templates:\n\n```python\nfrom fastapi import FastAPI, Request\nfrom fastapi.templating import Jinja2Templates\n\napp = FastAPI()\ntemplates = Jinja2Templates(directory=\"templates\")\n\n@app.get(\"/users\")\nasync def list_users(request: Request):\n    users = await get_users()\n    # If htmx request, return just the fragment\n    if request.headers.get(\"HX-Request\"):\n        return templates.TemplateResponse(\"partials/user_table.html\", {\"request\": request, \"users\": users})\n    # Otherwise return full page\n    return templates.TemplateResponse(\"users.html\", {\"request\": request, \"users\": users})\n```\n\nThe htmx frontend:\n```html\n<button hx-get=\"/users\" hx-target=\"#user-list\" hx-swap=\"innerHTML\">\n  Refresh Users\n</button>\n<div id=\"user-list\">...</div>\n```\n\nNo API design, no serialization, no client state management. The server returns HTML fragments and htmx swaps them in."
+    }
+  ]
+}

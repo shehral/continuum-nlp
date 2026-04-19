@@ -1,0 +1,15 @@
+{
+  "id": "conv-200",
+  "domain": "web-development",
+  "topic": "Exploring signals as universal reactive primitive",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Signals seem to be everywhere now - Solid, Angular, Preact, Vue, Svelte. Is React going to adopt signals too? Should we care?"
+    },
+    {
+      "role": "assistant",
+      "content": "Signals are having a moment, but the picture is nuanced:\n\n**Who uses signals**:\n- **SolidJS**: Pioneered fine-grained reactivity with `createSignal`\n- **Angular**: Added `signal()` in Angular 16\n- **Preact**: `@preact/signals` - reactive state that skips vDOM diffing\n- **Vue**: `ref()` and `computed()` are effectively signals\n- **Svelte 5**: Runes (`$state`, `$derived`) are signal-like\n- **Qwik**: `useSignal()` for resumable state\n\n**What about React?**\nReact explicitly chose NOT to adopt signals. Their approach:\n- React Compiler auto-memoizes (solves the re-render problem differently)\n- `useMemo`, `useCallback` become unnecessary\n- Philosophy: coarse-grained re-renders + smart compiler > fine-grained signals\n\n**Should you care?**\nIf you're on React: the Compiler is React's answer to the performance problems signals solve. You don't need signals.\n\nIf you're choosing a framework: signals produce smaller, faster bundles with less boilerplate. SolidJS and Svelte 5 offer the best signal-based DX.\n\nThe TC39 proposal for `Signal` as a web standard is in early stages. If adopted, all frameworks would build on the same reactive primitive. That's 2-3 years away.\n\nBottom line: signals vs React's approach is a philosophical difference, not a clear winner. Both solve the reactivity problem effectively."
+    }
+  ]
+}

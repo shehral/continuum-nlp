@@ -1,0 +1,23 @@
+{
+  "id": "conv-074",
+  "domain": "mobile",
+  "topic": "Jetpack Compose vs XML layouts for Android",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a new Android app. Jetpack Compose or stick with XML layouts? Our team knows XML."
+    },
+    {
+      "role": "assistant",
+      "content": "**Jetpack Compose** for any new Android app in 2026:\n\n- Declarative UI (like SwiftUI, React) — less code, easier reasoning\n- No more `findViewById`, ViewBinding, or data binding\n- Live previews in Android Studio\n- Material 3 components built-in\n- Animations are dramatically simpler\n- Interop: Compose can embed XML views and vice versa\n\nXML layouts are legacy. Google has shifted all documentation and new APIs to Compose. New features (like adaptive layouts for foldables) are Compose-only.\n\nFor your XML-experienced team: the mental model shift takes 1-2 weeks. Compose is much closer to React/SwiftUI than XML. Most developers prefer it once they get past the initial learning curve.\n\n```kotlin\n@Composable\nfun UserCard(user: User) {\n    Card(modifier = Modifier.padding(8.dp)) {\n        Text(user.name, style = MaterialTheme.typography.headlineMedium)\n        Text(user.email, style = MaterialTheme.typography.bodyMedium)\n    }\n}\n```"
+    },
+    {
+      "role": "user",
+      "content": "What about the navigation library? We use the old Fragment-based navigation."
+    },
+    {
+      "role": "assistant",
+      "content": "Compose has its own navigation:\n\n**Navigation Compose** (`androidx.navigation:navigation-compose`):\n- Type-safe routes with Kotlin serialization (no more string-based routes)\n- Deep linking support\n- Shared element transitions\n- Nested navigation graphs\n\n```kotlin\n@Serializable data class UserDetail(val userId: Int)\n\nNavHost(navController, startDestination = Home) {\n    composable<Home> { HomeScreen(onUserClick = { navController.navigate(UserDetail(it)) }) }\n    composable<UserDetail> { backStackEntry ->\n        val route = backStackEntry.toRoute<UserDetail>()\n        UserDetailScreen(userId = route.userId)\n    }\n}\n```\n\nThe type-safe navigation (added in Navigation 2.8+) is much better than the old string-based Fragment transactions. Compile-time checking of route parameters.\n\nFor a new project: Navigation Compose. For migration: you can mix Fragment navigation and Compose navigation during the transition."
+    }
+  ]
+}

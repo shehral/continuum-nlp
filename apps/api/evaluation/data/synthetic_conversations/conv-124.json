@@ -1,0 +1,23 @@
+{
+  "id": "conv-124",
+  "domain": "cloud-architecture",
+  "topic": "Serverless patterns: Step Functions vs EventBridge Pipes",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a serverless order processing pipeline on AWS. Step Functions or EventBridge Pipes for orchestration?"
+    },
+    {
+      "role": "assistant",
+      "content": "Different tools for different patterns:\n\n**AWS Step Functions**:\n- Visual workflow orchestration (state machine)\n- Branching, parallel execution, retries, error handling\n- Wait states, human approval steps\n- Express workflows for high-volume\n- Best for: complex multi-step business logic with decisions\n\n**EventBridge Pipes**:\n- Point-to-point event processing pipeline\n- Source -> (filter) -> (enrich) -> Target\n- No branching or complex logic\n- Cheaper for simple transformations\n\nFor order processing: **Step Functions** is the right choice."
+    },
+    {
+      "role": "user",
+      "content": "Step Functions pricing worried me. $25 per million state transitions?"
+    },
+    {
+      "role": "assistant",
+      "content": "Use **Express Workflows** instead of Standard for high volume:\n\n**Standard Workflows**: $0.025 per 1,000 state transitions\n**Express Workflows**: $1.00 per million executions + duration-based pricing\n\n**Cost comparison at 100k orders/day** (5 states each):\n- Standard: 15M transitions/month -> $375/month\n- Express: 3M executions/month -> $3/month + ~$10 duration\n\nExpress is dramatically cheaper for short workflows. Just make your payment processing idempotent."
+    }
+  ]
+}

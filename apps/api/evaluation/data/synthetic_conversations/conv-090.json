@@ -1,0 +1,23 @@
+{
+  "id": "conv-090",
+  "domain": "cloud-architecture",
+  "topic": "Multi-region deployment strategy",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We need to go multi-region for latency and compliance (GDPR requires EU data residency). Currently single-region on us-east-1. How do we approach this?"
+    },
+    {
+      "role": "assistant",
+      "content": "Multi-region for GDPR compliance requires careful planning:\n\n**Architecture options**:\n\n1. **Active-Active** (both regions serve traffic):\n- Route 53 latency-based routing\n- Independent database per region\n- Most complex but best latency\n- Data stays in its region (GDPR-friendly)\n\n2. **Active-Passive** (failover only):\n- Primary in us-east-1, standby in eu-west-1\n- Cross-region replication for DR\n- EU users still hit US (latency issue)\n- Simpler but doesn't solve latency\n\n3. **Regional isolation** (recommended for GDPR):\n- Separate deployments per region\n- EU users → eu-west-1, US users → us-east-1\n- User data never crosses regional boundary\n- Shared services (auth) replicated read-only\n\nFor GDPR: Option 3 is the safest. EU personal data must stay in EU. Cross-region replication of personal data requires legal basis."
+    },
+    {
+      "role": "user",
+      "content": "We use RDS PostgreSQL. How do we handle the database in multi-region?"
+    },
+    {
+      "role": "assistant",
+      "content": "Database is the hardest part. Options:\n\n**Option 1: RDS Regional instances** (simplest for GDPR)\n- Separate RDS instance per region\n- Application routes users to their region's DB\n- No cross-region replication of user data\n- Global data (product catalog) replicated via RDS read replicas or CDC\n\n**Option 2: Aurora Global Database**:\n- Primary in one region, up to 5 read replicas in other regions\n- Sub-second replication lag\n- Automatic failover across regions\n- But: ALL data replicates everywhere (GDPR concern)\n\n**Option 3: CockroachDB / YugabyteDB**:\n- Distributed SQL, multi-region native\n- Geo-partitioning: pin rows to specific regions\n- EU user rows physically stored in EU\n- More expensive, different operational model\n\nFor GDPR compliance: **Option 1** (regional isolation) or **Option 3** (geo-partitioned). Aurora Global replicates everything, which complicates GDPR.\n\nA common pattern: regional RDS for user data + DynamoDB Global Tables for non-personal data (sessions, configs)."
+    }
+  ]
+}

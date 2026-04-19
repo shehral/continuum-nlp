@@ -1,0 +1,15 @@
+{
+  "id": "conv-181",
+  "domain": "mobile",
+  "topic": "Exploring Expo Router for file-based navigation",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We use React Navigation in our RN app. Should we switch to Expo Router? What are the benefits?"
+    },
+    {
+      "role": "assistant",
+      "content": "Expo Router builds on top of React Navigation with file-based routing:\n\n**Benefits over raw React Navigation**:\n- File-based routing (like Next.js) - create `app/profile/[id].tsx` and you have a route\n- Deep linking works automatically (URL <-> screen mapping)\n- Type-safe navigation\n- Shared layouts via `_layout.tsx`\n- Static route analysis (knows all routes at build time)\n- Web support (same routes work on web)\n\n**When to switch**:\n- Starting a new Expo project: Yes, use Expo Router from day 1\n- Existing React Navigation app: Only if you're on Expo and willing to restructure files\n\n**When to stay on React Navigation**:\n- Bare React Native (no Expo)\n- Complex navigation patterns that need fine-grained control\n- Large existing app where file restructuring is expensive\n\nExpo Router IS React Navigation under the hood - it generates the navigation config from your file structure. You can still use all React Navigation features (custom transitions, deep link config, etc.).\n\nIf you're already on Expo: the migration to Expo Router is worth it for the deep linking and type safety alone."
+    }
+  ]
+}

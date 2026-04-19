@@ -1,0 +1,31 @@
+{
+  "id": "conv-005",
+  "domain": "devops",
+  "topic": "Docker Compose vs Kubernetes for staging",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're running our staging env with docker-compose right now. Team wants to move to k8s. Is it worth it for a 5-person team?"
+    },
+    {
+      "role": "assistant",
+      "content": "For a 5-person team, Kubernetes is almost certainly overkill for staging. k8s adds massive operational complexity:\n\n- Cluster management (EKS/GKE/AKS or self-hosted)\n- YAML manifests for every service\n- Networking (ingress controllers, service mesh)\n- Monitoring (prometheus, grafana stack)\n- Secret management\n\nDocker Compose is perfectly fine for staging. The question is really about production."
+    },
+    {
+      "role": "user",
+      "content": "prod is on EKS already, managed by our one devops person. staging is docker compose on a single EC2 instance. The issue is staging doesn't match prod so we get env-specific bugs."
+    },
+    {
+      "role": "assistant",
+      "content": "Ah, that changes things. If production is already on EKS, having staging match makes sense. Options:\n\n1. **Staging EKS cluster** - Most parity with prod, but expensive ($73/month minimum for control plane + nodes)\n2. **k3s on EC2** - Lightweight Kubernetes that runs your same manifests, much cheaper\n3. **Minikube/kind on EC2** - Even simpler single-node k8s\n4. **Namespace in prod cluster** - Risky but cheapest. Use resource quotas and network policies for isolation.\n\nI'd go with **k3s** on a single EC2 instance. It runs the same kubernets manifests as EKS but with minimal overhead. You get staging/prod parity without the cost."
+    },
+    {
+      "role": "user",
+      "content": "k3s sounds interesting. Can we use helm charts with it? We use helm for prod deployments."
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, k3s supports Helm natively. It's a fully conformant Kubernetes distribution so all your existing Helm charts, kubectl commands, and kustomize overlays work unchanged.\n\nSetup on EC2:\n```bash\ncurl -sfL https://get.k3s.io | sh -\nexport KUBECONFIG=/etc/rancher/k3s/k3s.yaml\nhelm install my-app ./charts/my-app -f values-staging.yaml\n```\n\nk3s even includes Traefik as the default ingress controller and a local storage provisioner. You could have staging running in under an hour."
+    }
+  ]
+}

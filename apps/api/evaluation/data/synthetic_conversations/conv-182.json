@@ -1,0 +1,15 @@
+{
+  "id": "conv-182",
+  "domain": "data-engineering",
+  "topic": "Medallion architecture for data lakehouse",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What's the medallion architecture (bronze/silver/gold) for data lakehouses? Is it still recommended?"
+    },
+    {
+      "role": "assistant",
+      "content": "Medallion architecture organizes your lakehouse into three layers:\n\n**Bronze (Raw)**:\n- Exact copy of source data, no transformations\n- Append-only, keep everything\n- Schema: matches source (JSON, CSV, Avro as-is)\n- Purpose: single source of truth, reprocessing if needed\n\n**Silver (Cleaned)**:\n- Deduplicated, validated, conformed\n- Standard schemas (consistent types, naming)\n- Joins across sources\n- Purpose: clean, queryable data for most use cases\n\n**Gold (Aggregated)**:\n- Business-level aggregations and metrics\n- Optimized for specific use cases (dashboards, ML features)\n- Denormalized for performance\n- Purpose: ready-to-consume datasets\n\n**Is it still recommended?** Yes, with caveats:\n- The naming (bronze/silver/gold) is a Databricks convention. The concept (raw -> clean -> aggregated) is universal.\n- Don't be rigid - some data goes directly from bronze to gold if silver adds no value.\n- The number of layers should match your complexity, not a template.\n\n**In practice** with dbt:\n```\nmodels/\n  staging/     # Bronze -> Silver (clean, rename, cast)\n  intermediate/# Silver transformations (joins, dedup)\n  marts/       # Gold (business metrics, ready for BI)\n```"
+    }
+  ]
+}

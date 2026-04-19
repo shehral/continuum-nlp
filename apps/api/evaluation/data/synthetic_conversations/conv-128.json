@@ -1,0 +1,23 @@
+{
+  "id": "conv-128",
+  "domain": "web-development",
+  "topic": "Internationalization: next-intl vs react-i18next",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Adding i18n to our Next.js app. next-intl or react-i18next? We need to support 8 languages."
+    },
+    {
+      "role": "assistant",
+      "content": "For Next.js App Router specifically:\n\n**next-intl**: Built for Next.js, Server Component support (translations don't ship to client), middleware-based locale detection, type-safe message keys.\n\n**react-i18next**: Framework-agnostic, largest ecosystem, namespace-based code splitting, more mature.\n\nFor Next.js App Router: **next-intl**. Its Server Component integration means zero KB added to client bundles for static text."
+    },
+    {
+      "role": "user",
+      "content": "How do we manage translation files for 8 languages?"
+    },
+    {
+      "role": "assistant",
+      "content": "Translation management at scale:\n\n**1. Translation management platform**:\n- **Crowdin** - Most popular, GitHub integration, auto-PR with translations\n- **Lokalise** - Great API, CLI for CI/CD\n- **Phrase** - Enterprise-grade\n\nWorkflow: developers write English strings -> CI extracts new keys -> pushes to Crowdin -> translators work -> Crowdin creates PR with translations.\n\n**2. AI-assisted translation**: Use GPT-4/Claude to draft, human translators review. Cuts time by 60-80%.\n\n**3. Missing translation fallback**: next-intl falls back to default locale for missing keys. No broken UI."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "conv-056",
+  "domain": "backend",
+  "topic": "Axum vs Actix Web for Rust API",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a high-performance API in Rust. Axum or Actix Web? Need to handle 50k+ req/sec."
+    },
+    {
+      "role": "assistant",
+      "content": "Both can handle 50k+ req/sec easily. Key differences:\n\n**Axum**:\n- Built by the Tokio team (first-party async integration)\n- Tower middleware ecosystem (shared with tonic, hyper)\n- Type-safe extractors, composable routing\n- Growing fastest in the Rust web space\n- More idiomatic Rust (no macros for handlers)\n\n**Actix Web**:\n- Slightly faster in benchmarks (by ~5-10%)\n- Actor model available (not required)\n- More mature, longer track record\n- Macro-based routing (`#[get(\"/\")]`)\n- Larger existing codebase/examples\n\nFor new projects in 2026: **Axum**. The Tokio team backing means it integrates perfectly with the async ecosystem. Actix is still excellent but Axum has momentum."
+    },
+    {
+      "role": "user",
+      "content": "What about Warp? I saw it mentioned in some Rust tutorials."
+    },
+    {
+      "role": "assistant",
+      "content": "Warp is effectively superseded by Axum:\n\n- Same author (Sean McArthur) works on both hyper and Axum\n- Warp's filter-based API is clever but confusing (type errors are nightmarish)\n- Axum uses standard function handlers which are much more approachable\n- Warp's maintenance has slowed significantly\n\nThe Rust web framework landscape has consolidated around **Axum** for HTTP APIs and **tonic** for gRPC. Both built on Tower + Tokio + hyper.\n\nOther niche options:\n- **Rocket** — Nice DX but async support came late, smaller ecosystem now\n- **Poem** — Lightweight alternative, good for simple APIs\n- **Loco** — Rails-like framework for Rust (new, batteries-included)"
+    },
+    {
+      "role": "user",
+      "content": "Axum it is. What ORM or database layer should I use with it?"
+    },
+    {
+      "role": "assistant",
+      "content": "For Axum + PostgreSQL:\n\n1. **SQLx** (recommended) — Compile-time checked SQL queries, async, no ORM overhead:\n```rust\nlet user = sqlx::query_as!(User, \"SELECT * FROM users WHERE id = $1\", id)\n    .fetch_one(&pool)\n    .await?;\n```\n\n2. **SeaORM** — Full ORM if you prefer ActiveRecord pattern. Async, built on SQLx.\n3. **Diesel** — Mature ORM but sync-only (use with `tokio::task::spawn_blocking`)\n\nSQLx is the most popular choice with Axum because:\n- Queries checked at compile time against your actual DB schema\n- No N+1 query surprises\n- Raw SQL means you use Postgres features directly (CTEs, window functions, JSONB)\n- Async native with tokio"
+    }
+  ]
+}

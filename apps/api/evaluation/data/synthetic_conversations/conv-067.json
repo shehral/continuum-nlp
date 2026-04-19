@@ -1,0 +1,23 @@
+{
+  "id": "conv-067",
+  "domain": "ml",
+  "topic": "Embedding models: OpenAI vs open-source for RAG",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Choosing an embedding model for our RAG pipeline. OpenAI's text-embedding-3-large vs an open-source model. Cost is a concern at scale."
+    },
+    {
+      "role": "assistant",
+      "content": "For RAG embeddings at scale:\n\n**OpenAI text-embedding-3-large**:\n- Best quality (MTEB benchmark leader)\n- Dimension reduction (3072 → 256 with minimal quality loss)\n- $0.13/1M tokens\n- API dependency, data leaves your infra\n\n**Open-source alternatives** (self-hosted):\n- **BGE-large-en-v1.5** (BAAI) — Near-OpenAI quality, 1024 dims\n- **E5-large-v2** (Microsoft) — Strong retrieval performance\n- **GTE-Qwen2** — Excellent multilingual, 1536 dims\n- **NV-EmbedQA** (NVIDIA) — Optimized for Q&A retrieval, 2048 dims\n- **nomic-embed-text** — Open-source, 768 dims, very efficient\n\nCost comparison at 10M documents:\n- OpenAI: ~$130 for initial embedding + ongoing query costs\n- Self-hosted (single GPU): ~$300/month fixed, unlimited queries\n\nBreakeven: ~3M queries/month. Above that, self-hosted wins."
+    },
+    {
+      "role": "user",
+      "content": "We have about 5M docs and expect heavy query traffic. How do I self-host efficiently?"
+    },
+    {
+      "role": "assistant",
+      "content": "For 5M docs with heavy traffic, self-hosted is clearly more cost-effective:\n\n**Serving stack**:\n1. **TEI** (Text Embeddings Inference by HuggingFace) — Purpose-built for embedding serving:\n```bash\ndocker run -p 8080:80 --gpus all \\\n  ghcr.io/huggingface/text-embeddings-inference:latest \\\n  --model-id BAAI/bge-large-en-v1.5\n```\n\n2. **Batching**: TEI handles dynamic batching automatically. Send requests and it optimizes GPU utilization.\n\n3. **Hardware**: Single A10G (24GB) handles BGE-large at ~5000 embeddings/sec. That's 430M embeddings/day.\n\n4. **Quantization**: INT8 quantization cuts memory in half with <1% quality loss.\n\nFor 5M initial docs: ~15 minutes to embed everything on a single A10G. Then queries are essentially free.\n\nPair with **Qdrant** or **pgvector** for storage and retrieval."
+    }
+  ]
+}

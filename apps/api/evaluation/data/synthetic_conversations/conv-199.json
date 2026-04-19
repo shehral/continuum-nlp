@@ -1,0 +1,15 @@
+{
+  "id": "conv-199",
+  "domain": "ml",
+  "topic": "Building an AI code review assistant",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Want to build an internal AI code reviewer that knows our codebase conventions. What's the approach?"
+    },
+    {
+      "role": "assistant",
+      "content": "Building a codebase-aware AI code reviewer:\n\n**Architecture**:\n```\nPR Webhook -> Fetch Diff -> RAG (retrieve similar code + style guide) -> LLM Review -> Post Comments\n```\n\n**Components**:\n\n1. **PR integration**: GitHub webhook on `pull_request.opened` / `.synchronize`\n2. **Context retrieval** (RAG):\n   - Embed your codebase's key files (style guide, architecture docs, example PRs)\n   - On each PR: retrieve relevant conventions based on changed files\n3. **LLM review**:\n   - System prompt: your coding conventions, common patterns, what to flag\n   - User prompt: the diff + retrieved context\n   - Model: GPT-4o or Claude (good at code understanding)\n4. **Comment posting**: Use GitHub API to post inline review comments\n\n**What to review**:\n- Style violations not caught by linters\n- Missing error handling patterns\n- Security issues (SQL injection, XSS)\n- Performance anti-patterns specific to your stack\n- Missing tests for new functionality\n- Naming convention violations\n\n**Existing tools to build on**:\n- **CodeRabbit** - AI code review as a service\n- **PR-Agent** (CodiumAI) - Open-source AI PR reviewer\n- **Sweep** - AI-powered code improvements\n\nFor a custom solution: PR-Agent is open-source and customizable. Fork it and add your coding conventions to the prompts. Faster than building from scratch."
+    }
+  ]
+}

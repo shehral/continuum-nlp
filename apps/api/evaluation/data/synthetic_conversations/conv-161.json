@@ -1,0 +1,15 @@
+{
+  "id": "conv-161",
+  "domain": "security",
+  "topic": "API security: OWASP API Top 10",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What are the main API security risks we should check for? Our API is public."
+    },
+    {
+      "role": "assistant",
+      "content": "OWASP API Security Top 10 (2023), the most critical:\n\n**1. Broken Object Level Authorization (BOLA)**\n- Accessing other users' data by changing IDs in requests\n- Fix: Verify the requesting user owns the resource on every endpoint\n\n**2. Broken Authentication**\n- Weak tokens, no rate limiting on login, credential stuffing\n- Fix: Strong JWTs, rate limiting, MFA\n\n**3. Broken Object Property Level Authorization**\n- Mass assignment: user sends `{\"role\": \"admin\"}` in update request\n- Fix: Explicit allowlists for writable fields, not blocklists\n\n**4. Unrestricted Resource Consumption**\n- No rate limiting, no pagination limits, unbounded queries\n- Fix: Rate limiting, max page size, query complexity limits\n\n**5. Broken Function Level Authorization**\n- Regular user accessing admin endpoints\n- Fix: Role-based access on every endpoint, not just frontend\n\n**Quick security audit checklist for your API**:\n- [ ] Every endpoint checks ownership (BOLA)\n- [ ] Rate limiting on all endpoints (especially auth)\n- [ ] Request size limits\n- [ ] Input validation (Pydantic strict mode)\n- [ ] No sensitive data in error messages\n- [ ] CORS configured correctly\n- [ ] Security headers (X-Content-Type-Options, etc.)"
+    }
+  ]
+}

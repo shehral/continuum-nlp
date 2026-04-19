@@ -1,0 +1,23 @@
+{
+  "id": "conv-096",
+  "domain": "ml",
+  "topic": "Data labeling: Label Studio vs Argilla vs Prodigy",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to label training data for an NLP model (named entity recognition). Label Studio, Argilla, or Prodigy?"
+    },
+    {
+      "role": "assistant",
+      "content": "Each has a different philosophy:\n\n**Label Studio** (open-source):\n- Most versatile — NLP, CV, audio, video, time series\n- Self-hosted, web UI\n- ML-assisted labeling (pre-annotate, active learning)\n- Team management, quality control\n- Free, with Enterprise tier for SSO/RBAC\n\n**Argilla** (open-source):\n- Built for LLM/NLP workflows specifically\n- Integrates with HuggingFace ecosystem natively\n- Feedback loops for RLHF, instruction tuning\n- Python-first (Jupyter notebook workflows)\n- Great for iterating on prompts + collecting human feedback\n\n**Prodigy** (commercial, by spaCy team):\n- Local-first (runs on your machine, data never leaves)\n- Active learning built-in (model suggests, human confirms)\n- Fastest annotation speed (binary yes/no decisions)\n- $490 one-time license\n- NLP-focused (NER, classification, spans)\n\nFor NER specifically: **Prodigy** if budget allows (fastest labeling), **Label Studio** if you want free + team collaboration."
+    },
+    {
+      "role": "user",
+      "content": "We also need to do RLHF feedback collection later. Does that change things?"
+    },
+    {
+      "role": "assistant",
+      "content": "RLHF feedback collection changes the recommendation to **Argilla**:\n\n- Purpose-built for LLM feedback workflows\n- Supports preference ranking (response A vs B)\n- Integrates with TRL (Transformer Reinforcement Learning) for DPO/RLHF training\n- HuggingFace Datasets integration for direct training\n\n```python\nimport argilla as rg\n\n# Create a feedback dataset for RLHF\ndataset = rg.FeedbackDataset(\n    fields=[rg.TextField(name=\"prompt\"), rg.TextField(name=\"response_a\"), rg.TextField(name=\"response_b\")],\n    questions=[rg.RankingQuestion(name=\"preference\", values=[\"response_a\", \"response_b\"])]\n)\n```\n\nWorkflow:\n1. Use Argilla for NER labeling now\n2. Train your NER model\n3. Later: use same Argilla instance for RLHF preference collection\n4. Export to HuggingFace format → fine-tune with TRL\n\nArgilla bridges the gap between data labeling and LLM fine-tuning better than any other tool."
+    }
+  ]
+}

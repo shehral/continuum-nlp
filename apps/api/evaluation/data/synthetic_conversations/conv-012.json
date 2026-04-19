@@ -1,0 +1,23 @@
+{
+  "id": "conv-012",
+  "domain": "data-engineering",
+  "topic": "dbt vs Airflow for data transformations",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're building our data pipeline. Have raw data in snowflake. Should I use dbt or airflow for transformations?"
+    },
+    {
+      "role": "assistant",
+      "content": "dbt and Airflow solve different problems - you'll likely want both:\n\n**dbt (data build tool)**:\n- SQL-based transformations *inside* your warehouse\n- Version-controlled models with lineage\n- Testing and documentation built-in\n- Runs transformations as SELECT statements in Snowflake\n\n**Apache Airflow**:\n- Workflow orchestrator (DAGs)\n- Handles the full pipeline: extract, load, transform, notify\n- Python-based, highly flexible\n- Manages dependencies, retries, scheduling\n\nTypical setup: Airflow orchestrates the overall pipeline (extract from sources, load to Snowflake) → dbt runs inside Airflow to transform the data in Snowflake."
+    },
+    {
+      "role": "user",
+      "content": "Do I really need airflow? Can't dbt Cloud handle the scheduling?"
+    },
+    {
+      "role": "assistant",
+      "content": "You're right - dbt Cloud can handle scheduling, and if your pipeline is mostly ELT (extract-load with Fivetran/Airbyte, transform with dbt), you might not need Airflow at all.\n\n**dbt Cloud only** works if:\n- Your data sources sync via managed tools (Fivetran, Stitch, Airbyte)\n- All transformations are SQL in the warehouse\n- You don't need complex branching/conditional logic\n\n**Add Airflow when**:\n- You have custom Python extraction scripts\n- Need to call external APIs as part of the pipeline\n- Complex dependencies between non-SQL tasks\n- Want full control over orchestration\n\nFor simplicity, start with dbt Cloud + Fivetran. Add Airflow (or Dagster/Prefect as modern alternatives) when you outgrow it."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-117",
+  "domain": "systems",
+  "topic": "eBPF for production observability",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Heard about eBPF for observability. What is it and should we use it instead of traditional APM?"
+    },
+    {
+      "role": "assistant",
+      "content": "eBPF (extended Berkeley Packet Filter) is a Linux kernel technology that lets you run sandboxed programs in the kernel without modifying kernel code:\n\n**What eBPF enables for observability**:\n- Trace any system call, function, or network packet at the kernel level\n- Zero instrumentation needed (no code changes, no sidecars, no agents)\n- Near-zero overhead (<1% CPU)\n- See everything: HTTP requests, DNS queries, TCP connections, file I/O, syscalls\n\n**eBPF-based observability tools**:\n- **Cilium Hubble** — Network observability for Kubernetes\n- **Pixie** (New Relic) — Auto-instrument everything in K8s without code changes\n- **Parca** — Continuous profiling via eBPF\n- **Coroot** — Full observability from eBPF (metrics, traces, logs, profiling)\n- **Beyla** (Grafana) — Auto-instrument HTTP/gRPC without code changes\n\n**Should you replace APM with eBPF?**\nNo — use both. eBPF gives you infrastructure-level visibility (network, syscalls). APM gives you application-level visibility (business logic, user flows). They're complementary."
+    },
+    {
+      "role": "user",
+      "content": "Pixie sounds interesting. No code changes for tracing? How?"
+    },
+    {
+      "role": "assistant",
+      "content": "Pixie uses eBPF to automatically trace at the kernel level:\n\n**How it works**:\n1. Pixie deploys as a DaemonSet on your K8s nodes\n2. eBPF programs attach to kernel network and syscall events\n3. Automatically captures:\n   - HTTP/gRPC requests (method, path, status, latency)\n   - SQL queries (full query text, latency)\n   - DNS lookups\n   - TCP connections (retransmits, latency)\n   - Process CPU/memory usage\n4. Data stored locally on nodes (no data leaves your cluster)\n5. Query with PxL (Pixie Query Language) or Grafana plugin\n\n**What you see without changing code**:\n```\nService A → HTTP POST /api/orders (200, 45ms)\n  → SQL: SELECT * FROM inventory WHERE id = $1 (3ms)\n  → HTTP GET service-b:8080/stock (200, 12ms)\n    → SQL: SELECT count(*) FROM stock (2ms)\n```\n\nFull distributed trace without OpenTelemetry SDKs, without code changes, without sidecars.\n\n**Limitations**:\n- Kernel 4.14+ required (most modern K8s nodes are fine)\n- Encrypted traffic (TLS) can be traced via uprobe on SSL libraries, but has edge cases\n- Custom business metrics still need application-level instrumentation\n- Data retention is limited (stores on-node, not long-term)\n\nPixie is now part of New Relic but the open-source version works standalone."
+    }
+  ]
+}

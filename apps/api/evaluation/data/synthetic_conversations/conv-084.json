@@ -1,0 +1,23 @@
+{
+  "id": "conv-084",
+  "domain": "systems",
+  "topic": "LLVM vs Cranelift for compiler backend",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a compiler for a small language as a learning project. LLVM or Cranelift as the backend?"
+    },
+    {
+      "role": "assistant",
+      "content": "Great project. Comparison:\n\n**LLVM**:\n- Industry standard compiler backend (used by Clang, Rust, Swift, Julia)\n- Extensive optimizations (hundreds of passes)\n- Best generated code quality\n- Targets every architecture (x86, ARM, RISC-V, WASM, SPIRV)\n- Massive codebase, complex API\n- Slow compilation (all those optimization passes)\n\n**Cranelift** (Bytecode Alliance):\n- Designed for fast compilation (JIT-friendly)\n- Simpler API, easier to learn\n- Used by Wasmtime (WebAssembly runtime)\n- Rust-native (LLVM is C++)\n- Fewer optimizations (faster compilation, slower generated code)\n- Fewer targets (x86_64, AArch64, s390x, RISC-V)\n\nFor a learning project: **Cranelift**. Simpler API, Rust-native, faster iteration. You'll spend time on YOUR language, not fighting LLVM.\n\nFor production quality: LLVM. The optimization pipeline produces significantly better code."
+    },
+    {
+      "role": "user",
+      "content": "I'm writing the compiler in Rust. How do I interface with LLVM from Rust?"
+    },
+    {
+      "role": "assistant",
+      "content": "Two options for LLVM from Rust:\n\n1. **Inkwell** — Safe Rust wrapper around LLVM C API:\n```rust\nuse inkwell::context::Context;\nlet context = Context::create();\nlet module = context.create_module(\"my_lang\");\nlet builder = context.create_builder();\n\nlet i64_type = context.i64_type();\nlet fn_type = i64_type.fn_type(&[i64_type.into(), i64_type.into()], false);\nlet function = module.add_function(\"add\", fn_type, None);\n```\n\n2. **llvm-sys** — Raw FFI bindings (more control, less safe)\n\nFor Cranelift (simpler):\n```rust\nuse cranelift::prelude::*;\nlet mut builder = FunctionBuilder::new(&mut func, &mut builder_ctx);\nlet a = builder.append_block_param(block, types::I64);\nlet b = builder.append_block_param(block, types::I64);\nlet sum = builder.ins().iadd(a, b);\n```\n\nMy suggestion: Start with Cranelift to get your language working end-to-end fast. Switch to LLVM (via Inkwell) later if you need better optimization. The frontend (parser, type checker) is the same regardless of backend."
+    }
+  ]
+}

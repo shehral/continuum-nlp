@@ -1,0 +1,23 @@
+{
+  "id": "conv-132",
+  "domain": "ml",
+  "topic": "Evaluation framework for RAG systems",
+  "messages": [
+    {
+      "role": "user",
+      "content": "How do we measure our RAG system's quality? Users say answers are sometimes wrong but we have no metrics."
+    },
+    {
+      "role": "assistant",
+      "content": "RAG evaluation has two parts: retrieval quality and generation quality.\n\n**Retrieval metrics**: Recall@k, Precision@k, MRR\n**Generation metrics**: Faithfulness, answer relevance, context relevance\n\n**Frameworks**:\n- **RAGAS** - Most popular, metrics for faithfulness, relevancy, precision\n- **DeepEval** - More metrics, CI/CD integration, dashboard\n- **Arize Phoenix** - Observability with RAG evaluation, LLM-as-judge"
+    },
+    {
+      "role": "user",
+      "content": "We don't have ground truth answers. Can we still evaluate?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, **LLM-as-judge** evaluation works without ground truth. Use a strong LLM (GPT-4, Claude) to evaluate your RAG system's outputs.\n\nNo ground truth needed for:\n1. **Faithfulness** - Is the answer grounded in retrieved context?\n2. **Context relevance** - Is the retrieved context relevant to the query?\n3. **Answer relevance** - Does the answer address the question?\n\n**Building ground truth over time**:\n1. Collect user questions + system answers\n2. Have domain experts rate a sample (100-200 questions)\n3. This becomes your evaluation dataset\n4. Run automated evaluation on every RAG pipeline change\n\nStart with LLM-as-judge today, build human-labeled ground truth iteratively."
+    }
+  ]
+}

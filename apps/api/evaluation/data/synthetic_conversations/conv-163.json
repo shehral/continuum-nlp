@@ -1,0 +1,23 @@
+{
+  "id": "conv-163",
+  "domain": "ml",
+  "topic": "Vector search: pgvector vs dedicated vector DB",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We already have PostgreSQL. Should we use pgvector for our vector search or add a dedicated vector DB like Qdrant?"
+    },
+    {
+      "role": "assistant",
+      "content": "Decision depends on scale and requirements:\n\n**pgvector** (use Postgres):\n- No new infrastructure\n- Combine vector search with SQL filters in one query\n- HNSW and IVFFlat indexes\n- Good for: <5M vectors, moderate QPS\n- Limitations: slower at scale, limited tuning options\n\n**Dedicated vector DB** (Qdrant, Weaviate, Milvus):\n- Purpose-built for vector operations\n- Better performance at scale (10M+ vectors)\n- Advanced features: payload filtering during search, quantization\n- Horizontal scaling\n- Additional service to manage\n\n**Rules of thumb**:\n- <1M vectors, <100 QPS: **pgvector** (keep it simple)\n- 1-10M vectors, moderate QPS: **pgvector with HNSW** (still fine)\n- >10M vectors or >1000 QPS: **Dedicated vector DB**\n- Need filtering + vector search combined: **Qdrant** (filters during search, not after)\n\nStart with pgvector. It's already in your Postgres. Migrate to dedicated only when you hit performance limits."
+    },
+    {
+      "role": "user",
+      "content": "We have 3M documents. pgvector it is. How do we optimize it?"
+    },
+    {
+      "role": "assistant",
+      "content": "pgvector optimization for 3M vectors:\n\n**1. Use HNSW index** (not IVFFlat):\n```sql\nCREATE INDEX ON documents USING hnsw (embedding vector_cosine_ops)\n  WITH (m = 16, ef_construction = 200);\n```\nHNSW is slower to build but faster to query. For 3M vectors: build time ~30 min, query time <10ms.\n\n**2. Tune `ef_search`** at query time:\n```sql\nSET hnsw.ef_search = 100;  -- Higher = more accurate, slower\n```\nDefault is 40. For production: 100-200 balances speed and recall.\n\n**3. Reduce dimensions** if possible:\n- If using OpenAI text-embedding-3-large: reduce from 3072 to 1024 or 512\n- `embedding[:1024]` with Matryoshka embeddings\n- Cuts memory and improves speed significantly\n\n**4. Partition by tenant/category** if you always filter:\n```sql\nCREATE TABLE documents (\n    id BIGINT,\n    tenant_id INT,\n    embedding vector(1024)\n) PARTITION BY LIST (tenant_id);\n```\nPartial indexes per tenant avoid scanning irrelevant vectors.\n\n**5. Memory**: Ensure `shared_buffers` and `effective_cache_size` are large enough to keep the index in memory. For 3M vectors at 1024 dims: ~12GB for the index."
+    }
+  ]
+}

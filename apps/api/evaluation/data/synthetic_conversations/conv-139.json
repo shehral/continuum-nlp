@@ -1,0 +1,23 @@
+{
+  "id": "conv-139",
+  "domain": "systems",
+  "topic": "Exploring async Rust patterns with Tokio",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Learning async Rust with Tokio. The select! macro confuses me. When do I use select vs join?"
+    },
+    {
+      "role": "assistant",
+      "content": "Key difference:\n\n**`tokio::join!`** - Run futures concurrently, wait for ALL to complete. Use when you need all results.\n\n**`tokio::select!`** - Run futures concurrently, wait for FIRST to complete, cancel others. Use for timeout, shutdown, or multiple event sources.\n\nCommon patterns: timeout (work vs sleep), graceful shutdown (server vs ctrl_c signal), event loop (recv from multiple channels)."
+    },
+    {
+      "role": "user",
+      "content": "What about cancellation safety? I read that select can cause issues."
+    },
+    {
+      "role": "assistant",
+      "content": "Cancellation safety is a real concern. When one select! branch completes, others are **dropped** (cancelled). Problematic if a future has done partial work.\n\n**Safe patterns**:\n1. Use cancellation-safe methods (channel recv is safe, partial reads may not be)\n2. Pin futures outside select so they survive across iterations\n3. Use `tokio::spawn` for critical work - spawned tasks run to completion even if the select moves on\n\nRule of thumb: if a future does multi-step work that must complete atomically, wrap it in `tokio::spawn` instead of putting it directly in `select!`."
+    }
+  ]
+}

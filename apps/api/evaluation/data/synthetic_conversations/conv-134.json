@@ -1,0 +1,23 @@
+{
+  "id": "conv-134",
+  "domain": "devops",
+  "topic": "Exploring platform engineering with Backstage",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our engineering team is growing to 50+ devs. Heard about Backstage for internal developer portals. Worth it?"
+    },
+    {
+      "role": "assistant",
+      "content": "Backstage (by Spotify, CNCF incubating) provides: software catalog, scaffolder templates, TechDocs, 200+ plugins, unified search.\n\nSetup cost: 2-4 weeks, ongoing ~0.5 FTE maintenance.\n\n**Worth it if**: 50+ services, frequent onboarding, unclear service ownership\n**Not worth it if**: <20 services, small stable team"
+    },
+    {
+      "role": "user",
+      "content": "We have 80 services and onboarding is painful. New devs take weeks to find things."
+    },
+    {
+      "role": "assistant",
+      "content": "80 services + onboarding pain is the exact use case.\n\n**Phase 1**: Software Catalog (Week 1-2) - Import all 80 services via catalog-info.yaml in each repo. Every developer can search and find services, owners, docs, APIs.\n**Phase 2**: TechDocs (Week 3) - Add docs/ folders, Backstage renders as searchable docs site.\n**Phase 3**: Scaffolder (Week 4) - Templates for new microservice, new frontend, add database to service.\n**Phase 4**: Plugins (ongoing) - Kubernetes status, CI/CD, per-service costs.\n\nThe software catalog alone solves the onboarding problem."
+    }
+  ]
+}

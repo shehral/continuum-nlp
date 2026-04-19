@@ -1,0 +1,23 @@
+{
+  "id": "conv-069",
+  "domain": "ml",
+  "topic": "LoRA fine-tuning vs full fine-tuning for domain adaptation",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Want to fine-tune Llama 3.3 8B on our domain-specific data (legal documents). LoRA or full fine-tuning? We have a single A100."
+    },
+    {
+      "role": "assistant",
+      "content": "For a single A100, **LoRA** is the practical choice:\n\n**LoRA (Low-Rank Adaptation)**:\n- Trains ~0.1-1% of parameters (adapter weights)\n- A100 80GB can fine-tune Llama 8B easily, even 70B with QLoRA\n- Training time: hours, not days\n- Merge adapter back into base model for serving\n- 90-95% of full fine-tuning quality for most tasks\n\n**Full Fine-tuning**:\n- Updates all parameters\n- Llama 8B needs ~4x A100 for full fine-tuning (FP16)\n- Better for large domain shifts\n- Risk of catastrophic forgetting\n- Much more expensive\n\nFor legal domain adaptation: LoRA is almost certainly sufficient. The base model already understands language — you're teaching it legal terminology and reasoning patterns, which LoRA handles well."
+    },
+    {
+      "role": "user",
+      "content": "What tools do I use? I've heard of unsloth and axolotl."
+    },
+    {
+      "role": "assistant",
+      "content": "Both are excellent for LoRA fine-tuning:\n\n**Unsloth**:\n- 2-5x faster training than standard HuggingFace\n- 60% less VRAM usage\n- Automatic quantized LoRA (QLoRA)\n- Simple API:\n```python\nfrom unsloth import FastLanguageModel\nmodel, tokenizer = FastLanguageModel.from_pretrained(\n    \"meta-llama/Llama-3.3-8B-Instruct\",\n    load_in_4bit=True\n)\nmodel = FastLanguageModel.get_peft_model(model, r=16, lora_alpha=32)\n```\n\n**Axolotl**:\n- YAML-based config (no code changes for different setups)\n- Supports LoRA, QLoRA, full fine-tuning, DPO, RLHF\n- Multi-GPU training out of the box\n- More features but more complex\n\nFor your single A100 + legal fine-tuning: **Unsloth**. It's faster, simpler, and the VRAM efficiency means you could even try LoRA on 70B.\n\nDataset format: convert your legal docs to instruction-following format (question-answer pairs about the documents). Tools like `Argilla` help with data labeling."
+    }
+  ]
+}

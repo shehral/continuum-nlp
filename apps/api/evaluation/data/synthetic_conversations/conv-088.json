@@ -1,0 +1,23 @@
+{
+  "id": "conv-088",
+  "domain": "security",
+  "topic": "Web app penetration testing approach",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our team needs to do a security assessment of our web app before launch. How do we approach pentesting? No security specialist on the team."
+    },
+    {
+      "role": "assistant",
+      "content": "For a team without a security specialist, a structured approach:\n\n**Phase 1: Automated scanning** (do first)\n1. **OWASP ZAP** — Free, open-source web app scanner. Run against staging:\n```bash\ndocker run -t zaproxy/zap-stable zap-baseline.py -t https://staging.example.com\n```\n2. **Nuclei** (ProjectDiscovery) — Template-based vulnerability scanner, 6000+ checks\n3. **nikto** — Web server misconfiguration scanner\n\n**Phase 2: Manual checks** (OWASP Top 10)\n- [ ] Authentication: test password reset flows, session management\n- [ ] Authorization: try accessing other users' data by changing IDs\n- [ ] Injection: SQL injection, XSS in all input fields\n- [ ] CSRF: check anti-CSRF tokens on state-changing forms\n- [ ] Headers: run securityheaders.com against your site\n\n**Phase 3: Professional pentest** (before launch)\n- Hire a pentest firm for a 1-week engagement (~$5-15k)\n- They'll find what automated tools miss\n- Required for SOC2/PCI compliance"
+    },
+    {
+      "role": "user",
+      "content": "Can we use Burp Suite? I've heard it's the industry standard."
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, **Burp Suite** is the gold standard for web app testing:\n\n**Burp Suite Community** (free):\n- Proxy to intercept/modify HTTP requests\n- Repeater for manual request crafting\n- Decoder for encoding/decoding\n- Limited scanner (throttled)\n\n**Burp Suite Professional** ($449/year):\n- Full automated scanner\n- Active scanning (tests for vulns automatically)\n- Intruder for brute-force/fuzzing\n- Extensions (BApp Store)\n- Much faster than free version\n\nWorkflow with Burp:\n1. Set browser proxy to Burp (127.0.0.1:8080)\n2. Browse your app normally — Burp builds a site map\n3. Right-click endpoints → \"Scan\" for automated testing\n4. Use Repeater to manually test suspicious endpoints\n5. Check Intruder for auth bypasses (change user IDs, roles)\n\nFor your pre-launch: Burp Professional ($449) + OWASP ZAP (free) gives you comprehensive coverage. Run ZAP for broad automated scanning, Burp for targeted manual testing.\n\nAlternative: **Caido** — Modern Burp alternative built in Rust, growing quickly."
+    }
+  ]
+}

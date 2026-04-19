@@ -1,0 +1,15 @@
+{
+  "id": "conv-192",
+  "domain": "web-development",
+  "topic": "Edge rendering vs SSR vs ISR for dynamic content",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our Next.js app serves personalized content. Should we use SSR, ISR, or edge rendering? Trying to balance personalization and speed."
+    },
+    {
+      "role": "assistant",
+      "content": "Each approach has different personalization vs performance tradeoffs:\n\n**SSR (Server-Side Rendering)**:\n- Full personalization per request\n- Runs in one region (origin server)\n- Latency: 100-500ms depending on data fetching\n- Good for: highly personalized pages\n\n**ISR (Incremental Static Regeneration)**:\n- Static page regenerated in background\n- Cannot personalize per user (same page for everyone)\n- Fastest TTFB (served from CDN)\n- Good for: content that changes but isn't per-user\n\n**Edge Rendering** (middleware + edge functions):\n- Runs close to user (edge network)\n- Can personalize based on headers, cookies, geo\n- Limited runtime (no database connections from edge)\n- Good for: geo-personalization, A/B testing, auth checks\n\n**Recommended pattern for personalized content**:\n```\nStatic shell (ISR) + Client-side personalization (React Query)\n```\n\n1. ISR renders the page layout (fast, cached globally)\n2. Client fetches personalized data after mount (useQuery)\n3. Skeleton/loading state shown briefly during fetch\n\nThis gives you: CDN-fast initial load + full personalization. The \"flash\" of generic content is usually acceptable and can be minimized with good skeleton UI."
+    }
+  ]
+}

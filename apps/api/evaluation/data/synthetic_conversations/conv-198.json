@@ -1,0 +1,15 @@
+{
+  "id": "conv-198",
+  "domain": "devops",
+  "topic": "Observability: OpenTelemetry adoption",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have a mix of Datadog, Prometheus, and custom logging. Should we standardize on OpenTelemetry?"
+    },
+    {
+      "role": "assistant",
+      "content": "OpenTelemetry (OTel) is the convergence point for observability. Standardizing on it is generally a good move:\n\n**What OTel gives you**:\n- **Vendor-neutral instrumentation**: Same SDK works with Datadog, Grafana, Honeycomb, New Relic\n- **Three signals**: Traces, metrics, logs (all correlated)\n- **Auto-instrumentation**: HTTP, database, gRPC traced without code changes\n- **Language support**: Python, JS/TS, Go, Java, Rust, .NET, Ruby\n\n**Migration strategy**:\n1. **Instrument with OTel SDKs** (replace Datadog/proprietary SDKs)\n2. **Deploy OTel Collector** as a central pipeline\n3. **Export to your current backends** (Datadog, Prometheus) initially\n4. **Switch backends** whenever you want (no app code changes)\n\n**OTel Collector** is the key piece:\n```yaml\nreceivers:\n  otlp:\n    protocols:\n      grpc: {}\n      http: {}\nexporters:\n  datadog:\n    api:\n      key: ${DD_API_KEY}\n  prometheus:\n    endpoint: \"0.0.0.0:9090\"\nservice:\n  pipelines:\n    traces:\n      receivers: [otlp]\n      exporters: [datadog]\n    metrics:\n      receivers: [otlp]\n      exporters: [prometheus]\n```\n\nYou instrument once, export everywhere. If you decide to switch from Datadog to Grafana Cloud later, change the exporter config. Zero app changes."
+    }
+  ]
+}

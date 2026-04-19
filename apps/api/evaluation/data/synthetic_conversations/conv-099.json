@@ -1,0 +1,31 @@
+{
+  "id": "conv-099",
+  "domain": "ml",
+  "topic": "Exploring LLM structured output without clear decision",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Been playing with structured output from LLMs. Like getting JSON back reliably. What approaches are there?"
+    },
+    {
+      "role": "assistant",
+      "content": "Several approaches, each with tradeoffs:\n\n**1. Prompt engineering** (simplest):\n- \"Respond in JSON with fields: name, age, city\"\n- Unreliable — model may add markdown, extra text\n\n**2. JSON mode** (OpenAI, Anthropic):\n- `response_format: { type: \"json_object\" }`\n- Guarantees valid JSON but not schema compliance\n\n**3. Structured outputs** (OpenAI):\n- Pass a JSON Schema, model output is guaranteed to match\n- Uses constrained decoding (grammar-based sampling)\n- Most reliable for OpenAI models\n\n**4. Instructor** (Python library):\n- Uses Pydantic models to define output schema\n- Automatic retry on validation failure\n- Works with OpenAI, Anthropic, Ollama, etc.\n```python\nimport instructor\nfrom pydantic import BaseModel\n\nclass User(BaseModel):\n    name: str\n    age: int\n\nuser = client.chat.completions.create(\n    model=\"gpt-4o\",\n    response_model=User,\n    messages=[{\"role\": \"user\", \"content\": \"Extract: John is 30\"}]\n)\n```\n\n**5. Outlines** (open-source, for self-hosted models):\n- Grammar-constrained generation at the token level\n- Guarantees schema compliance without retries\n- Works with vLLM, transformers"
+    },
+    {
+      "role": "user",
+      "content": "Interesting. We're using Claude via Bedrock. Which approach works best?"
+    },
+    {
+      "role": "assistant",
+      "content": "For Claude on Bedrock, your best options:\n\n**1. Instructor + Anthropic** (recommended):\n```python\nimport instructor\nimport anthropic\n\nclient = instructor.from_anthropic(anthropic.Anthropic())\n\nclass OrderInfo(BaseModel):\n    product: str\n    quantity: int\n    urgent: bool\n\norder = client.messages.create(\n    model=\"claude-sonnet-4-20250514\",\n    max_tokens=1024,\n    response_model=OrderInfo,\n    messages=[{\"role\": \"user\", \"content\": \"I need 5 widgets ASAP\"}]\n)\n# order.product = \"widgets\", order.quantity = 5, order.urgent = True\n```\n\n**2. Claude's native tool_use** for structured output:\n- Define a tool with a JSON schema, Claude fills it in\n- No library needed, works directly with Bedrock API\n- Slightly more manual than Instructor\n\n**3. XML tags** (Claude-specific):\n- Claude is trained to respect XML structure\n- `<output><name>John</name><age>30</age></output>`\n- Parse with standard XML library\n\nInstructor is the most ergonomic. It uses tool_use under the hood for Claude but gives you Pydantic models directly."
+    },
+    {
+      "role": "user",
+      "content": "Does the structured output slow down generation at all?"
+    },
+    {
+      "role": "assistant",
+      "content": "Minimal impact:\n\n- **Instructor/tool_use**: Adds ~50-100 tokens to the system prompt (tool definition). No generation speed impact. May add a retry call if validation fails (~5% of the time).\n\n- **Constrained decoding** (Outlines, vLLM grammar mode): Slight overhead per token (~5-10%) because it masks invalid tokens from the vocabulary at each step. But output is shorter (no filler text), so total latency often improves.\n\n- **JSON mode**: Zero overhead. The model is simply instructed to output JSON.\n\nThe real cost consideration is **retries**. Without structured output:\n- 80% of the time, prompting alone works\n- 15% needs one retry (parsing failure)\n- 5% needs manual intervention\n\nWith Instructor:\n- 95% works first try (tool_use is reliable)\n- 5% needs one automatic retry\n- <0.1% fails completely\n\nThe reliability improvement far outweighs any minor latency. For production systems, structured output isn't optional — it's a requirement."
+    }
+  ]
+}

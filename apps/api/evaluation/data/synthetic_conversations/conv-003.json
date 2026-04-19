@@ -1,0 +1,31 @@
+{
+  "id": "conv-003",
+  "domain": "backend",
+  "topic": "FastAPI vs Django for REST API",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a new REST API in python. FastAPI or Django REST Framework? The API serves a mobile app and a react frontend."
+    },
+    {
+      "role": "assistant",
+      "content": "Key differences:\n\n**FastAPI**:\n- Async-first (great for I/O-bound mobile APIs)\n- Automatic OpenAPI/Swagger docs from type hints\n- Pydantic v2 for validation (fast, strict)\n- Lightweight, you pick your own ORM/DB layer\n\n**Django REST Framework (DRF)**:\n- Batteries included (admin, ORM, auth, migrations)\n- Mature ecosystem with packages for everything\n- Synchronous by default (async support improving)\n- Heavier but more structure out of the box\n\nWhat's your DB choice and team experience?"
+    },
+    {
+      "role": "user",
+      "content": "We're on postgres. Team has some Django experience from a previous project. But I really like the async stuff in fastapi, especially since we'll have websocket connections for real-time features."
+    },
+    {
+      "role": "assistant",
+      "content": "WebSocket support tips this toward FastAPI. Django Channels exists for WebSockets but it's clunky compared to FastAPI's native WebSocket support.\n\nFor PostgreSQL with FastAPI, you'd use either:\n- **SQLAlchemy** (async mode with `asyncpg`) - most mature\n- **SQLModel** - built by the FastAPI creator, combines SQLAlchemy + Pydantic\n- **Tortoise ORM** - Django-like async ORM\n\nI'd go FastAPI + SQLAlchemy async + Alembic for migrations. You lose Django's admin panel but gain proper async and WebSocket support."
+    },
+    {
+      "role": "user",
+      "content": "yeah let's go with fastapi. What about rate limiting and caching? We need both."
+    },
+    {
+      "role": "assistant",
+      "content": "For FastAPI:\n\n**Rate limiting**: Use `slowapi` (built on `limits` library) or implement token bucket with Redis. Redis-backed is better for distributed deployments.\n\n**Caching**: Redis again - use `aioredis` or `redis-py` with async support. For response caching, `fastapi-cache2` works well with Redis or in-memory backends.\n\nBasic pattern:\n```python\nfrom redis.asyncio import Redis\nredis = Redis.from_url(\"redis://localhost:6379\")\n```\n\nConsider adding `gzip` middleware too - `GZipMiddleware` from Starlette handles compression automatically."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "conv-172",
+  "domain": "data-engineering",
+  "topic": "Data lineage: tracking data flow across systems",
+  "messages": [
+    {
+      "role": "user",
+      "content": "When something goes wrong with our dashboards, we have no idea where the bad data came from. Need data lineage. Options?"
+    },
+    {
+      "role": "assistant",
+      "content": "Data lineage tools help you trace data from source to dashboard:\n\n**Open-source**:\n- **OpenLineage** - Standard for lineage metadata. Integrations with Airflow, Spark, dbt, Great Expectations.\n- **DataHub** (LinkedIn) - Data catalog with built-in lineage visualization.\n- **OpenMetadata** - Data catalog with lineage, quality, profiling.\n- **Marquez** (WeWork) - OpenLineage reference implementation, lightweight.\n\n**Commercial**:\n- **Monte Carlo** - Data observability + lineage. Detects issues proactively.\n- **Atlan** - Data catalog + lineage + governance. Beautiful UI.\n- **Metaphor** (Metaphor Data) - Automated lineage discovery.\n\n**dbt-native lineage**:\n- dbt already tracks model-to-model lineage\n- `dbt docs generate` creates a lineage graph\n- Limited to dbt models (doesn't show source systems or dashboards)\n\nFor starting out: **DataHub** or **OpenMetadata** (free, comprehensive). For dbt-heavy shops: dbt lineage + **Elementary** (dbt-native data observability)."
+    }
+  ]
+}

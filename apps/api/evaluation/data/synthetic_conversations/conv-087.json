@@ -1,0 +1,23 @@
+{
+  "id": "conv-087",
+  "domain": "security",
+  "topic": "SAST tools: Semgrep vs SonarQube vs CodeQL",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a SAST (static analysis) tool for our CI pipeline. Considering Semgrep, SonarQube, or CodeQL. We have Python and TypeScript code."
+    },
+    {
+      "role": "assistant",
+      "content": "All three work for Python + TypeScript:\n\n**Semgrep**:\n- Fast, lightweight pattern matching\n- Custom rules are easy to write (YAML-based)\n- 2000+ community rules\n- Free for open-source, paid for teams\n- Best for security-specific scanning\n- Runs in seconds (not minutes)\n\n**SonarQube / SonarCloud**:\n- Code quality + security (bugs, smells, vulnerabilities)\n- Quality gates (block PRs below threshold)\n- Technical debt tracking\n- Self-hosted (free Community) or SonarCloud (managed)\n- Broader scope than just security\n\n**CodeQL** (GitHub):\n- Deep semantic analysis (data flow, taint tracking)\n- Best at finding complex vulnerabilities\n- Free for public repos, included in GitHub Advanced Security\n- Slower (minutes to hours for large repos)\n- Query language is powerful but complex\n\nMy recommendation: **Semgrep** (security) + **SonarCloud** (quality). Semgrep catches security issues fast, SonarCloud handles code quality metrics."
+    },
+    {
+      "role": "user",
+      "content": "We're on GitHub. Is CodeQL + GitHub Advanced Security worth the price?"
+    },
+    {
+      "role": "assistant",
+      "content": "GitHub Advanced Security (GHAS) bundles:\n- CodeQL SAST\n- Dependabot (dependency scanning)\n- Secret scanning (API keys in code)\n- Security overview dashboard\n\nPricing: $49/committer/month (Enterprise only). For a team of 10: $490/month.\n\nIs it worth it?\n- **Yes if**: You need compliance reporting (SOC2, ISO 27001), the security overview dashboard, and your team is already all-in on GitHub\n- **No if**: Budget-constrained — you can get 80% of the value for free:\n  - Semgrep (free tier) for SAST\n  - Dependabot (free on GitHub)\n  - GitLeaks or TruffleHog (free) for secret scanning\n  - `npm audit` / `pip-audit` for dependency vulnerabilities\n\nThe free alternative stack is genuinely good. GHAS's advantage is unified dashboard and CodeQL's deeper analysis. For most startups, the free stack is sufficient."
+    }
+  ]
+}

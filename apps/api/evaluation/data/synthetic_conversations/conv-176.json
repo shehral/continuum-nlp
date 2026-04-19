@@ -1,0 +1,15 @@
+{
+  "id": "conv-176",
+  "domain": "web-development",
+  "topic": "React Server Components data fetching patterns",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Best practices for data fetching in React Server Components? We keep accidentally making things client components."
+    },
+    {
+      "role": "assistant",
+      "content": "Key rules for RSC data fetching:\n\n**1. Fetch in Server Components by default**:\n```tsx\n// app/users/page.tsx (Server Component - no 'use client')\nasync function UsersPage() {\n  const users = await db.query('SELECT * FROM users');\n  return <UserList users={users} />;\n}\n```\nNo useEffect, no loading state management, no client-side fetching library needed.\n\n**2. Push 'use client' as low as possible**:\n```tsx\n// Server Component (fetches data)\nasync function Dashboard() {\n  const data = await fetchDashboardData();\n  return (\n    <div>\n      <h1>Dashboard</h1>           {/* Server rendered */}\n      <StaticMetrics data={data} /> {/* Server rendered */}\n      <InteractiveChart data={data} /> {/* Client component */}\n    </div>\n  );\n}\n```\nOnly `InteractiveChart` needs 'use client' (for mouse events). Everything else stays on the server.\n\n**3. Common mistakes**:\n- Adding 'use client' to a layout (makes everything below it client)\n- Importing a client component that imports a server component (breaks the boundary)\n- Using `useState` for data that could be server-fetched"
+    }
+  ]
+}

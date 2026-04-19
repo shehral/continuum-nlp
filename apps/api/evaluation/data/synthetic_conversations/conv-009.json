@@ -1,0 +1,31 @@
+{
+  "id": "conv-009",
+  "domain": "mobile",
+  "topic": "React Native vs Flutter for cross-platform",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a new mobile app - cross-platform required. React Native or Flutter? Our web team knows React and typescript."
+    },
+    {
+      "role": "assistant",
+      "content": "Given your team knows React and TypeScript, **React Native** is the natural choice:\n\n**React Native (RN)**:\n- Reuse React knowledge, same mental model\n- TypeScript support is native\n- Share code/logic with your web app\n- Expo makes development very fast\n- Large npm ecosystem\n\n**Flutter**:\n- Dart language (new to learn)\n- Better animations and custom UI\n- Single rendering engine = pixel-perfect consistency\n- Growing but smaller ecosystem than npm\n\nThe main reason to pick Flutter over RN would be if you need complex custom animations or highly custom UI that differs significantly from native platform patterns."
+    },
+    {
+      "role": "user",
+      "content": "Yeah we want to ship fast. Expo or bare RN workflow?"
+    },
+    {
+      "role": "assistant",
+      "content": "**Expo** all the way for a new project in 2026. The old limitations are gone:\n\n- EAS Build handles native compilation in the cloud\n- Expo Modules let you write custom native code when needed\n- OTA updates via `expo-updates` (skip app store review for JS changes)\n- Expo Router for file-based routing (like Next.js)\n\nBare workflow only if you need very specific native modules that don't support Expo. That's increasingly rare.\n\nStart with: `npx create-expo-app@latest --template tabs-typescript`"
+    },
+    {
+      "role": "user",
+      "content": "What about state management and navigation in RN?"
+    },
+    {
+      "role": "assistant",
+      "content": "**Navigation**: Expo Router (file-based, built on React Navigation). It's the default and works great.\n\n**State management**: Same options as React web:\n- **Zustand** - Simplest, works perfectly in RN\n- **TanStack Query** - For server state / API caching\n- **Jotai** - If you prefer atomic state\n- **MMKV** - For persistent local storage (way faster than AsyncStorage)\n\nTypical stack: Expo Router + Zustand + TanStack Query + MMKV. That covers navigation, UI state, server state, and local persistence."
+    }
+  ]
+}

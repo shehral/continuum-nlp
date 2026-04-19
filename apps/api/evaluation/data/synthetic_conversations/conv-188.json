@@ -1,0 +1,15 @@
+{
+  "id": "conv-188",
+  "domain": "ml",
+  "topic": "A/B testing for ML models",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We want to A/B test a new recommendation model against our current one. How do we set this up properly?"
+    },
+    {
+      "role": "assistant",
+      "content": "ML model A/B testing requires careful experiment design:\n\n**Architecture**:\n```\nUser Request -> Feature Store -> Model Router (A/B split)\n                                     |         |\n                                  Model A    Model B\n                                  (current)  (candidate)\n                                     |         |\n                                  Log predictions + outcomes\n                                     |\n                              Analysis Dashboard\n```\n\n**Key components**:\n\n1. **Traffic splitting**: Use your feature flag system (LaunchDarkly, Unleash) to assign users to cohorts. Important: assignment must be **sticky** (same user always sees same model).\n\n2. **Metrics to track**:\n- Primary: business metric (click-through rate, conversion, revenue)\n- Secondary: model metrics (latency, prediction distribution)\n- Guardrail: metrics that must not degrade (error rate, latency p99)\n\n3. **Statistical significance**: Don't peek at results daily and declare winners. Use proper statistical testing:\n- Sample size calculator before starting\n- Sequential testing if you must check early (avoids multiple comparison problem)\n- Minimum 1-2 weeks runtime for recommendation models\n\n4. **Logging**: Log for EVERY request: user_id, model_version, prediction, features used, outcome (clicked/purchased/etc.).\n\n**Simple implementation** without ML infrastructure:\n- Feature flag: 50% users get model A, 50% get model B\n- Log everything to your analytics warehouse\n- After 2 weeks: SQL query comparing conversion rates between cohorts\n- Statistical test: two-proportion z-test or chi-squared test"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "conv-175",
+  "domain": "mobile",
+  "topic": "Deep linking and universal links setup",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Users share links from our web app but they always open in the browser, not our mobile app. How do we set up deep linking?"
+    },
+    {
+      "role": "assistant",
+      "content": "You need **Universal Links** (iOS) and **App Links** (Android):\n\n**iOS Universal Links**:\n1. Host an `apple-app-site-association` file at `https://yourapp.com/.well-known/apple-app-site-association`:\n```json\n{\n  \"applinks\": {\n    \"apps\": [],\n    \"details\": [{\n      \"appID\": \"TEAM_ID.com.yourapp.app\",\n      \"paths\": [\"/product/*\", \"/profile/*\"]\n    }]\n  }\n}\n```\n2. Add Associated Domains in Xcode: `applinks:yourapp.com`\n3. Handle in app: `application(_:continue:restorationHandler:)`\n\n**Android App Links**:\n1. Host a `assetlinks.json` at `https://yourapp.com/.well-known/assetlinks.json`:\n```json\n[{\n  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n  \"target\": {\n    \"namespace\": \"android_app\",\n    \"package_name\": \"com.yourapp.app\",\n    \"sha256_cert_fingerprints\": [\"your_cert_sha256\"]\n  }\n}]\n```\n2. Add intent filter in AndroidManifest with `autoVerify=\"true\"`\n\n**For React Native with Expo**:\n```javascript\n// app.json\n\"expo\": {\n  \"scheme\": \"yourapp\",\n  \"ios\": { \"associatedDomains\": [\"applinks:yourapp.com\"] },\n  \"android\": { \"intentFilters\": [...] }\n}\n```\n\nUse Expo Router for handling incoming links — it maps URLs to screens via file-based routing."
+    }
+  ]
+}

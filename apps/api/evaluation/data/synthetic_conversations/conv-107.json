@@ -1,0 +1,23 @@
+{
+  "id": "conv-107",
+  "domain": "backend",
+  "topic": "Go 1.22+ range over func and iterators",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Go 1.22 added range over func. What is it and how does it change how we write Go code?"
+    },
+    {
+      "role": "assistant",
+      "content": "Range over functions is Go's answer to iterators. It lets you `range` over custom sequences:\n\n**Before (Go 1.21)**:\n```go\n// Return a slice (allocates)\nfunc FilterUsers(users []User, fn func(User) bool) []User {\n    var result []User\n    for _, u := range users {\n        if fn(u) { result = append(result, u) }\n    }\n    return result\n}\n\nfor _, u := range FilterUsers(users, isActive) { ... }\n```\n\n**After (Go 1.22+)**:\n```go\n// Yield values lazily (no allocation)\nfunc FilterUsers(users []User, fn func(User) bool) iter.Seq[User] {\n    return func(yield func(User) bool) {\n        for _, u := range users {\n            if fn(u) && !yield(u) { return }\n        }\n    }\n}\n\nfor u := range FilterUsers(users, isActive) { ... }\n```\n\nKey benefits:\n- Lazy evaluation — don't need to build an entire slice\n- Composable — chain iterators without intermediate allocations\n- `break` in the range loop works correctly (stops the iterator)\n- Standard library `iter`, `slices`, `maps` packages use it"
+    },
+    {
+      "role": "user",
+      "content": "Interesting but the yield syntax looks weird. Is this commonly used in practice?"
+    },
+    {
+      "role": "assistant",
+      "content": "The syntax IS unusual for Go, but it's gaining adoption:\n\n**Where it shines in practice**:\n\n1. **Database result streaming** (don't load all rows into memory):\n```go\nfunc QueryUsers(db *sql.DB) iter.Seq2[User, error] {\n    return func(yield func(User, error) bool) {\n        rows, err := db.Query(\"SELECT * FROM users\")\n        if err != nil { yield(User{}, err); return }\n        defer rows.Close()\n        for rows.Next() {\n            var u User\n            if err := rows.Scan(&u.ID, &u.Name); err != nil {\n                if !yield(User{}, err) { return }\n            }\n            if !yield(u, nil) { return }\n        }\n    }\n}\n```\n\n2. **Tree/graph traversal** without callbacks\n3. **File processing** line by line without buffering\n\n**Practical impact**: Most Go developers use iterators via `slices.Collect()`, `maps.Keys()`, and library functions rather than writing raw iterator functions. The stdlib does the heavy lifting.\n\nThe community is split — some love the composability, others think it's too clever for Go's philosophy. But the stdlib has committed to it, so it's here to stay."
+    }
+  ]
+}

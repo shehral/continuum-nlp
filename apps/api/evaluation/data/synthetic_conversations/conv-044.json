@@ -1,0 +1,23 @@
+{
+  "id": "conv-044",
+  "domain": "ml",
+  "topic": "Weights & Biases vs MLflow for experiment tracking",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need experiment tracking for our ML team. W&B (Weights and Biases) or MLflow? We have 4 ML engineers."
+    },
+    {
+      "role": "assistant",
+      "content": "Both are excellent. Key differences:\n\n**Weights & Biases (wandb)**:\n- Cloud-hosted (also has self-hosted option)\n- Beautiful UI, real-time experiment comparison\n- Sweeps for hyperparameter tuning\n- Artifacts for dataset/model versioning\n- $0 for personal, $50/user/month for teams\n\n**MLflow**:\n- Open-source, self-hosted (or Databricks managed)\n- Experiment tracking, model registry, serving\n- Integration with Spark, Databricks ecosystem\n- Free (self-hosted) but you manage the infra\n- UI is functional but less polished\n\nFor a team of 4: **W&B** for better UX and zero ops. The $200/month total is worth not managing MLflow infrastructure."
+    },
+    {
+      "role": "user",
+      "content": "We're training on AWS SageMaker. Does that change things?"
+    },
+    {
+      "role": "assistant",
+      "content": "SageMaker has its own experiment tracking (SageMaker Experiments), but it's basic. Both W&B and MLflow integrate with SageMaker:\n\n**W&B + SageMaker**:\n```python\nimport wandb\nwandb.sagemaker_auth()  # Auto-configures auth\n# Then use wandb.log() as normal in your training script\n```\n\n**MLflow + SageMaker**:\n- SageMaker has native MLflow integration\n- `mlflow.sagemaker.deploy()` for model deployment\n- Databricks-managed MLflow integrates particularly well\n\nIf you're deep in the AWS ecosystem and might use Databricks later, **MLflow** has better long-term integration. Otherwise, **W&B** for the superior experiment comparison UX.\n\nHybrid option: Use W&B for experiment tracking and SageMaker Model Registry for deployment. They serve different purposes."
+    }
+  ]
+}

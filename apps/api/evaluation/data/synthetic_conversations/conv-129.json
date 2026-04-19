@@ -1,0 +1,23 @@
+{
+  "id": "conv-129",
+  "domain": "web-development",
+  "topic": "Web Components vs framework components for design system",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a design system that needs to work across our apps using different frameworks. Web Components?"
+    },
+    {
+      "role": "assistant",
+      "content": "Web Components are the natural fit for cross-framework design systems:\n\n- Native browser standard\n- Work in any framework or plain HTML\n- Shadow DOM for style encapsulation\n\n**Tools**:\n- **Lit** (Google) - Most popular, ~5KB\n- **Stencil** (Ionic) - Generates framework-specific wrappers automatically\n- **Shoelace / Web Awesome** - Pre-built web component library\n\n**Stencil** is great because it auto-generates typed wrappers for each framework from your Web Components."
+    },
+    {
+      "role": "user",
+      "content": "How well do Web Components actually work with modern frameworks?"
+    },
+    {
+      "role": "assistant",
+      "content": "Framework compatibility has improved significantly. React 19 fixed the major issues with passing properties and handling custom events on custom elements.\n\nFor your multi-framework design system:\n1. Build with **Stencil** (generates Web Components + framework wrappers)\n2. Distribute as:\n   - `@my-ds/web-components` - Raw web components\n   - `@my-ds/react` - React wrapper\n   - `@my-ds/vue` - Vue wrapper\n   - `@my-ds/angular` - Angular wrapper\n\nEach team uses their native-feeling package, all backed by the same Web Components."
+    }
+  ]
+}

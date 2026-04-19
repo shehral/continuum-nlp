@@ -1,0 +1,23 @@
+{
+  "id": "conv-111",
+  "domain": "data-engineering",
+  "topic": "Exploring data lakehouse without clear decision",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Keep hearing about 'data lakehouse' architecture. Is it actually different from a data warehouse? We use Snowflake."
+    },
+    {
+      "role": "assistant",
+      "content": "The lakehouse is a convergence of data lakes and data warehouses:\n\n**Traditional split**:\n- **Data Lake** (S3/GCS): Cheap storage, any format, no schema enforcement. Good for ML, raw data. Bad for BI queries.\n- **Data Warehouse** (Snowflake/BigQuery): Structured, fast SQL, expensive storage. Good for BI. Bad for unstructured data.\n\n**Lakehouse combines both**:\n- Store everything in open file formats (Parquet) on object storage (S3)\n- Add a metadata/transaction layer (Iceberg, Delta Lake, Hudi)\n- Query with any engine (Spark, Trino, DuckDB, Snowflake)\n- ACID transactions on a data lake\n\n**If you already have Snowflake**: You essentially have a lakehouse already. Snowflake supports Iceberg tables on your own S3, external tables, and can query the lake directly."
+    },
+    {
+      "role": "user",
+      "content": "So we don't need to change anything?"
+    },
+    {
+      "role": "assistant",
+      "content": "Maybe not. But there are reasons to evolve:\n\n**Stay pure Snowflake if**:\n- All your data fits in Snowflake\n- Your team knows SQL and nothing else\n- Budget isn't a concern\n- No ML/data science workloads\n\n**Add lakehouse layer if**:\n- You want cheaper storage (S3 vs Snowflake storage)\n- ML team needs raw data access (Spark, PyTorch)\n- You want to avoid Snowflake lock-in\n- Multiple query engines needed (Trino for ad-hoc, Spark for ML)\n\n**Practical evolution path**:\n1. Create Snowflake **Iceberg tables** (stores data in your S3 as Iceberg format)\n2. Snowflake reads/writes as before\n3. ML team can read same data with Spark/DuckDB directly from S3\n4. Gradually move more tables to Iceberg format\n5. Eventually, you can query with any engine, not just Snowflake\n\nThis is a low-risk evolution — Snowflake manages the Iceberg tables, but you own the data in open format on your S3. No migration, no new tools, just a configuration change."
+    }
+  ]
+}

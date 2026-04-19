@@ -1,0 +1,23 @@
+{
+  "id": "conv-071",
+  "domain": "mobile",
+  "topic": "Tauri vs Electron for desktop app",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a desktop app. Electron feels bloated — 200MB for a simple app. Tauri any good?"
+    },
+    {
+      "role": "assistant",
+      "content": "Tauri is the modern Electron alternative:\n\n**Tauri**:\n- Uses system webview (not bundled Chromium) → 2-10MB app size vs 200MB\n- Rust backend, any web frontend\n- Lower memory usage (~50% less than Electron)\n- IPC via Rust commands (type-safe)\n- Auto-updater, system tray, notifications built-in\n- v2 supports mobile (iOS/Android) too\n\n**Electron**:\n- Mature ecosystem (VS Code, Slack, Discord built on it)\n- Node.js backend (easier if you know JS)\n- Consistent rendering (bundled Chromium)\n- Better documentation and examples\n- Larger community\n\nFor a new desktop app: **Tauri** unless you need specific Node.js APIs or Chromium-specific features. The size/memory difference is dramatic."
+    },
+    {
+      "role": "user",
+      "content": "We'd use React for the frontend. Does Tauri work well with React + Vite?"
+    },
+    {
+      "role": "assistant",
+      "content": "Tauri + React + Vite is the most popular Tauri stack:\n\n```bash\nnpm create tauri-app@latest -- --template react-ts\n```\n\nThis sets up:\n- Vite for the React frontend (dev server + HMR)\n- Rust backend with Tauri APIs\n- TypeScript bindings for Rust commands\n\nCalling Rust from React:\n```rust\n// src-tauri/src/lib.rs\n#[tauri::command]\nfn read_file(path: String) -> Result<String, String> {\n    std::fs::read_to_string(path).map_err(|e| e.to_string())\n}\n```\n\n```typescript\n// React component\nimport { invoke } from '@tauri-apps/api/core';\nconst content = await invoke<string>('read_file', { path: '/tmp/data.txt' });\n```\n\nThe DX is excellent — Vite's HMR works for the frontend, `cargo watch` rebuilds the Rust backend. No Rust knowledge needed for simple apps (Tauri provides most APIs you need)."
+    }
+  ]
+}

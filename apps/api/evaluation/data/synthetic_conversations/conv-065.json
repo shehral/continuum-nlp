@@ -1,0 +1,15 @@
+{
+  "id": "conv-065",
+  "domain": "devops",
+  "topic": "Prometheus + Alertmanager vs Grafana OnCall for alerting",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Setting up alerting for our k8s cluster. Prometheus Alertmanager or Grafana OnCall? We already have Grafana dashboards."
+    },
+    {
+      "role": "assistant",
+      "content": "Since you already have Grafana:\n\n**Prometheus Alertmanager**:\n- Tightly coupled with Prometheus\n- Alert routing, grouping, silencing\n- Config-as-code (YAML)\n- No built-in on-call schedules\n- Need PagerDuty/OpsGenie for escalation\n\n**Grafana OnCall** (open-source):\n- On-call schedules, rotation, escalation built-in\n- Integrates with Grafana alerts natively\n- Slack/Telegram/SMS/phone notifications\n- ChatOps (acknowledge from Slack)\n- Free self-hosted, or Grafana Cloud\n\n**Recommendation**: Use both together.\n- Prometheus Alertmanager for alert *routing and deduplication*\n- Grafana OnCall for *on-call management and escalation*\n- Alertmanager sends to OnCall via webhook\n\nThis gives you Prometheus's excellent alert evaluation + OnCall's rotation/escalation. No need for PagerDuty."
+    }
+  ]
+}

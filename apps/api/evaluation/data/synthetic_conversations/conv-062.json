@@ -1,0 +1,23 @@
+{
+  "id": "conv-062",
+  "domain": "devops",
+  "topic": "Podman vs Docker for container development",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our company is moving away from Docker Desktop due to licensing costs. Podman a good replacement?"
+    },
+    {
+      "role": "assistant",
+      "content": "Podman is a solid Docker Desktop replacement:\n\n**Podman advantages**:\n- Free and open-source (no licensing issues)\n- Daemonless (no Docker daemon running in background)\n- Rootless containers by default (better security)\n- CLI is Docker-compatible (`alias docker=podman`)\n- Pod support (group containers like k8s pods)\n- Podman Desktop GUI available\n\n**Docker Desktop advantages**:\n- Polish and DX (more mature GUI)\n- Docker Compose integration is tighter\n- Extensions marketplace\n- Better macOS/Windows performance (VM optimization)\n- More tutorials/docs reference Docker\n\nFor Linux: Podman is nearly a perfect drop-in replacement.\nFor macOS: Podman Desktop works but Docker Desktop's VM is slightly more polished."
+    },
+    {
+      "role": "user",
+      "content": "We use docker-compose extensively. Does podman support that?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, two options:\n\n1. **podman-compose** — Python-based, reads `docker-compose.yml` directly:\n```bash\npip install podman-compose\npodman-compose up -d\n```\n\n2. **podman compose** (built-in) — Podman 4+ includes a `compose` subcommand that uses the Docker Compose spec:\n```bash\npodman compose up -d\n```\n\nMost `docker-compose.yml` files work unchanged. Gotchas:\n- `depends_on` health checks work but behavior can differ slightly\n- Volume mounts in rootless mode need `:Z` or `:z` SELinux labels on Linux\n- Network aliases work differently (use pod networking instead)\n\nFor your team: install **Podman Desktop** (GUI) + use `podman compose`. Set `alias docker=podman` in everyone's shell profile. Most developers won't notice the difference."
+    }
+  ]
+}

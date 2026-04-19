@@ -1,0 +1,23 @@
+{
+  "id": "conv-025",
+  "domain": "security",
+  "topic": "OAuth2 vs SAML for enterprise SSO",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our enterprise customers are asking for SSO. Should we implement OAuth2/OIDC or SAML? Most of our customers use Azure AD or Okta."
+    },
+    {
+      "role": "assistant",
+      "content": "Both Azure AD and Okta support both protocols. Here's the comparison:\n\n**OAuth 2.0 + OIDC**:\n- Modern, JSON/REST-based\n- Better for SPAs and mobile apps\n- JWT tokens (easy to validate)\n- Simpler implementation\n- Standard for new applications\n\n**SAML 2.0**:\n- XML-based (more complex)\n- Enterprise standard for decades\n- Some legacy IdPs only support SAML\n- Better for server-rendered apps\n- Required by some compliance frameworks\n\nRecommendation: Implement **OIDC** as your primary protocol. Most enterprise IdPs (Azure AD, Okta, OneLogin, Ping) support OIDC. Add SAML only if specific customers require it."
+    },
+    {
+      "role": "user",
+      "content": "How do we implement this? We're a node/express backend with a react frontend."
+    },
+    {
+      "role": "assistant",
+      "content": "For Node.js + React with enterprise SSO:\n\n**Option 1: Auth provider service** (recommended):\n- **WorkOS** - Purpose-built for enterprise SSO. Single API for OIDC + SAML.\n- **Auth0** - Enterprise SSO connections, Universal Login\n- **Clerk** - Developer-friendly, SAML enterprise connections\n\n**Option 2: Self-implement with Passport.js**:\n- `passport-openidconnect` for OIDC\n- `passport-saml` for SAML\n- More work but full control\n\nWorkOS is the fastest path:\n```javascript\nconst workos = new WorkOS('sk_...');\nconst url = workos.sso.getAuthorizationURL({\n  organization: 'org_...',\n  redirectURI: 'https://app.com/callback'\n});\n```\n\nIt normalizes OIDC and SAML into a single callback - your app doesn't need to know which protocol the customer uses."
+    }
+  ]
+}

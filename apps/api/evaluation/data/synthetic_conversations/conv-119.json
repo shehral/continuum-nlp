@@ -1,0 +1,23 @@
+{
+  "id": "conv-119",
+  "domain": "mobile",
+  "topic": "App size optimization for mobile",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our React Native app is 85MB. Users in emerging markets are complaining. How do we reduce the size?"
+    },
+    {
+      "role": "assistant",
+      "content": "85MB is large for RN. Common culprits and fixes:\n\n**1. Analyze the bundle** (first step):\n- Android: `cd android && ./gradlew app:dependencies` and check APK Analyzer in Android Studio\n- iOS: Xcode → Product → Archive → check size report\n- JS bundle: `npx react-native-bundle-visualizer`\n\n**2. Quick wins**:\n- **Enable Hermes** (should already be default) — smaller JS bundle, faster parsing\n- **ProGuard/R8** (Android) — minify Java/Kotlin code, remove unused classes\n- **App Bundles** (Android) — AAB instead of APK, Google Play delivers only needed resources. Can save 30-50%.\n- **Bitcode** (iOS) — Apple optimizes for specific device\n\n**3. Asset optimization**:\n- Images: Convert PNGs to WebP (50-70% smaller)\n- Fonts: Subset fonts to only used characters\n- Remove unused assets: `npx react-native-clean-project`\n\n**4. Native library audit**:\n- Some RN libraries include large native binaries\n- `react-native-firebase` (all modules): can add 10-20MB. Only import what you use.\n- Maps SDK: 10-15MB. Use `react-native-maps` Lite mode for simple use cases."
+    },
+    {
+      "role": "user",
+      "content": "The JS bundle is 12MB. That seems huge. What's in it?"
+    },
+    {
+      "role": "assistant",
+      "content": "12MB JS bundle is very large. Debug with:\n\n```bash\n# Generate source map and analyze\nnpx react-native bundle --entry-file index.js --platform android \\\n  --dev false --bundle-output /tmp/bundle.js --sourcemap-output /tmp/bundle.js.map\n\nnpx source-map-explorer /tmp/bundle.js /tmp/bundle.js.map\n```\n\n**Common JS bundle bloaters**:\n\n1. **Moment.js** (500KB+ with all locales) → Replace with `date-fns` or `dayjs` (2-7KB)\n2. **Lodash** (full import) → Use `lodash-es` with tree-shaking or individual imports: `import debounce from 'lodash/debounce'`\n3. **AWS SDK v2** (huge) → Migrate to `@aws-sdk/client-*` v3 (modular)\n4. **Crypto libraries** (node polyfills) → Use `react-native-quick-crypto` instead of bundled polyfills\n5. **Unused code** from large libraries (UI kits importing everything)\n\n**Reduction techniques**:\n- Use Metro's `transformer.minifierConfig` for aggressive minification\n- Lazy load screens: `React.lazy()` + code splitting\n- Replace heavy libs with lighter alternatives\n- Enable tree-shaking: ensure `\"sideEffects\": false` in package.json\n\nRealistic target: 12MB → 3-4MB with proper optimization."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "conv-167",
+  "domain": "web-development",
+  "topic": "Streaming SSR patterns in Next.js",
+  "messages": [
+    {
+      "role": "user",
+      "content": "How do we use streaming SSR effectively in Next.js App Router? Our pages take 3+ seconds to load because of slow data fetches."
+    },
+    {
+      "role": "assistant",
+      "content": "Streaming SSR sends HTML progressively as data becomes available:\n\n**Pattern 1: `loading.tsx`** (route-level Suspense):\n```\napp/\n  dashboard/\n    page.tsx      # Async data fetching\n    loading.tsx   # Shows instantly while page.tsx loads\n```\nThe shell renders immediately, data content streams in when ready.\n\n**Pattern 2: Component-level Suspense** (granular):\n```tsx\nasync function DashboardPage() {\n  return (\n    <div>\n      <h1>Dashboard</h1>\n      <Suspense fallback={<ChartSkeleton />}>\n        <SlowChart />   {/* Fetches data, streams when ready */}\n      </Suspense>\n      <Suspense fallback={<TableSkeleton />}>\n        <SlowTable />   {/* Independent, streams separately */}\n      </Suspense>\n    </div>\n  );\n}\n```\nThe header shows instantly. Chart and table stream independently as their data resolves.\n\n**Pattern 3: Parallel data fetching** (don't waterfall):\n```tsx\nasync function Page() {\n  // BAD: Sequential (6 seconds)\n  const users = await getUsers();    // 3 sec\n  const orders = await getOrders();  // 3 sec\n  \n  // GOOD: Parallel (3 seconds)\n  const [users, orders] = await Promise.all([\n    getUsers(),\n    getOrders()\n  ]);\n}\n```\n\nCombine patterns: parallel fetching + component-level Suspense for perceived instant loads even with slow backends."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "conv-153",
+  "domain": "backend",
+  "topic": "Event sourcing with Marten or EventStoreDB",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Considering event sourcing for our order management system. EventStoreDB or using Marten with Postgres?"
+    },
+    {
+      "role": "assistant",
+      "content": "Two different approaches:\n\n**EventStoreDB**:\n- Purpose-built event store database\n- Built-in projections (derive read models from events)\n- Subscriptions for real-time event processing\n- Optimistic concurrency on streams\n- Separate database to manage\n- Best for: complex event sourcing with many projections\n\n**Marten** (with PostgreSQL):\n- .NET library that adds event sourcing to Postgres\n- Events stored in JSONB columns\n- Projections run as part of your app\n- No extra database (uses your existing Postgres)\n- Best for: .NET teams who want event sourcing without new infrastructure\n\n**If you're not on .NET**, alternatives:\n- **Postgres + custom tables** - Store events in an append-only table, build projections yourself\n- **Axon Framework** (Java) - Event sourcing + CQRS framework\n- **Sequent** (Ruby) - Event sourcing framework\n\nFor Python/FastAPI: Roll your own with Postgres. Event sourcing in Python typically uses a simple events table + SQLAlchemy."
+    }
+  ]
+}

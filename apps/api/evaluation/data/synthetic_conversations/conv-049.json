@@ -1,0 +1,23 @@
+{
+  "id": "conv-049",
+  "domain": "data-engineering",
+  "topic": "Apache Flink vs Kafka Streams for stream processing",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need real-time stream processing. Already using Kafka. Should I use Kafka Streams or Apache Flink?"
+    },
+    {
+      "role": "assistant",
+      "content": "Both integrate with Kafka but are fundamentally different:\n\n**Kafka Streams**:\n- Library (not a cluster) - runs in your Java/Kotlin app\n- No separate infrastructure to manage\n- Exactly-once processing with Kafka transactions\n- Limited to Kafka as source/sink\n- Simpler for straightforward stream processing\n\n**Apache Flink**:\n- Distributed processing engine (separate cluster)\n- SQL-like API (Flink SQL) for stream queries\n- Multiple sources: Kafka, Kinesis, files, databases\n- Event time processing, complex windowing\n- Checkpointing for fault tolerance\n\nRule of thumb: If your data is already in Kafka and processing is moderate, **Kafka Streams**. If you need complex event processing, joins across streams, or non-Kafka sources, **Flink**."
+    },
+    {
+      "role": "user",
+      "content": "Our use case: join user events from Kafka with user profiles from Postgres in real-time for personalization."
+    },
+    {
+      "role": "assistant",
+      "content": "Stream-table join (Kafka events + Postgres profiles) - both can do this but differently:\n\n**Kafka Streams**: Use KTable backed by a compacted topic. You'd CDC your Postgres profiles into Kafka (via Debezium), then join:\n```java\nKStream<String, Event> events = builder.stream(\"user-events\");\nKTable<String, Profile> profiles = builder.table(\"user-profiles\");\nevents.join(profiles, (event, profile) -> enrich(event, profile));\n```\n\n**Flink**: Can query Postgres directly as a lookup table:\n```sql\nSELECT e.*, p.segment, p.preferences\nFROM user_events e\nJOIN user_profiles FOR SYSTEM_TIME AS OF e.event_time AS p\nON e.user_id = p.user_id\n```\n\nFlink's temporal join is more elegant here - no need to replicate all of Postgres into Kafka. **Flink** is the better fit for your use case."
+    }
+  ]
+}

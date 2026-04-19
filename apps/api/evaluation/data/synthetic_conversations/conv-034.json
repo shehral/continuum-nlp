@@ -1,0 +1,23 @@
+{
+  "id": "conv-034",
+  "domain": "mobile",
+  "topic": "Kotlin Multiplatform vs Flutter",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Cross-platform mobile app needed. Our android team knows Kotlin. Considering KMP (Kotlin Multiplatform) or Flutter. Thoughts?"
+    },
+    {
+      "role": "assistant",
+      "content": "Great question given your Kotlin experience:\n\n**KMP (Kotlin Multiplatform)**:\n- Share business logic, keep native UI (SwiftUI + Compose)\n- Kotlin knowledge transfers directly\n- Platform-specific UI = best native feel\n- JetBrains backing, Google endorsement\n- Shared: networking, DB, business logic\n- Not shared: UI layer\n\n**Flutter**:\n- Share everything including UI\n- Dart language (new to your team)\n- Single codebase = faster development\n- Pixel-perfect consistency across platforms\n- Large widget ecosystem\n\nKey tradeoff: KMP = better native feel but more code. Flutter = less code but non-native UI."
+    },
+    {
+      "role": "user",
+      "content": "We want native UI feel. Sounds like KMP. How mature is it for production?"
+    },
+    {
+      "role": "assistant",
+      "content": "KMP is production-ready in 2026:\n\n**Companies using KMP in production**: Netflix, McDonald's, Cash App, VMware, Philips\n\nMaturity by layer:\n- **Shared business logic**: Stable, 100% production-ready\n- **Ktor** (networking): Multiplatform HTTP client, very mature\n- **SQLDelight**: Multiplatform SQLite, production-grade\n- **Koin** or **Kodein**: Multiplatform dependency injection\n- **Compose Multiplatform** (UI sharing): Stable for Android/Desktop, alpha for iOS\n\nRecommended approach:\n- Share: networking, data models, business logic, repositories\n- Platform-specific: UI (Jetpack Compose for Android, SwiftUI for iOS)\n- This gives you 40-60% code sharing while keeping native UI quality"
+    }
+  ]
+}

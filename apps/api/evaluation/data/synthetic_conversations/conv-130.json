@@ -1,0 +1,23 @@
+{
+  "id": "conv-130",
+  "domain": "backend",
+  "topic": "Rate limiting strategies comparison",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Implementing rate limiting for our public API. What algorithm should I use? Fixed window, sliding window, token bucket?"
+    },
+    {
+      "role": "assistant",
+      "content": "Rate limiting algorithms, in order of sophistication:\n\n**1. Fixed Window**: Simplest, count per time window. Problem: burst at window boundary.\n**2. Sliding Window Log**: Track each timestamp. Accurate but memory-intensive.\n**3. Sliding Window Counter**: Weighted count from current + previous window. Good balance.\n**4. Token Bucket** (recommended for APIs): Bucket fills at steady rate, allows bursts up to capacity.\n**5. Leaky Bucket**: Fixed processing rate, no bursts.\n\nFor a public API: **Token Bucket**. It allows legitimate bursts while enforcing average rate. This is what Stripe, GitHub, and most APIs use."
+    },
+    {
+      "role": "user",
+      "content": "We use FastAPI with Redis. How do I implement token bucket?"
+    },
+    {
+      "role": "assistant",
+      "content": "Token bucket with Redis + FastAPI uses an atomic Lua script to avoid race conditions:\n\nThe script stores tokens and last_refill time in a Redis hash. On each request, it calculates elapsed time, refills tokens at the configured rate (capped at capacity), and atomically decrements if tokens are available.\n\nKey design points:\n- Lua script runs atomically in Redis - no race conditions at thousands of concurrent requests\n- Token bucket refills at `rate` tokens/second up to `capacity`\n- Use per-user keys: `ratelimit:{user_id}` or `ratelimit:{ip}`\n- Set TTL on keys so they auto-expire\n\nAdd rate limit headers for good API citizenship: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`."
+    }
+  ]
+}

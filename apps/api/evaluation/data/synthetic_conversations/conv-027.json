@@ -1,0 +1,23 @@
+{
+  "id": "conv-027",
+  "domain": "web-development",
+  "topic": "Prisma vs Drizzle vs TypeORM for Node.js ORM",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need an ORM for our Node/TS project on postgres. Prisma, Drizzle, or TypeORM?"
+    },
+    {
+      "role": "assistant",
+      "content": "Current state in 2026:\n\n**Prisma**:\n- Schema-first (prisma.schema file)\n- Auto-generated client with great TS types\n- Prisma Studio for DB browsing\n- Migrations built-in\n- Slower at runtime (query engine overhead)\n\n**Drizzle**:\n- TypeScript-first, SQL-like API\n- Very fast (thin layer over SQL)\n- Zero overhead, no code generation\n- Drizzle Kit for migrations\n- Growing rapidly\n\n**TypeORM**:\n- Decorator-based, Angular-style\n- Mature but buggy TypeScript support\n- Falling out of favor\n\n**Recommendation**: **Drizzle** for new projects. It's the most TypeScript-native, fastest, and its SQL-like API means you actually learn SQL patterns rather than ORM abstractions."
+    },
+    {
+      "role": "user",
+      "content": "How does drizzle compare to prisma for complex queries? Joins, aggregations, etc?"
+    },
+    {
+      "role": "assistant",
+      "content": "Drizzle is actually better for complex queries because its API maps directly to SQL:\n\n```typescript\n// Drizzle - reads like SQL\nconst result = await db\n  .select({ name: users.name, orderCount: count(orders.id) })\n  .from(users)\n  .leftJoin(orders, eq(users.id, orders.userId))\n  .groupBy(users.name)\n  .having(gt(count(orders.id), 5));\n```\n\nPrisma's equivalent requires `_count`, `include`, and `groupBy` which feel less intuitive for complex queries. For raw SQL, Prisma needs `$queryRaw` which loses type safety.\n\nDrizzle supports: joins, subqueries, CTEs, window functions, aggregations, unions - all type-safe."
+    }
+  ]
+}

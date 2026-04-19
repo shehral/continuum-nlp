@@ -1,0 +1,23 @@
+{
+  "id": "conv-024",
+  "domain": "systems",
+  "topic": "C++ vs Rust for game engine",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a 2D game engine as a side project. C++ or Rust? I know C++ already but Rust interests me."
+    },
+    {
+      "role": "assistant",
+      "content": "For a side project/learning experience, this is really a \"what do you want to learn\" question:\n\n**C++**:\n- You already know it (faster start)\n- Industry standard for game engines (Unreal, Unity's C++ layer)\n- SDL2, SFML, raylib all have C++ bindings\n- Mature tooling (CMake, Conan/vcpkg)\n- Footgun-rich (memory bugs, undefined behavior)\n\n**Rust**:\n- Memory safety without GC (perfect for game engines)\n- `bevy` is an excellent ECS game engine/framework\n- `wgpu` for cross-platform GPU access\n- Cargo package manager is great\n- Steeper initial curve, but fewer runtime bugs\n\nFor a 2D engine, performance differences are negligible. Pick based on learning goals."
+    },
+    {
+      "role": "user",
+      "content": "I want to learn Rust. But can it actually do game dev well? I've heard the borrow checker makes game architectures hard."
+    },
+    {
+      "role": "assistant",
+      "content": "The borrow checker does conflict with traditional OOP game architectures (scene trees with parent/child references create ownership cycles). But the game dev community solved this:\n\n**Entity Component System (ECS)** is the standard pattern in Rust game dev:\n- Entities are IDs, not objects\n- Components are plain data structs\n- Systems iterate over components\n- No ownership cycles, borrow checker is happy\n\n**Bevy** (Rust game framework) is built entirely around ECS and it's surprisingly ergonomic:\n```rust\nfn move_player(mut query: Query<&mut Transform, With<Player>>, time: Res<Time>) {\n    for mut transform in &mut query {\n        transform.translation.x += 100.0 * time.delta_secs();\n    }\n}\n```\n\nFor 2D specifically, also check out `macroquad` (simpler, immediate-mode) or `ggez` (SDL2-like)."
+    }
+  ]
+}

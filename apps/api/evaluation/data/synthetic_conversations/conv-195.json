@@ -1,0 +1,15 @@
+{
+  "id": "conv-195",
+  "domain": "systems",
+  "topic": "Exploring CRDTs for collaborative editing",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a collaborative text editor (like Google Docs). CRDTs or OT (Operational Transformation)?"
+    },
+    {
+      "role": "assistant",
+      "content": "The two main approaches for real-time collaborative editing:\n\n**OT (Operational Transformation)**:\n- Google Docs, Etherpad use this\n- Requires a central server to resolve conflicts\n- Well-understood, mature\n- Complex to implement correctly (edge cases)\n- Doesn't work peer-to-peer\n\n**CRDTs (Conflict-free Replicated Data Types)**:\n- Figma, Linear, and newer tools use this\n- Works without a central server (peer-to-peer possible)\n- Mathematically guaranteed to converge\n- Larger memory footprint (stores history)\n- Newer, actively researched\n\n**Libraries** (don't implement from scratch):\n\n**CRDT-based**:\n- **Yjs** - Most popular, excellent performance, works with any editor\n- **Automerge** - Rich data types, good for structured data\n- **Loro** - Rust-based, high-performance CRDT library\n\n**OT-based**:\n- **ShareDB** - Node.js, MongoDB-backed OT\n\nFor a new project: **Yjs**. It's the most battle-tested CRDT library with integrations for ProseMirror, TipTap, Monaco, CodeMirror, and more.\n\n```typescript\nimport * as Y from 'yjs'\nimport { WebsocketProvider } from 'y-websocket'\n\nconst doc = new Y.Doc()\nconst provider = new WebsocketProvider('ws://localhost:1234', 'room', doc)\nconst text = doc.getText('editor')\n```"
+    }
+  ]
+}

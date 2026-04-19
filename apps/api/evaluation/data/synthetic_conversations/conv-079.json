@@ -1,0 +1,23 @@
+{
+  "id": "conv-079",
+  "domain": "data-engineering",
+  "topic": "Dagster vs Prefect vs Airflow for orchestration",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a data pipeline orchestrator. Airflow is the default but seems complex. Dagster and Prefect look simpler. Which one?"
+    },
+    {
+      "role": "assistant",
+      "content": "All three are mature but have different philosophies:\n\n**Apache Airflow**:\n- Industry standard, largest community\n- DAG-based, schedule-driven\n- Complex setup (scheduler, webserver, workers, metadata DB)\n- Managed options: MWAA (AWS), Cloud Composer (GCP), Astronomer\n- Weakest for data-aware orchestration\n\n**Dagster**:\n- Software-defined assets (declare what data should exist)\n- Built-in data lineage and observability\n- Type-checked I/O, partitions as first-class concept\n- Best local development experience\n- Asset-centric, not task-centric\n\n**Prefect**:\n- Python-native (decorate functions, done)\n- Hybrid execution (orchestration cloud + your compute)\n- Dynamic workflows (no DAG limitations)\n- Simplest API of the three\n- Free cloud tier for scheduling\n\nFor data teams: **Dagster** (asset-centric model matches how data teams think).\nFor general automation: **Prefect** (simplest).\nFor enterprises with existing investment: **Airflow** (ecosystem)."
+    },
+    {
+      "role": "user",
+      "content": "We're a small data team (4 people). Leaning Dagster but worried about hiring - everyone knows Airflow."
+    },
+    {
+      "role": "assistant",
+      "content": "Valid concern, but Dagster's learning curve from Airflow is short (days, not weeks). The concepts map:\n\n| Airflow | Dagster |\n|---------|--------|\n| DAG | Job |\n| Task/Operator | Op/Asset |\n| Connection | Resource |\n| Variable | Config |\n| XCom | I/O Manager |\n\nDagster advantages for a small team:\n1. **Local dev** — `dagster dev` runs everything locally. Airflow needs Docker/VMs.\n2. **Testing** — Assets are just Python functions, test with pytest.\n3. **Dagster Cloud** — Managed, $100/month. No infra to manage.\n4. **dbt integration** — `dagster-dbt` makes dbt models into Dagster assets automatically.\n\nHiring: anyone who knows Airflow can learn Dagster in a week. And Dagster's growing quickly — it's becoming a resume keyword.\n\nFor 4 people: Dagster Cloud ($100/month) vs MWAA ($400+/month). Better DX AND cheaper."
+    }
+  ]
+}

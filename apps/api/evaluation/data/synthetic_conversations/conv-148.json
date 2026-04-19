@@ -1,0 +1,23 @@
+{
+  "id": "conv-148",
+  "domain": "ml",
+  "topic": "Exploring quantization for LLM deployment",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Want to run Llama 3.3 70B on smaller GPUs. What quantization options are there? GPTQ, AWQ, GGUF?"
+    },
+    {
+      "role": "assistant",
+      "content": "Quantization formats for 70B:\n\n- **FP16** (16-bit): ~140GB VRAM, best quality\n- **GPTQ** (4-bit): ~35GB, fast GPU inference\n- **AWQ** (4-bit): ~35GB, fastest GPU inference, best quality at 4-bit. **Recommended for GPU serving.**\n- **GGUF** (2-8 bit): CPU-friendly, used by llama.cpp. Best for Mac M-series.\n- **bitsandbytes** (4/8-bit): Best for training (QLoRA)\n\nFor serving 70B on 2x A100 40GB: AWQ 4-bit fits easily."
+    },
+    {
+      "role": "user",
+      "content": "I have 2x RTX 4090 (24GB each). Can I run 70B?"
+    },
+    {
+      "role": "assistant",
+      "content": "2x RTX 4090 = 48GB total. Yes with quantization:\n\n**AWQ 4-bit** (~35GB): Run with vLLM tensor-parallel-size 2. ~15-25 tokens/sec.\n**GGUF Q4_K_M** (~40GB): Run with llama.cpp, split layers across GPUs.\n**EXL2**: Flexible bit rates (3.5-4.5 bps), often best quality-per-bit.\n\n**Gotcha**: 4090s use PCIe (not NVLink), so pipeline parallelism (split by layers) works better than tensor parallelism.\n\nRealistic: 70B AWQ on 2x 4090 = ~20 tokens/sec. Usable for production at moderate concurrency."
+    }
+  ]
+}

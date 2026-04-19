@@ -1,0 +1,31 @@
+{
+  "id": "conv-007",
+  "domain": "ml",
+  "topic": "PyTorch vs TensorFlow for a CV project",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a computer vision project - object detection on industrial parts. Should I use pytorch or tensorflow? The model needs to run on edge devices eventually."
+    },
+    {
+      "role": "assistant",
+      "content": "For a CV project in 2026:\n\n**PyTorch** is the default choice for research and development:\n- Dominant in CV research (95%+ of papers)\n- Better debugging (eager execution)\n- torchvision, YOLO (Ultralytics), Detectron2\n- Export via TorchScript or ONNX for deployment\n\n**TensorFlow/TF** is better for deployment pipelines:\n- TFLite for mobile/edge devices\n- TF Serving for production inference\n- Keras makes prototyping fast\n\nFor edge deployment specifically, the path is usually: develop in PyTorch → export to ONNX → convert to TFLite or use ONNX Runtime on edge."
+    },
+    {
+      "role": "user",
+      "content": "We'll be deploying on NVIDIA Jetson devices. Does that change the recommendation?"
+    },
+    {
+      "role": "assistant",
+      "content": "NVIDIA Jetson changes things significantly. NVIDIA's stack is PyTorch-native:\n\n- **TensorRT** - NVIDIA's inference optimizer, works great with PyTorch models\n- **DeepStream** - Video analytics SDK, integrates with PyTorch/TensorRT\n- **Jetson Inference** - Pre-built models optimized for Jetson\n- **torch2trt** - Direct PyTorch to TensorRT conversion\n\nThe pipeline: Train in PyTorch → Export to ONNX → Optimize with TensorRT → Deploy on Jetson\n\nFor object detection specifically, look at YOLOv8 or YOLOv11 (Ultralytics) - they have built-in TensorRT export and run great on Jetson Orin."
+    },
+    {
+      "role": "user",
+      "content": "perfect, going with pytorch + ultralytics then. What about data labeling?"
+    },
+    {
+      "role": "assistant",
+      "content": "For object detection labeling:\n\n1. **Label Studio** - Open-source, self-hosted, supports bounding boxes and polygons. Free.\n2. **Roboflow** - Managed platform with augmentation, dataset versioning. Free tier available.\n3. **CVAT** (Intel) - Powerful open-source, good for teams. Supports interpolation for video.\n4. **V7 (Darwin)** - Premium, AI-assisted labeling, great for production workflows.\n\nFor industrial parts detection, I'd start with **Roboflow** - it handles augmentation (rotation, brightness, noise) which is critical for industrial CV where you often have limited training data."
+    }
+  ]
+}

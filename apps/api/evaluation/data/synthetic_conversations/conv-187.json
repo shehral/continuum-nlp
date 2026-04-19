@@ -1,0 +1,15 @@
+{
+  "id": "conv-187",
+  "domain": "cloud-architecture",
+  "topic": "Choosing between EKS, ECS, and Lambda for new service",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Deploying a new Python service on AWS. EKS, ECS Fargate, or Lambda? It handles ~1000 req/sec with 200ms average response time."
+    },
+    {
+      "role": "assistant",
+      "content": "For 1000 req/sec Python service:\n\n**Lambda**:\n- No servers to manage\n- Cold starts problematic for Python (500ms-2s)\n- At 1000 req/sec continuously: expensive (~$2500/month)\n- Best for: bursty, event-driven workloads\n- Not ideal for your steady 1000 req/sec\n\n**ECS Fargate**:\n- Container-based, no EC2 management\n- No cold starts (always running)\n- Simple: define task, set auto-scaling\n- Cost: ~$100-200/month (2 tasks, 0.5 vCPU each)\n- Best for: simple services, small-medium teams\n\n**EKS (Kubernetes)**:\n- Full K8s capabilities\n- Overkill unless you already run K8s\n- ~$73/month for control plane alone + nodes\n- Best for: teams already invested in K8s, many services\n\nFor your case: **ECS Fargate** is the sweet spot. Simple, no cold starts, auto-scales, and at 1000 req/sec it's the cheapest option.\n\nIf you already have an EKS cluster: deploy there instead of adding another service type. Consistency > optimization."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-070",
+  "domain": "ml",
+  "topic": "Feature store: Feast vs Tecton",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our ML team keeps duplicating feature engineering code. Need a feature store. Feast or Tecton? We're on AWS."
+    },
+    {
+      "role": "assistant",
+      "content": "Feature stores solve a real pain point. Comparison:\n\n**Feast** (open-source):\n- Free, self-managed\n- Offline store: S3/BigQuery/Snowflake/Redshift\n- Online store: Redis/DynamoDB/PostgreSQL\n- Python SDK, terraform provider\n- Community-driven, lighter feature set\n- You manage the infrastructure\n\n**Tecton** (managed):\n- Built by ex-Uber (Michelangelo team)\n- Real-time feature computation\n- Stream + batch feature pipelines\n- Monitoring, data quality, versioning\n- Expensive ($$$)\n- Enterprise-focused\n\nFor AWS:\n- **Feast + DynamoDB (online) + S3 (offline)** is the most common open-source setup\n- **SageMaker Feature Store** is AWS's managed option (integrates with SageMaker pipelines)\n\nFor a team just starting with feature stores: **Feast**. It's simple enough to get running in a day and teaches the concepts without vendor lock-in."
+    },
+    {
+      "role": "user",
+      "content": "How does Feast actually work day-to-day? Like what does the workflow look like?"
+    },
+    {
+      "role": "assistant",
+      "content": "Feast workflow:\n\n1. **Define features** in Python:\n```python\n# feature_repo/features.py\nfrom feast import Entity, FeatureView, Field\nfrom feast.types import Float32, Int64\n\nuser = Entity(name=\"user_id\", join_keys=[\"user_id\"])\n\nuser_features = FeatureView(\n    name=\"user_features\",\n    entities=[user],\n    schema=[\n        Field(name=\"total_purchases\", dtype=Int64),\n        Field(name=\"avg_order_value\", dtype=Float32),\n    ],\n    source=s3_source,  # Where historical features live\n)\n```\n\n2. **Materialize** (load from offline → online store):\n```bash\nfeast materialize 2025-01-01 2026-03-18\n```\n\n3. **Training** (get historical features):\n```python\nfeatures = store.get_historical_features(\n    entity_df=training_events,\n    features=[\"user_features:total_purchases\", \"user_features:avg_order_value\"]\n)\n```\n\n4. **Serving** (get real-time features):\n```python\nfeatures = store.get_online_features(\n    features=[\"user_features:total_purchases\"],\n    entity_rows=[{\"user_id\": 123}]\n)\n```\n\nSame feature definitions used for training and serving — no training/serving skew."
+    }
+  ]
+}

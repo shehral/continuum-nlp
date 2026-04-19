@@ -1,0 +1,15 @@
+{
+  "id": "conv-123",
+  "domain": "security",
+  "topic": "Encryption at rest for PostgreSQL",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Compliance audit says we need encryption at rest for our postgressql database. Options?"
+    },
+    {
+      "role": "assistant",
+      "content": "Multiple layers of encryption at rest for Postgres:\n\n**1. Storage-level encryption** (easiest, most common):\n- **AWS RDS**: Enabled by default on new instances. Uses AES-256 via AWS KMS.\n- **Azure/GCP**: Same - managed Postgres has encryption at rest by default.\n- **Self-hosted**: Use LUKS (Linux) or dm-crypt for disk encryption.\n\n**2. Column-level encryption** (for sensitive fields):\n- Use `pgcrypto` extension or application-level encryption\n\n**3. Transparent Data Encryption (TDE)**:\n- PostgreSQL 17+ has experimental TDE support\n\nFor most compliance audits: **storage-level encryption** (RDS default) is sufficient. Add column-level for PII/PCI data."
+    }
+  ]
+}

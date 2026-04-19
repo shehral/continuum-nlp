@@ -1,0 +1,23 @@
+{
+  "id": "conv-057",
+  "domain": "backend",
+  "topic": "Gin vs Echo vs Fiber for Go API",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a Go API. Which web framework: Gin, Echo, or Fiber? Also heard about Chi and Mux."
+    },
+    {
+      "role": "assistant",
+      "content": "The Go web framework landscape:\n\n**Gin** — Most popular, fast, middleware-rich. Martini-like API.\n**Echo** — Similar to Gin, slightly cleaner API, built-in data binding/validation.\n**Fiber** — Express.js-inspired, built on fasthttp (not net/http). Fastest benchmarks.\n**Chi** — Lightweight router, 100% compatible with net/http stdlib.\n**Mux** (gorilla/mux) — Classic, but gorilla project was archived then revived. Less recommended for new projects.\n\nKey decision: **stdlib-compatible or not?**\n\n- Chi, Gin, Echo all use `net/http` — you can use any standard middleware\n- Fiber uses `fasthttp` — faster but incompatible with `net/http` middleware\n\nFor most teams: **Chi** if you like minimal + stdlib, **Echo** if you want more features built-in, **Gin** if you want the largest community."
+    },
+    {
+      "role": "user",
+      "content": "We want something lightweight. Our team is new to Go. Chi looks interesting but is it too minimal?"
+    },
+    {
+      "role": "assistant",
+      "content": "Chi is minimal but not *too* minimal. It gives you:\n\n- URL parameter routing (`/users/{id}`)\n- Middleware chaining\n- Route groups with sub-routers\n- stdlib `http.Handler` compatibility\n\n```go\nr := chi.NewRouter()\nr.Use(middleware.Logger)\nr.Use(middleware.Recoverer)\n\nr.Route(\"/api/users\", func(r chi.Router) {\n    r.Get(\"/\", listUsers)\n    r.Post(\"/\", createUser)\n    r.Get(\"/{id}\", getUser)\n})\n\nhttp.ListenAndServe(\":8080\", r)\n```\n\nWhat Chi doesn't include (but you add easily): request validation, response serialization, Swagger generation.\n\nFor a Go-new team, I'd actually recommend **Echo** — it includes validation (`go-playground/validator`), data binding, and Swagger generation out of the box. Less decisions to make while learning Go."
+    }
+  ]
+}

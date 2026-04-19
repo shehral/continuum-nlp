@@ -1,0 +1,23 @@
+{
+  "id": "conv-126",
+  "domain": "cloud-architecture",
+  "topic": "Database per service vs shared database in microservices",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Microservices best practice says 'database per service' but that seems like a nightmare to manage. Is a shared DB really that bad?"
+    },
+    {
+      "role": "assistant",
+      "content": "Pragmatic answer:\n\n**Shared database is fine when**:\n- Small team (< 10 devs)\n- Services are tightly coupled anyway\n- Transactions span multiple services frequently\n\n**Database per service matters when**:\n- Teams need independent deployment cadence\n- Different services need different databases\n- Schema changes in one service shouldn't break others\n\n**The real-world middle ground**:\n- Shared Postgres instance, separate **schemas** per service\n- Each service owns its schema, others can't directly query it\n- Cross-service data access via APIs, not SQL joins"
+    },
+    {
+      "role": "user",
+      "content": "The shared Postgres with separate schemas sounds perfect. How do we enforce the boundaries?"
+    },
+    {
+      "role": "assistant",
+      "content": "Enforce schema boundaries at the database level:\n\n```sql\nCREATE SCHEMA orders;\nCREATE SCHEMA users;\nCREATE ROLE orders_service LOGIN PASSWORD '...';\nGRANT USAGE ON SCHEMA orders TO orders_service;\nGRANT ALL ON ALL TABLES IN SCHEMA orders TO orders_service;\nREVOKE ALL ON SCHEMA users FROM orders_service;\n```\n\nNow each service's database credentials can only access its own schema.\n\n**Additional enforcement**:\n1. **CI check**: Lint SQL migrations - flag cross-schema references\n2. **Code review**: Service X importing Service Y's ORM models is a red flag\n3. **For cross-service data**: Build explicit APIs (REST or gRPC)"
+    }
+  ]
+}

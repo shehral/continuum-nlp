@@ -1,0 +1,15 @@
+{
+  "id": "conv-144",
+  "domain": "cloud-architecture",
+  "topic": "Multi-cloud strategy: genuine need vs complexity",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our CTO wants us to go multi-cloud (AWS + GCP) to avoid vendor lock-in. Is this actually a good idea for a 30-person company?"
+    },
+    {
+      "role": "assistant",
+      "content": "For a 30-person company, multi-cloud is almost certainly a bad idea:\n\n- Double the expertise needed\n- Double the tooling\n- No volume discounts (split spend)\n- Lowest common denominator (can't use cloud-specific features)\n- 2-3x operational overhead\n\n**When multi-cloud makes sense**: Regulatory requirement, acquisition brought different clouds, specific services only on one cloud, >500 engineers.\n\n**Better alternatives**:\n1. Multi-region on one cloud\n2. Portable abstractions (Kubernetes, Terraform)\n3. Avoid deep lock-in (Postgres not Aurora Serverless, standard K8s not Fargate)\n4. Negotiate committed spend discounts"
+    }
+  ]
+}

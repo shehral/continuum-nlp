@@ -1,0 +1,15 @@
+{
+  "id": "conv-190",
+  "domain": "devops",
+  "topic": "Incident management: PagerDuty vs Opsgenie vs Rootly",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need incident management tooling. PagerDuty seems expensive. Alternatives?"
+    },
+    {
+      "role": "assistant",
+      "content": "Incident management tools comparison:\n\n**PagerDuty**:\n- Industry standard, most mature\n- On-call scheduling, escalation, automated response\n- AI-powered noise reduction\n- $21/user/month (Professional)\n- Worth it for: large teams, complex escalation needs\n\n**Opsgenie** (Atlassian):\n- Similar features to PagerDuty at lower cost\n- Integrates with Jira, Confluence\n- $9/user/month (Essentials), $19 (Standard)\n- Good for: Atlassian shops\n\n**Grafana OnCall** (open-source):\n- Free self-hosted, or Grafana Cloud\n- On-call schedules, escalation, Slack integration\n- Integrates with Grafana alerting natively\n- Good for: teams already on Grafana stack\n\n**Rootly / incident.io**:\n- Incident management + on-call + status pages\n- Slack-native workflows\n- Automated incident channels, roles, postmortems\n- ~$16-25/user/month\n- Good for: Slack-heavy teams\n\nFor cost-conscious teams: **Grafana OnCall** (free) + **Better Stack** (status page, free tier). For Atlassian teams: **Opsgenie**. For best-in-class: **PagerDuty** or **incident.io**."
+    }
+  ]
+}

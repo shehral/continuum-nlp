@@ -1,0 +1,15 @@
+{
+  "id": "conv-196",
+  "domain": "cloud-architecture",
+  "topic": "API Gateway patterns: Kong vs AWS API Gateway vs Envoy",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need an API gateway for our microservices. Kong, AWS API Gateway, or Envoy?"
+    },
+    {
+      "role": "assistant",
+      "content": "Three different categories:\n\n**AWS API Gateway** (managed):\n- Zero ops, pay per request\n- HTTP API ($1/million requests) or REST API ($3.50/million)\n- Auth integration (Cognito, Lambda authorizers)\n- Rate limiting, throttling, caching\n- AWS-only, vendor lock-in\n- Best for: serverless architectures on AWS\n\n**Kong** (self-hosted or Kong Cloud):\n- Feature-rich: auth, rate limiting, transforms, analytics\n- Plugin ecosystem (100+ plugins)\n- Admin API + Dashboard (Kong Manager)\n- Runs on K8s, Docker, VMs\n- Open-source (Kong OSS) or enterprise\n- Best for: teams wanting full control with rich features\n\n**Envoy** (proxy + service mesh):\n- L4/L7 proxy (not a full API gateway out of the box)\n- xDS API for dynamic configuration\n- Foundation for Istio, Gloo, Emissary\n- Best observability (tracing, metrics native)\n- Steeper learning curve\n- Best for: service mesh, advanced traffic management\n\nFor most teams: **AWS API Gateway** (HTTP API) if on AWS and want simplicity. **Kong** if you need more control or are multi-cloud. **Envoy** if you're building a service mesh."
+    }
+  ]
+}

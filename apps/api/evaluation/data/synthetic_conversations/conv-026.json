@@ -1,0 +1,23 @@
+{
+  "id": "conv-026",
+  "domain": "backend",
+  "topic": "GraphQL vs REST for mobile API",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Designing the API for our mobile app. GraphQL or REST? The app has complex nested data (users -> posts -> comments -> likes)."
+    },
+    {
+      "role": "assistant",
+      "content": "For deeply nested data with a mobile client:\n\n**GraphQL** advantages:\n- Client specifies exactly what fields it needs (no over-fetching)\n- Single request for nested data (no N+1 HTTP calls)\n- Strong typing with schema\n- Great for bandwidth-constrained mobile\n\n**REST** advantages:\n- Simpler to implement and cache\n- HTTP caching works out of the box\n- Easier to rate limit and secure\n- Team probably knows it already\n\nFor your nested data case, GraphQL genuinely shines. A mobile client fetching user->posts->comments in one request vs 3+ REST calls makes a real UX difference on slow connections."
+    },
+    {
+      "role": "user",
+      "content": "We're using Node with typescript. What GraphQL server should we use?"
+    },
+    {
+      "role": "assistant",
+      "content": "Top options for Node + TypeScript:\n\n1. **Pothos + Yoga** - Type-safe schema builder + modern GraphQL server\n2. **Nexus + Apollo Server** - Code-first schema, mature ecosystem\n3. **tRPC** - Not GraphQL but gives you type-safe APIs with zero schema. Worth considering if both client and server are TypeScript.\n\nMy recommendation: **Pothos + GraphQL Yoga** (by The Guild). Pothos generates the schema from TypeScript types, so your schema is always in sync with your types. Yoga is lightweight and runs anywhere.\n\nAlternatively, if your client is also TypeScript (React Native), seriously consider **tRPC** - it gives you end-to-end type safety without the GraphQL complexity."
+    }
+  ]
+}

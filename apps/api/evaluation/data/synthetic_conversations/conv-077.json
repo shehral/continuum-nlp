@@ -1,0 +1,23 @@
+{
+  "id": "conv-077",
+  "domain": "data-engineering",
+  "topic": "Airbyte vs Fivetran for data ingestion",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to sync data from SaaS tools (Salesforce, HubSpot, Stripe) into our warehouse. Fivetran or Airbyte?"
+    },
+    {
+      "role": "assistant",
+      "content": "Classic build vs buy for data ingestion:\n\n**Fivetran** (managed):\n- 300+ pre-built connectors, battle-tested at scale\n- Zero maintenance — Fivetran handles schema changes, API changes\n- Incremental sync, CDC for databases\n- Expensive: $1-2+ per MAR (Monthly Active Row)\n- At 10M rows/month: ~$500-1000/month\n\n**Airbyte** (open-source or cloud):\n- 400+ connectors (many community-built)\n- Self-hosted (free) or Airbyte Cloud (managed)\n- Lower cost at scale (self-hosted = compute cost only)\n- Connector quality varies (community connectors can be flaky)\n- More operational overhead if self-hosted\n\nFor Salesforce + HubSpot + Stripe specifically: both have excellent connectors for these. Fivetran's are more battle-tested. Airbyte's are good but occasionally need attention."
+    },
+    {
+      "role": "user",
+      "content": "Cost is important. How hard is it to self-host Airbyte?"
+    },
+    {
+      "role": "assistant",
+      "content": "Self-hosting Airbyte is straightforward:\n\n```bash\ngit clone https://github.com/airbytehq/airbyte.git\ncd airbyte\ndocker compose up -d\n```\n\nThat gives you the Airbyte UI at localhost:8000. Configure connectors via the UI or Terraform provider.\n\nResource requirements:\n- Minimum: 4 CPU, 8GB RAM (t3.xlarge)\n- Recommended: 8 CPU, 16GB RAM for production\n- Storage: depends on data volume, 100GB+ for temp staging\n\nOperational considerations:\n- Updates: `docker compose pull && docker compose up -d`\n- Monitoring: built-in notifications for sync failures\n- Scaling: Kubernetes deployment available for high-volume\n- Gotcha: Airbyte's temp storage can fill up with large syncs — set `JOB_MAIN_CONTAINER_MEMORY_LIMIT`\n\nCost comparison at 50M rows/month:\n- Fivetran: ~$2,500-5,000/month\n- Airbyte self-hosted: ~$100-200/month (EC2 + storage)\n\nThe savings are significant. Start with Airbyte Cloud ($10 per credit) to validate connectors, then self-host when you're confident."
+    }
+  ]
+}

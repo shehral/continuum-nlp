@@ -1,0 +1,23 @@
+{
+  "id": "conv-015",
+  "domain": "web-development",
+  "topic": "TailwindCSS vs styled-components vs CSS Modules",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a new react project. CSS approach? Options are tailwind, styled-components, or CSS modules. Team has mixed opinions."
+    },
+    {
+      "role": "assistant",
+      "content": "In 2026, the landscape has shifted:\n\n**TailwindCSS v4**:\n- Utility-first, directly in JSX\n- Excellent DX with IntelliSense\n- @apply for reusable patterns\n- Works great with React Server Components\n- No runtime cost\n\n**styled-components / Emotion**:\n- CSS-in-JS, runtime styling\n- Being phased out by many teams\n- Doesn't work well with RSC (needs 'use client')\n- Bundle size overhead\n\n**CSS Modules**:\n- Scoped CSS, no runtime\n- Works everywhere including RSC\n- Less ergonomic than Tailwind\n- Good for gradual migration\n\n**Recommendation**: TailwindCSS v4 + shadcn/ui components. It's the dominant approach in the React ecosystem now."
+    },
+    {
+      "role": "user",
+      "content": "Some devs hate reading tailwind classes - they say its ugly. Any way to make it cleaner?"
+    },
+    {
+      "role": "assistant",
+      "content": "Common solutions for Tailwind readability:\n\n1. **CVA (class-variance-authority)** - Define component variants cleanly:\n```tsx\nconst button = cva('rounded font-semibold', {\n  variants: {\n    intent: { primary: 'bg-blue-500 text-white', secondary: 'bg-gray-200' },\n    size: { sm: 'px-2 py-1 text-sm', lg: 'px-4 py-2 text-lg' }\n  }\n})\n```\n\n2. **`cn()` utility** (clsx + tailwind-merge) - Compose classes cleanly\n3. **Extract components** - Instead of long class strings, make `<Button>`, `<Card>`, etc.\n4. **Prettier plugin** - `prettier-plugin-tailwindcss` sorts classes consistently\n\nWith shadcn/ui + CVA, most of your styling is in well-organized component files, not scattered utility classes."
+    }
+  ]
+}

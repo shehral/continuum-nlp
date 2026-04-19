@@ -1,0 +1,23 @@
+{
+  "id": "conv-030",
+  "domain": "data-engineering",
+  "topic": "Postgres vs ClickHouse for analytics",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're doing product analytics - tracking user events, funnels, retention. Currently querying postgres but it's getting slow at 50M+ rows. ClickHouse?"
+    },
+    {
+      "role": "assistant",
+      "content": "50M+ rows of event data is exactly where PostgreSQL starts struggling and columnar databases shine.\n\n**ClickHouse**:\n- Columnar storage (reads only needed columns)\n- 10-100x faster for analytical queries on large datasets\n- Built-in aggregation functions (retention, funnel, sessionization)\n- Compression: 50M rows might be 500MB vs 5GB in pg\n- Real-time ingestion (millions of rows/sec)\n\nExample: A query scanning 50M rows that takes 30s in Postgres typically takes <1s in ClickHouse.\n\nThe question is whether you want to self-host or use managed:\n- **ClickHouse Cloud** - Managed, auto-scaling\n- **Tinybird** - Managed ClickHouse with API layer\n- **Self-hosted** - Docker, ~1GB RAM for 50M rows"
+    },
+    {
+      "role": "user",
+      "content": "Can we keep pg for our main app and add clickhouse just for analytics? How do we sync the data?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, dual-database is the standard pattern:\n\n**Sync approaches**:\n1. **CDC (Change Data Capture)**: Debezium reads Postgres WAL → Kafka → ClickHouse. Real-time, production-proven.\n2. **Direct insert**: Application writes events to both PG and ClickHouse. Simpler but couples them.\n3. **Batch ETL**: Periodic pg_dump → transform → load to ClickHouse. Simplest but delayed.\n\nFor product analytics specifically, consider **PostHog** - it's open-source, built on ClickHouse, and handles all the analytics infrastructure (events, funnels, session replay, feature flags). You'd just add PostHog's SDK and skip building the pipeline yourself."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-165",
+  "domain": "devops",
+  "topic": "Blue-green vs canary vs rolling deployments",
+  "messages": [
+    {
+      "role": "user",
+      "content": "What deployment strategy should we use? Currently doing rolling updates on K8s but had a bad deploy last week that affected all users."
+    },
+    {
+      "role": "assistant",
+      "content": "Deployment strategies by risk level:\n\n**Rolling Update** (what you have):\n- Gradually replaces old pods with new\n- If new version is broken, some users are affected until rollback\n- Default K8s strategy\n- No extra infrastructure cost\n\n**Canary** (recommended):\n- Deploy new version to small % of traffic (1-5%)\n- Monitor metrics (error rate, latency, success rate)\n- Gradually increase traffic if healthy\n- Rollback affects only the canary percentage\n- Needs: traffic splitting (Istio, Linkerd, Argo Rollouts)\n\n**Blue-Green**:\n- Two identical environments (blue = current, green = new)\n- Switch all traffic at once after testing green\n- Instant rollback (switch back to blue)\n- Needs: 2x infrastructure during deployment\n\nFor your situation (bad deploys affecting all users): **Canary deployments** with **Argo Rollouts**. Start at 5% traffic, auto-promote if error rate stays below threshold, auto-rollback if it spikes."
+    },
+    {
+      "role": "user",
+      "content": "How do we set up canary with Argo Rollouts?"
+    },
+    {
+      "role": "assistant",
+      "content": "Argo Rollouts replaces the K8s Deployment resource:\n\n```yaml\napiVersion: argoproj.io/v1alpha1\nkind: Rollout\nspec:\n  replicas: 10\n  strategy:\n    canary:\n      steps:\n        - setWeight: 5       # 5% traffic to canary\n        - pause: { duration: 5m }\n        - setWeight: 20      # 20% traffic\n        - pause: { duration: 5m }\n        - setWeight: 50      # 50% traffic\n        - pause: { duration: 10m }\n        - setWeight: 100     # Full rollout\n      canaryMetrics:\n        - name: error-rate\n          provider:\n            prometheus:\n              query: |\n                sum(rate(http_requests_total{status=~\"5..\"}[5m])) /\n                sum(rate(http_requests_total[5m]))\n          successCondition: result[0] < 0.01  # <1% error rate\n          failureLimit: 3\n```\n\nThis automatically:\n1. Sends 5% of traffic to new version\n2. Checks error rate via Prometheus\n3. If error rate <1%, promotes to 20%, then 50%, then 100%\n4. If error rate >1% for 3 checks, auto-rollback\n5. Bad deploy last week? Would have been caught at 5% traffic.\n\nRequires: Argo Rollouts controller + a traffic management provider (Istio, Nginx Ingress, or AWS ALB Ingress)."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-010",
+  "domain": "mobile",
+  "topic": "SwiftUI vs UIKit for iOS",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a new iOS-only app. SwiftUI or UIKit? Need to support iOS 16+."
+    },
+    {
+      "role": "assistant",
+      "content": "For a new app targeting iOS 16+ in 2026, **SwiftUI** is the way to go:\n\n- Declarative UI (less code, easier to reason about)\n- Live previews in Xcode speed up development\n- Built-in support for accessibility, dark mode, dynamic type\n- NavigationStack (iOS 16+) fixes the old navigation issues\n- SwiftData for persistence (replaces Core Data boilerplate)\n\nUIKit is still needed for:\n- Very complex collection view layouts\n- Custom view controller transitions\n- Some third-party SDKs that only provide UIKit APIs\n\nYou can always drop into UIKit with `UIViewRepresentable` when needed."
+    },
+    {
+      "role": "user",
+      "content": "We need maps, camera access, and push notifications. All doable in swiftui?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, all doable:\n\n- **Maps**: `MapKit` has native SwiftUI support since iOS 17. For iOS 16, use `Map` view (basic) or wrap `MKMapView` with UIViewRepresentable.\n- **Camera**: Use `AVFoundation` wrapped in a UIViewRepresentable. Or `PhotosPicker` for gallery access (pure SwiftUI).\n- **Push notifications**: `UserNotifications` framework works independently of UI framework. APNs setup is the same regardless.\n\nFor the camera specifically, check out **Swift Packages** like `CameraKit` that provide SwiftUI-native camera views."
+    }
+  ]
+}

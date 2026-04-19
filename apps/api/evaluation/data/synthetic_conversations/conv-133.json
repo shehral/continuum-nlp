@@ -1,0 +1,23 @@
+{
+  "id": "conv-133",
+  "domain": "ml",
+  "topic": "GPU infrastructure: on-prem vs cloud for ML training",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We need GPUs for ML training. Renting on AWS/GCP is expensive. Should we buy our own GPUs?"
+    },
+    {
+      "role": "assistant",
+      "content": "The buy vs rent calculus for GPUs:\n\n**Cloud GPUs**: AWS p5 (H100) ~$32/hr, Lambda Cloud (H100) ~$2.5/hr. No upfront cost, scale to zero.\n**On-prem**: H100 ~$30-40k, RTX 4090 ~$1,600. Payback in 6-12 months at >50% utilization.\n\n**Decision framework**:\n- Training <20 hours/week -> **Cloud**\n- Training >40 hours/week consistently -> **On-prem**\n- Bursty training needs -> **Cloud**\n- Need H100 NVLink clusters -> **Cloud** (buy cost is $500k+)"
+    },
+    {
+      "role": "user",
+      "content": "We train about 60 hours/week. But the upfront cost of H100s is scary."
+    },
+    {
+      "role": "assistant",
+      "content": "Middle-ground options:\n\n**1. Cheaper GPU cloud providers**: Lambda Cloud $1.10/hr for A100, CoreWeave $2.06/hr, RunPod $1.64/hr\n**2. A100 instead of H100**: 60-70% of H100 performance, much cheaper\n**3. Consumer GPUs (RTX 4090)**: 80% of A100 training performance for $1,600/card. QLoRA fine-tuning works great on 24GB VRAM.\n\nAt 60 hrs/week on Lambda Cloud A100: $1.10 * 60 * 4 = **$264/month**. Start there, buy hardware only if utilization grows to 24/7."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-151",
+  "domain": "web-development",
+  "topic": "Exploring View Transitions API for page navigation",
+  "messages": [
+    {
+      "role": "user",
+      "content": "The View Transitions API looks cool for page transitions. Can we use it in production with Next.js?"
+    },
+    {
+      "role": "assistant",
+      "content": "The View Transitions API is a browser feature for smooth transitions between DOM states:\n\n**Browser support** (2026): Chrome, Edge, Safari 18+, Firefox partial.\n\n**In Next.js**: Experimental support via `next/navigation`:\n- Same-document transitions work in App Router\n- Cross-document (MPA) transitions work with static pages\n- `startViewTransition` API for fine-grained control\n\n**Basic usage**:\n```css\n::view-transition-old(root) {\n  animation: fade-out 0.2s ease;\n}\n::view-transition-new(root) {\n  animation: fade-in 0.2s ease;\n}\n```\n\nFor production: use as progressive enhancement. Works in supported browsers, gracefully degrades (no transition) in others. No JS bundle cost since it's a browser API."
+    },
+    {
+      "role": "user",
+      "content": "Can we do element-level transitions? Like morph a card into a full page?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, view-transition-name enables element-level morphing:\n\n```css\n/* Card in list */\n.card-thumbnail {\n  view-transition-name: hero-image;\n}\n\n/* Full image on detail page */\n.detail-image {\n  view-transition-name: hero-image;\n}\n```\n\nThe browser automatically morphs between elements with matching `view-transition-name` values. The card thumbnail smoothly expands into the detail page image.\n\nConstraints:\n- `view-transition-name` must be unique per page\n- Dynamic names work: `view-transition-name: card-${id}`\n- Works best with `will-change: view-transition-name` for performance\n\nThis replaces complex animation libraries (Framer Motion's `layoutId`, FLIP animations) with a native CSS solution. Much less JavaScript, smoother performance."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-059",
+  "domain": "backend",
+  "topic": "Java 21 LTS virtual threads for microservices",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're on Java 17 with Spring Boot. Java 21 LTS has virtual threads. Worth upgrading? Our services do lots of blocking I/O."
+    },
+    {
+      "role": "assistant",
+      "content": "For blocking I/O-heavy services, virtual threads (Project Loom) are a game-changer:\n\n**Virtual Threads (Java 21)**:\n- Lightweight threads managed by JVM (not OS)\n- One virtual thread per request — no more thread pool sizing\n- Blocking calls (JDBC, HTTP clients) automatically yield\n- No code changes for most Spring Boot apps\n- Handles 100k+ concurrent requests on modest hardware\n\nBefore: 200 platform threads = 200 concurrent requests max during DB calls\nAfter: Unlimited virtual threads = thousands of concurrent requests\n\nSpring Boot 3.2+ has native support:\n```properties\nspring.threads.virtual.enabled=true\n```\n\nThat's literally it. Your existing blocking code becomes highly concurrent."
+    },
+    {
+      "role": "user",
+      "content": "Any gotchas? We use Hibernate, HikariCP, and Spring WebMVC."
+    },
+    {
+      "role": "assistant",
+      "content": "Some important gotchas:\n\n1. **Synchronized blocks pin virtual threads** — Replace `synchronized` with `ReentrantLock` where possible. Hibernate and some JDBC drivers use `synchronized` internally.\n2. **Connection pool sizing** — HikariCP pool (default 10) becomes the bottleneck instead of thread count. You may need to increase `maximumPoolSize`.\n3. **ThreadLocal abuse** — Virtual threads are cheap, so you'll have many more. ThreadLocal memory usage can spike.\n4. **Monitoring** — Thread dumps show millions of virtual threads. Tools need updating.\n\nHibernate 6.4+ and HikariCP 6+ have improved virtual thread support. Make sure you're on latest versions.\n\nThe upgrade from Java 17 to 21 is smooth — it's an LTS-to-LTS jump. Test thoroughly with load testing to catch any pinning issues (`-Djdk.tracePinnedThreads=short`)."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "conv-186",
+  "domain": "security",
+  "topic": "Implementing Content Security Policy",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our security scanner flagged missing Content Security Policy header. How do we implement CSP without breaking our Next.js app?"
+    },
+    {
+      "role": "assistant",
+      "content": "CSP implementation for Next.js:\n\n**Start with report-only mode** (won't block anything, just reports violations):\n```\nContent-Security-Policy-Report-Only: default-src 'self'; script-src 'self'; report-uri /api/csp-report\n```\n\nDeploy this first. Check the violation reports to understand what your app loads. Then tighten gradually.\n\n**Next.js specific config** in `next.config.ts`:\n```typescript\nconst cspHeader = `\n  default-src 'self';\n  script-src 'self' 'nonce-{NONCE}';\n  style-src 'self' 'unsafe-inline';\n  img-src 'self' blob: data: https:;\n  font-src 'self';\n  connect-src 'self' https://api.yourapp.com;\n  frame-ancestors 'none';\n`;\n```\n\n**Key gotchas for Next.js**:\n1. **Inline scripts**: Next.js injects inline scripts. Use `nonce` strategy.\n2. **Tailwind**: Needs `'unsafe-inline'` for `style-src` (or use `nonce` for styles too).\n3. **Third-party scripts** (analytics, chat widgets): Add their domains to `script-src`.\n4. **Next.js Image**: Add image domains to `img-src`.\n\n**Implementation steps**:\n1. Deploy `Content-Security-Policy-Report-Only` header\n2. Monitor violations for 1-2 weeks\n3. Add necessary exceptions\n4. Switch to enforcing `Content-Security-Policy`\n5. Keep `report-uri` to catch future violations"
+    }
+  ]
+}

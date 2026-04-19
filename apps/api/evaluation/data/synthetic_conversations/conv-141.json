@@ -1,0 +1,23 @@
+{
+  "id": "conv-141",
+  "domain": "backend",
+  "topic": "ES2024 features in Node.js 24",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We just upgraded to Node 24 LTS. What ES2024 features should we start using?"
+    },
+    {
+      "role": "assistant",
+      "content": "ES2024 features in Node.js 24:\n\n1. **`Object.groupBy`** - Replaces lodash groupBy. Group array items by key.\n2. **`Promise.withResolvers()`** - Create promise + resolve/reject externally.\n3. **Well-formed Unicode strings** - `isWellFormed()` / `toWellFormed()`\n4. **`Atomics.waitAsync`** - Non-blocking wait for SharedArrayBuffer\n5. **ArrayBuffer transfer** - Move memory ownership without copying\n\nBiggest practical win: `Object.groupBy` - drop lodash for this common operation."
+    },
+    {
+      "role": "user",
+      "content": "What about native TypeScript support in Node? I heard that's coming."
+    },
+    {
+      "role": "assistant",
+      "content": "Node.js 24 has TypeScript support via type stripping (stable). Node strips type annotations and runs the JS.\n\n**What works**: Type annotations, interfaces, generics, .ts imports.\n**What doesn't work**: Enums, decorators, namespace, JSX, path aliases.\n\nFor scripts and simple tools: `node app.ts` works great. For production apps: still use `tsc` or `tsx` for full TypeScript support.\n\nThe direction is clear: Node.js is moving toward native TS. For now, use `tsx` for development, `tsc` for production builds with full type checking."
+    }
+  ]
+}

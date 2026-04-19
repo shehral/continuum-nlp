@@ -1,0 +1,15 @@
+{
+  "id": "conv-146",
+  "domain": "web-development",
+  "topic": "Monorepo component sharing between Next.js apps",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have 3 Next.js apps in a pnpm monorepo sharing components. Current internal package setup is fragile. Using Turborepo. How do we share properly?"
+    },
+    {
+      "role": "assistant",
+      "content": "Standard pattern for shared components in Turborepo:\n\nStructure: `packages/ui/` (shared components), `packages/config-tailwind/`, `packages/config-typescript/`, with apps consuming them.\n\n**Key: Internal packages with `exports` field** in package.json pointing to raw source files (.tsx). Then in Next.js config, add `transpilePackages: ['@acme/ui']` so Next.js transpiles directly from source.\n\nThis avoids building the UI package separately - Next.js handles it."
+    }
+  ]
+}

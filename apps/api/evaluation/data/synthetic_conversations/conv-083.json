@@ -1,0 +1,23 @@
+{
+  "id": "conv-083",
+  "domain": "systems",
+  "topic": "io_uring vs epoll for high-performance Linux networking",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a high-performance proxy in Rust on Linux. Should I use io_uring or stick with epoll? Targeting 1M+ concurrent connections."
+    },
+    {
+      "role": "assistant",
+      "content": "For 1M+ connections, **io_uring** has clear advantages:\n\n**io_uring**:\n- Submission queue + completion queue in shared memory (fewer syscalls)\n- Batched I/O operations (submit N ops in one syscall)\n- Supports zero-copy networking (`IORING_OP_SEND_ZC`)\n- Fixed buffers for less allocation\n- ~30-50% better throughput than epoll at high connection counts\n\n**epoll**:\n- Mature, battle-tested (20+ years)\n- Simpler programming model\n- Wider kernel support (io_uring needs Linux 5.10+)\n- tokio/mio use epoll by default\n- No security concerns (io_uring has had CVEs)\n\nFor 1M+ connections in Rust:\n- **tokio-uring** — Experimental tokio backend using io_uring\n- **glommio** — io_uring-first async runtime (by Datadog)\n- **monoio** — Thread-per-core io_uring runtime (by ByteDance)\n\nCaveat: io_uring is disabled in some container environments (Docker, some cloud providers) due to past security vulnerabilities."
+    },
+    {
+      "role": "user",
+      "content": "We'll be running on bare metal, not containers. glommio or monoio?"
+    },
+    {
+      "role": "assistant",
+      "content": "For bare metal with 1M+ connections:\n\n**monoio** (ByteDance):\n- Thread-per-core architecture (no cross-thread synchronization)\n- Each core handles its own connections\n- Best for proxy workloads (independent requests)\n- Lower latency than glommio at high throughput\n- GAT-based (Generic Associated Types) for zero-cost async\n\n**glommio** (Datadog):\n- Also thread-per-core\n- Task queues with different priorities\n- Better for mixed workloads (CPU + I/O)\n- More mature, better documented\n- Used in production at Datadog\n\nFor a proxy: **monoio**. ByteDance built it specifically for their proxy infrastructure. The thread-per-core model eliminates lock contention at 1M+ connections.\n\nArchitecture:\n1. One core accepts connections, distributes to workers\n2. Each worker core handles ~50-100k connections independently\n3. io_uring for all I/O (accept, read, write, close)\n4. No shared state between cores (share-nothing)\n\nWith 16 cores, you can comfortably handle 1M+ connections."
+    }
+  ]
+}

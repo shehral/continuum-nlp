@@ -1,0 +1,23 @@
+{
+  "id": "conv-095",
+  "domain": "cloud-architecture",
+  "topic": "CDN strategy: CloudFront vs Cloudflare vs Fastly",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a CDN for our web app. Static assets + API caching. CloudFront, Cloudflare, or Fastly?"
+    },
+    {
+      "role": "assistant",
+      "content": "Three tiers of CDN:\n\n**Cloudflare**:\n- Generous free tier (unlimited bandwidth on free plan)\n- DDoS protection included\n- Workers for edge compute\n- Best DNS (fastest in the world)\n- R2 for S3-compatible storage ($0 egress)\n- Pro: $20/month for WAF, image optimization\n\n**CloudFront**:\n- Native AWS integration (S3, ALB, Lambda@Edge)\n- Pay per GB ($0.085/GB first 10TB)\n- Lambda@Edge and CloudFront Functions\n- Best if you're all-in on AWS\n- No free tier for bandwidth\n\n**Fastly**:\n- Best real-time purging (150ms global purge)\n- VCL and Compute@Edge for custom logic\n- Best for dynamic content caching\n- Enterprise pricing ($50+ minimum)\n- Used by: GitHub, Stripe, NYT\n\nFor most apps: **Cloudflare** (free tier + R2 + Workers). For AWS-native: **CloudFront** (tightest integration). For dynamic content at scale: **Fastly**."
+    },
+    {
+      "role": "user",
+      "content": "We're on AWS but the zero-egress from Cloudflare R2 is tempting. Can we mix CF with AWS?"
+    },
+    {
+      "role": "assistant",
+      "content": "Absolutely — Cloudflare in front of AWS is a common and smart pattern:\n\n**Architecture**:\n```\nUsers → Cloudflare CDN/WAF → AWS ALB → ECS/EC2\n                ↓\n           Cloudflare R2 (static assets, $0 egress)\n```\n\n**Benefits of this hybrid**:\n1. **Cloudflare handles**: CDN, DDoS, WAF, DNS, static assets on R2\n2. **AWS handles**: Application servers, databases, queuing\n3. **Cost savings**: Cloudflare's free CDN + R2's zero egress eliminates CloudFront costs AND S3 egress costs\n\nSetup:\n- Point DNS to Cloudflare (orange-cloud proxy mode)\n- Set AWS ALB as the origin\n- Cache static assets at Cloudflare edge\n- Move static files from S3 to R2 (S3-compatible API — `aws s3 sync` works with R2)\n\nGotchas:\n- Cloudflare terminates TLS — your ALB sees Cloudflare's IP, not the user's. Use `CF-Connecting-IP` header.\n- Set up authenticated origin pulls (mTLS between CF and ALB) so nobody can bypass Cloudflare.\n\nThis combo gives you enterprise-grade CDN + DDoS protection for $0-20/month instead of hundreds."
+    }
+  ]
+}

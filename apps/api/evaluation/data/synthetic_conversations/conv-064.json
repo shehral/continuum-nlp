@@ -1,0 +1,23 @@
+{
+  "id": "conv-064",
+  "domain": "devops",
+  "topic": "Tailscale vs WireGuard vs OpenVPN for team VPN",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a VPN for our remote team to access internal services. Tailscale, plain WireGuard, or OpenVPN?"
+    },
+    {
+      "role": "assistant",
+      "content": "Very different levels of complexity:\n\n**Tailscale** (recommended for most teams):\n- Built on WireGuard, zero-config mesh VPN\n- No VPN server to manage — peer-to-peer\n- NAT traversal (works behind firewalls)\n- SSO integration (Google, Okta, Azure AD)\n- MagicDNS — access machines by name\n- Free for personal, $6/user/month for teams\n\n**WireGuard** (raw):\n- Fastest VPN protocol (~3x OpenVPN throughput)\n- Simple config but manual key management\n- No built-in NAT traversal\n- Need to self-host a server\n\n**OpenVPN**:\n- Battle-tested, widest compatibility\n- Slowest of the three\n- Complex certificate management\n- Self-hosted or managed (OpenVPN Access Server)\n\nFor a remote team: **Tailscale**. Zero infra to manage, works behind any NAT, and the mesh topology means traffic goes peer-to-peer instead of through a central server."
+    },
+    {
+      "role": "user",
+      "content": "We want to self-host everything. Is there a Tailscale alternative?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes — **Headscale** is an open-source, self-hosted Tailscale control server:\n\n- Compatible with official Tailscale clients\n- You run the coordination server\n- All the WireGuard mesh benefits of Tailscale\n- Free, no per-user pricing\n- ACLs, DNS, exit nodes all supported\n\n```bash\ndocker run -v /path/to/config:/etc/headscale \\\n  headscale/headscale serve\n```\n\nAlternatives:\n- **Netbird** — Open-source, self-hosted mesh VPN with WireGuard. Has a nice UI.\n- **Nebula** (by Slack) — Certificate-based overlay network. Used at scale by Slack.\n- **ZeroTier** — Peer-to-peer VPN, partially open-source.\n\nFor self-hosted: **Headscale** if you want Tailscale's UX with self-hosting, **Netbird** if you want a friendlier admin UI."
+    }
+  ]
+}

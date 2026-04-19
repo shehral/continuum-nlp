@@ -1,0 +1,23 @@
+{
+  "id": "conv-114",
+  "domain": "systems",
+  "topic": "Leptos vs Yew for Rust WASM frontend",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Want to build a web frontend in Rust (compiles to WASM). Leptos or Yew? Doing this for a side project."
+    },
+    {
+      "role": "assistant",
+      "content": "Two main Rust WASM frontend frameworks:\n\n**Leptos**:\n- Fine-grained reactivity (like SolidJS)\n- Signals-based: `let count = create_signal(0);`\n- SSR support (full-stack Rust)\n- Smaller bundle size (only changed DOM nodes update)\n- Newer, rapidly growing\n- Actix or Axum for server-side\n\n**Yew**:\n- Virtual DOM (like React)\n- Component-based with `html!` macro\n- More mature, larger community\n- Function components with hooks\n- Heavier runtime due to vDOM diffing\n\n**Leptos** is the more modern choice:\n```rust\n#[component]\nfn Counter() -> impl IntoView {\n    let (count, set_count) = create_signal(0);\n    view! {\n        <button on:click=move |_| set_count.update(|n| *n += 1)>\n            \"Count: \" {count}\n        </button>\n    }\n}\n```\n\nLeptos is to Yew what SolidJS is to React — fine-grained reactivity without vDOM overhead. For a new project, Leptos is the better choice."
+    },
+    {
+      "role": "user",
+      "content": "How does the DX compare to writing React/TypeScript? Is it painful?"
+    },
+    {
+      "role": "assistant",
+      "content": "Honest assessment — the DX gap is real:\n\n**Pain points**:\n- Compile times: 5-30 seconds for incremental builds (React HMR: <100ms)\n- `html!`/`view!` macros: IDE support exists but isn't as good as JSX/TSX\n- Borrow checker in UI code: closure captures require `move`, `clone()` boilerplate\n- Ecosystem: No Tailwind-like tools. CSS is raw or via `stylers` crate.\n- Debugging: Browser devtools show WASM, not Rust source (source maps exist but are rough)\n\n**Nice things**:\n- Type safety everywhere (no `any` escape hatch)\n- No runtime errors from null/undefined\n- Full-stack Rust: same language for server and client\n- Compile-time route checking with Leptos\n- Performance: smaller bundles, faster updates than React\n\n**Verdict**: For a side project to learn Rust WASM — absolutely worth it. For a production app where shipping speed matters — React/TypeScript is still significantly more productive.\n\nThe Rust WASM frontend ecosystem is where React was in 2015 — promising but rough around the edges. It'll be great in 2-3 years."
+    }
+  ]
+}

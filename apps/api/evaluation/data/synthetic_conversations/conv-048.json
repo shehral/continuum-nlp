@@ -1,0 +1,23 @@
+{
+  "id": "conv-048",
+  "domain": "systems",
+  "topic": "WebAssembly vs native for browser compute",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have heavy computation in our web app (image processing). Currently JS but it's slow. Would WebAssembly (WASM) help?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, WASM can significantly speed up CPU-bound computation in the browser:\n\n**WebAssembly benefits**:\n- Near-native speed (within 10-20% of C/C++/Rust)\n- Great for: image processing, audio/video, crypto, physics\n- Runs in all modern browsers\n- Compile from Rust, C++, Go, or AssemblyScript\n\n**Expected speedup for image processing**: 3-10x over optimized JS, depending on the operation.\n\n**Best approach**: Write the hot path in **Rust** → compile to WASM with `wasm-pack`:\n```rust\n#[wasm_bindgen]\npub fn apply_filter(pixels: &mut [u8], width: u32, height: u32) {\n    // Process pixels at near-native speed\n}\n```\n\nThe rest of your app stays in JavaScript/TypeScript. WASM modules are loaded like any other import."
+    },
+    {
+      "role": "user",
+      "content": "Our team doesn't know Rust. Any easier options?"
+    },
+    {
+      "role": "assistant",
+      "content": "Several easier paths:\n\n1. **AssemblyScript** - TypeScript-like syntax that compiles to WASM:\n```typescript\nexport function processPixels(ptr: usize, len: i32): void {\n  // Familiar TS-like syntax\n}\n```\n\n2. **Emscripten (C/C++)** - If anyone knows C, it compiles directly to WASM\n\n3. **FFmpeg.wasm** - If your image processing involves standard operations, this runs FFmpeg in the browser via WASM. No custom code needed.\n\n4. **Web Workers + OffscreenCanvas** - Not WASM, but moving computation off the main thread to a Web Worker can solve perceived slowness without learning a new language.\n\nRecommendation: Try **Web Workers first** (easiest). If still too slow, use **AssemblyScript** for the hot path. The learning curve from TypeScript to AssemblyScript is minimal."
+    }
+  ]
+}

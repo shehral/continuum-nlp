@@ -1,0 +1,31 @@
+{
+  "id": "conv-001",
+  "domain": "web-development",
+  "topic": "Choosing React state management (Redux vs Zustand vs Jotai)",
+  "messages": [
+    {
+      "role": "user",
+      "content": "I need state management for my React app. It's getting complex with lots of shared state. Should I use Redux or Zustand? I've also heard of Jotai."
+    },
+    {
+      "role": "assistant",
+      "content": "For complex shared state in React, here are your main options:\n\n1. **Redux Toolkit (RTK)** - The modern Redux. Great DevTools, middleware ecosystem, widely adopted.\n2. **Zustand** - Much lighter (~1KB), simpler API, no boilerplate.\n3. **Jotai** - Atomic state model, similar to Recoil but lighter.\n\nWhat's your team size and how complex is the state shape?"
+    },
+    {
+      "role": "user",
+      "content": "Small team, 3 devs. We know redux already but the boilerplate is killing us. The state is mostly API responses cached client-side plus some UI state like modals and filters."
+    },
+    {
+      "role": "assistant",
+      "content": "Given your situation, I'd recommend **Zustand** for the UI state (modals, filters) and **React Query** (TanStack Query) for the API response caching. This is a common pattern that eliminates most Redux boilerplate.\n\nZustand gives you a simple store without providers, reducers, or action types. TanStack Query handles caching, refetching, and staleness automatically.\n\nIf you really want to stay in the Redux ecosystem, RTK Query (part of Redux Toolkit) handles the API caching side well too."
+    },
+    {
+      "role": "user",
+      "content": "Interesting. We're using typescript btw - does zustand have good ts support? And what about React 19 server components, does it work with RSC?"
+    },
+    {
+      "role": "assistant",
+      "content": "Zustand has excellent TypeScript support - it's written in TS natively. Type inference works well with `create<StateType>()`. For React 19 and Server Components, Zustand works fine since it's a client-side store - you'd use it in `'use client'` components. The store itself doesn't need to be aware of RSC boundaries."
+    }
+  ]
+}

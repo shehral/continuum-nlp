@@ -1,0 +1,31 @@
+{
+  "id": "conv-051",
+  "domain": "web-development",
+  "topic": "Astro vs Next.js for content-driven site",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Evaluating Astro for our docs site. Currently on nextjs but most pages are static markdown. Astro worth switching?"
+    },
+    {
+      "role": "assistant",
+      "content": "For a docs site that's mostly static markdown, **Astro** is a strong fit:\n\n- **Zero JS by default** — pages ship as pure HTML unless you opt in\n- **Content Collections** — type-safe markdown/MDX with frontmatter validation\n- **Island architecture** — interactive components hydrate independently\n- **Framework-agnostic** — use React, Vue, Svelte, or Solid components in the same project\n\nNext.js ships ~85KB of JS baseline even for static pages. Astro ships 0KB unless you add interactive islands. For a docs site, that's a massive Lighthouse win."
+    },
+    {
+      "role": "user",
+      "content": "We have some interactive components (search, code playground). Can we keep those in React?"
+    },
+    {
+      "role": "assistant",
+      "content": "Absolutely. Astro's island architecture lets you embed React components with explicit hydration:\n\n```astro\n---\nimport SearchBar from '../components/SearchBar.jsx';\nimport CodePlayground from '../components/CodePlayground.tsx';\n---\n<SearchBar client:load />\n<CodePlayground client:visible />\n```\n\n`client:load` hydrates immediately, `client:visible` waits until the component scrolls into view. The rest of the page stays static HTML.\n\nYou can literally copy your existing React components from Next.js into Astro and use them as islands. The migration path is smooth."
+    },
+    {
+      "role": "user",
+      "content": "What about Starlight? Heard it's an Astro theme for docs specifically."
+    },
+    {
+      "role": "assistant",
+      "content": "**Starlight** is excellent — it's the official Astro docs framework:\n\n- Sidebar navigation from file structure\n- Full-text search (Pagefind, runs client-side, no server)\n- i18n built in\n- OpenAPI/Swagger integration\n- Dark mode, mobile-responsive\n- Versioned docs support\n\n```bash\nnpm create astro@latest -- --template starlight\n```\n\nIt's what Astro's own docs use. If your docs site doesn't need heavy custom UI, Starlight saves weeks of work over building from scratch in Next.js."
+    }
+  ]
+}

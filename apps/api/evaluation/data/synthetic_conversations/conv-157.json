@@ -1,0 +1,23 @@
+{
+  "id": "conv-157",
+  "domain": "data-engineering",
+  "topic": "Exploring data mesh architecture",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our data team is a bottleneck - every team wants data pipelines but we can't keep up. Someone mentioned data mesh. What is it?"
+    },
+    {
+      "role": "assistant",
+      "content": "Data mesh is an organizational pattern (not a technology):\n\n**Core principles**:\n1. **Domain ownership** - Each team owns their data products (not a central data team)\n2. **Data as a product** - Treat data like a product with SLAs, documentation, quality\n3. **Self-serve platform** - Central team provides tools, not pipelines\n4. **Federated governance** - Global standards, local implementation\n\n**What it means practically**:\n- The orders team owns the `orders` data product (schema, quality, freshness)\n- They publish it to a catalog where anyone can discover and use it\n- The central data team builds the platform (tooling, infrastructure) but doesn't write pipelines\n- Data contracts define interfaces between domain data products\n\n**When data mesh makes sense**: Multiple domain teams (5+), data team is a bottleneck, clear domain boundaries.\n**When it doesn't**: Small company (<30 people), single data team handles everything fine, no clear domain boundaries."
+    },
+    {
+      "role": "user",
+      "content": "We have 8 product teams and our 3-person data team is totally overwhelmed. How do we start?"
+    },
+    {
+      "role": "assistant",
+      "content": "Incremental adoption for your situation:\n\n**Phase 1: Pick one domain team** (most data-literate)\n- They own their data pipeline end-to-end\n- Central team provides templates and tools\n- Success here proves the model\n\n**Phase 2: Self-serve platform**\n- Templated dbt projects per domain\n- Shared Airflow/Dagster instance with per-team DAGs\n- Data catalog (DataHub or OpenMetadata) for discovery\n- Soda checks template for quality\n\n**Phase 3: Expand to other teams**\n- Each team gets their own dbt project\n- Data team becomes platform team (maintains tooling, not pipelines)\n- Federated governance: naming conventions, quality standards, SLA templates\n\n**Your data team's new role**: Platform team. Build tools, templates, and standards. Train domain teams. Review data products. Don't write every pipeline.\n\nRealistic timeline: 6 months to have 3-4 domain teams owning their data. Your 3-person team shifts from pipeline developers to platform engineers."
+    }
+  ]
+}

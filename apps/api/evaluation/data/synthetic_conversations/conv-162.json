@@ -1,0 +1,15 @@
+{
+  "id": "conv-162",
+  "domain": "security",
+  "topic": "Passkeys vs passwords for web authentication",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Should we add passkey support to our web app? Are passwords going away?"
+    },
+    {
+      "role": "assistant",
+      "content": "Passkeys are the future of authentication, but passwords aren't going away yet:\n\n**Passkeys** (WebAuthn / FIDO2):\n- Cryptographic key pair (private key on device, public key on server)\n- Phishing-resistant (bound to origin)\n- No passwords to leak, stuff, or brute force\n- Biometric unlock (Face ID, fingerprint, Windows Hello)\n- Synced across devices via iCloud Keychain / Google Password Manager\n- Supported by: Apple, Google, Microsoft (all major browsers)\n\n**Current state (2026)**:\n- GitHub, Google, Amazon, Microsoft, PayPal all support passkeys\n- ~30% of users have used a passkey somewhere\n- Still need password fallback for users without compatible devices\n\n**Implementation**:\n- **SimpleWebAuthn** (TypeScript) - Server + client libraries\n- **py-webauthn** (Python) - Server library for FastAPI/Django\n- **Auth.js v5** has passkey support via WebAuthn provider\n\nRecommendation: Add passkeys as an **option** alongside existing auth. Don't force it. Offer: passkey > email magic link > password."
+    }
+  ]
+}

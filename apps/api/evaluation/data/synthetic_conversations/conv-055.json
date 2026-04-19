@@ -1,0 +1,23 @@
+{
+  "id": "conv-055",
+  "domain": "web-development",
+  "topic": "Svelte 5 runes vs React hooks",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Svelte 5 just introduced runes. How do they compare to React hooks? We're evaluating frameworks for a new project."
+    },
+    {
+      "role": "assistant",
+      "content": "Svelte 5 runes are a significant evolution:\n\n**Svelte 5 Runes** (`$state`, `$derived`, `$effect`):\n- True reactivity — compiler tracks dependencies automatically\n- No dependency arrays (the #1 source of React bugs)\n- Fine-grained updates (no component re-renders)\n- Works outside components (in `.svelte.js` files)\n\n**React Hooks** (`useState`, `useMemo`, `useEffect`):\n- Manual dependency tracking (stale closure bugs)\n- Component-level re-rendering\n- Rules of hooks (can't call conditionally)\n- Massive ecosystem\n\n```svelte\n<!-- Svelte 5 -->\n<script>\nlet count = $state(0);\nlet doubled = $derived(count * 2);\n// No dependency array needed — compiler figures it out\n</script>\n```\n\nRunes fix most of the pain points developers have with hooks. The tradeoff is Svelte's smaller ecosystem."
+    },
+    {
+      "role": "user",
+      "content": "Does SvelteKit have feature parity with Next.js for SSR, API routes, etc?"
+    },
+    {
+      "role": "assistant",
+      "content": "Mostly yes:\n\n| Feature | Next.js 16 | SvelteKit 2 |\n|---------|-----------|-------------|\n| SSR | Yes | Yes |\n| SSG | Yes | Yes |\n| API routes | Yes | Yes (+server.ts) |\n| File routing | Yes | Yes |\n| Middleware | Yes | Yes (hooks) |\n| Image optimization | next/image | @sveltejs/enhanced-img |\n| Auth | Auth.js | Auth.js (SvelteKit adapter) |\n| Forms | Server Actions | Form actions (progressive enhancement) |\n| Streaming | Yes | Yes |\n\nSvelteKit's form actions with progressive enhancement are actually better than Next.js Server Actions for forms — they work without JavaScript enabled.\n\nMain gaps: fewer deployment adapters (though Vercel, Netlify, Cloudflare, Node all work), smaller template/starter ecosystem."
+    }
+  ]
+}

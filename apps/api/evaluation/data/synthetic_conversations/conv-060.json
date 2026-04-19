@@ -1,0 +1,23 @@
+{
+  "id": "conv-060",
+  "domain": "backend",
+  "topic": "Celery vs Dramatiq vs Temporal for task queues in Python",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a task queue for our Python backend. Celery, Dramatiq, or Temporal? Processing background jobs like email sending, report generation."
+    },
+    {
+      "role": "assistant",
+      "content": "Three very different tools:\n\n**Celery**:\n- De facto standard for Python task queues\n- Redis or RabbitMQ as broker\n- Periodic tasks (celery beat), chaining, groups\n- Complex, lots of configuration\n- Occasional reliability issues with Redis broker\n\n**Dramatiq**:\n- Modern Celery alternative, simpler API\n- Redis or RabbitMQ broker\n- Better defaults, less configuration\n- Middleware architecture\n- Smaller community\n\n**Temporal**:\n- Workflow orchestration (not just task queue)\n- Durable execution — workflows survive crashes\n- Versioning, retries, timeouts built in\n- Separate Temporal server needed\n- Overkill for simple background jobs\n\nFor email + reports: **Dramatiq** (simpler than Celery, more reliable defaults). For complex multi-step workflows: **Temporal**."
+    },
+    {
+      "role": "user",
+      "content": "We already use Redis. Dramatiq with Redis then?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, Dramatiq + Redis is a clean setup:\n\n```python\nimport dramatiq\nfrom dramatiq.brokers.redis import RedisBroker\n\nbroker = RedisBroker(url=\"redis://localhost:6379/0\")\ndramatiq.set_broker(broker)\n\n@dramatiq.actor(max_retries=3, time_limit=300000)\ndef send_email(to: str, subject: str, body: str):\n    # Send email logic\n    pass\n\n@dramatiq.actor(queue_name=\"reports\", priority=0)\ndef generate_report(report_id: int):\n    # Heavy report generation\n    pass\n\n# Enqueue\nsend_email.send(\"user@example.com\", \"Welcome\", \"...\")\ngenerate_report.send(report_id=42)\n```\n\nRun workers: `dramatiq myapp.tasks -p 4 -t 8`\n\nKey advantages over Celery:\n- Automatic retries with exponential backoff\n- Priority queues built-in\n- Worker shutdown is graceful (waits for current tasks)\n- `dramatiq-dashboard` for monitoring"
+    }
+  ]
+}

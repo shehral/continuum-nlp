@@ -1,0 +1,23 @@
+{
+  "id": "conv-100",
+  "domain": "web-development",
+  "topic": "Next.js App Router migration from Pages Router",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have a large Next.js app still on Pages Router. The App Router migration seems risky. Worth it?"
+    },
+    {
+      "role": "assistant",
+      "content": "App Router (Server Components) is a significant paradigm shift. Worth evaluating carefully:\n\n**Benefits of migrating**:\n- Server Components reduce client JS significantly\n- Streaming SSR for faster TTFB\n- Nested layouts (shared UI across routes)\n- Server Actions (no separate API routes for mutations)\n- Parallel routes, intercepting routes\n- Cache Components (`'use cache'`)\n\n**Risks**:\n- Mental model change (server vs client components)\n- Some libraries don't work in Server Components\n- Caching behavior is different (and confusing)\n- Migration is incremental but tedious\n- Performance can actually regress if done wrong\n\n**Migration strategy**: Incremental. Both routers work simultaneously.\n1. New pages → App Router\n2. Migrate simple pages first (static content, data fetching)\n3. Complex interactive pages last\n4. Keep Pages Router for anything that's working fine"
+    },
+    {
+      "role": "user",
+      "content": "We use getServerSideProps heavily. How does that translate to App Router?"
+    },
+    {
+      "role": "assistant",
+      "content": "Direct translation:\n\n**Pages Router (getServerSideProps)**:\n```typescript\nexport async function getServerSideProps() {\n  const data = await fetchData();\n  return { props: { data } };\n}\nexport default function Page({ data }) {\n  return <div>{data.title}</div>;\n}\n```\n\n**App Router (Server Component)**:\n```typescript\n// app/page.tsx — this IS a server component by default\nexport default async function Page() {\n  const data = await fetchData(); // Direct async in component\n  return <div>{data.title}</div>;\n}\n```\n\nKey differences:\n- No `getServerSideProps` — just `async` the component and `await` data\n- Caching: `fetch()` is cached by default in App Router. Add `{ cache: 'no-store' }` for dynamic data\n- Loading states: Add `loading.tsx` next to `page.tsx` for streaming Suspense boundaries\n- Error handling: `error.tsx` for error boundaries\n\nThe simplification is real — no more separate data fetching functions. But the caching behavior catches people off guard. Read the caching docs carefully."
+    }
+  ]
+}

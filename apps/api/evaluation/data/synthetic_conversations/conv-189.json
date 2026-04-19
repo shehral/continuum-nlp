@@ -1,0 +1,15 @@
+{
+  "id": "conv-189",
+  "domain": "ml",
+  "topic": "Exploring multimodal AI: vision + language",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We want to build a feature where users upload images and ask questions about them. What models and tools do we need?"
+    },
+    {
+      "role": "assistant",
+      "content": "Vision-language models (VLMs) are perfect for this:\n\n**Model options**:\n\n**API-based** (easiest):\n- **GPT-4o** - Best quality, handles complex visual reasoning. $2.50/1M input tokens.\n- **Claude Sonnet** - Strong visual understanding, good at detailed descriptions.\n- **Gemini 2.0** - Multimodal native, competitive quality.\n\n**Self-hosted** (privacy/cost):\n- **LLaVA** (7B-34B) - Open-source VLM, runs on consumer GPUs\n- **InternVL2** - Strong open-source alternative\n- **Qwen-VL** - Good multilingual vision-language\n- **Pixtral** (Mistral) - Efficient vision-language model\n\n**Implementation** (using OpenAI as example):\n```python\nresponse = client.chat.completions.create(\n    model=\"gpt-4o\",\n    messages=[{\n        \"role\": \"user\",\n        \"content\": [\n            {\"type\": \"text\", \"text\": \"What's in this image?\"},\n            {\"type\": \"image_url\", \"image_url\": {\"url\": f\"data:image/jpeg;base64,{base64_image}\"}}\n        ]\n    }]\n)\n```\n\nFor production: GPT-4o or Claude API for quality. Self-host LLaVA 34B on an A100 if you need data privacy or high volume (cost-effective above ~50k images/day)."
+    }
+  ]
+}

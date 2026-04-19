@@ -1,0 +1,23 @@
+{
+  "id": "conv-112",
+  "domain": "data-engineering",
+  "topic": "Polars vs Pandas for data processing",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our pandas ETL scripts are slow. A coworker mentioned Polars. Is it really faster?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, **Polars** is significantly faster than pandas:\n\n**Performance**:\n- 5-50x faster than pandas for most operations\n- Written in Rust, uses Apache Arrow columnar format\n- Multi-threaded by default (pandas is single-threaded)\n- Lazy evaluation — optimizes the query plan before execution\n\n**API differences**:\n```python\n# Pandas\ndf = pd.read_csv(\"data.csv\")\nresult = df[df[\"age\"] > 25].groupby(\"city\")[\"salary\"].mean()\n\n# Polars (eager)\ndf = pl.read_csv(\"data.csv\")\nresult = df.filter(pl.col(\"age\") > 25).group_by(\"city\").agg(pl.col(\"salary\").mean())\n\n# Polars (lazy - even faster)\nresult = (\n    pl.scan_csv(\"data.csv\")\n    .filter(pl.col(\"age\") > 25)\n    .group_by(\"city\")\n    .agg(pl.col(\"salary\").mean())\n    .collect()\n)\n```\n\nThe lazy API is where Polars really shines — it optimizes predicate pushdown, projection pushdown, and parallel execution automatically.\n\nFor ETL: Polars + lazy evaluation can turn a 10-minute pandas job into a 30-second Polars job."
+    },
+    {
+      "role": "user",
+      "content": "Can we migrate incrementally? Some scripts are huge."
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, Polars and pandas interoperate:\n\n```python\nimport polars as pl\nimport pandas as pd\n\n# Pandas → Polars\npandas_df = pd.read_csv(\"data.csv\")\npolars_df = pl.from_pandas(pandas_df)\n\n# Polars → Pandas (when you need pandas-only libraries)\npandas_df = polars_df.to_pandas()\n```\n\n**Migration strategy**:\n1. Profile your slow scripts — find the bottleneck operations\n2. Replace hot paths with Polars first (groupby, joins, aggregations)\n3. Keep pandas for libraries that require it (some viz libraries, scikit-learn)\n4. New scripts: write in Polars from the start\n\n**Libraries that work with Polars natively**:\n- Altair/Plotly for visualization\n- scikit-learn (via `.to_pandas()` or `.to_numpy()`)\n- DuckDB (reads Polars DataFrames directly)\n- Great Expectations\n\n**Gotcha**: Polars has different semantics — no index, null handling differs from NaN, and some operations have different names. It's not a drop-in replacement. But the expression API is more consistent than pandas."
+    }
+  ]
+}

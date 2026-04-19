@@ -1,0 +1,15 @@
+{
+  "id": "conv-109",
+  "domain": "devops",
+  "topic": "Secret management in CI/CD pipelines",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our CI pipeline needs access to secrets (API keys, deploy keys, DB passwords). Currently using GitHub Actions secrets. Is there a better way?"
+    },
+    {
+      "role": "assistant",
+      "content": "GitHub Actions secrets are fine for simple cases. Improvements at each level:\n\n**Level 1: GitHub Actions Secrets** (current)\n- Encrypted at rest, masked in logs\n- Org-level + repo-level + environment-level\n- Limitations: no versioning, no rotation, 100 secrets/repo max\n\n**Level 2: OIDC + Cloud Provider** (recommended upgrade)\n- No stored secrets at all — GitHub Actions authenticates via OIDC\n- Temporary credentials for each workflow run\n```yaml\npermissions:\n  id-token: write\nsteps:\n  - uses: aws-actions/configure-aws-credentials@v4\n    with:\n      role-to-arn: arn:aws:iam::123:role/github-actions\n      aws-region: us-east-1\n```\n- Works with AWS, GCP, Azure, HashiCorp Vault\n- No long-lived credentials to rotate\n\n**Level 3: External Secret Manager**\n- 1Password (via `1password/load-secrets-action`)\n- HashiCorp Vault (via OIDC + `vault` CLI)\n- AWS Secrets Manager (via OIDC + `aws-actions`)\n\nBiggest quick win: **OIDC for cloud providers**. Eliminates AWS/GCP access keys entirely — the most common source of leaked credentials in CI."
+    }
+  ]
+}

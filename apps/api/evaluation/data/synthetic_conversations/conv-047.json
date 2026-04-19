@@ -1,0 +1,15 @@
+{
+  "id": "conv-047",
+  "domain": "web-development",
+  "topic": "pnpm vs yarn vs npm for package management",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're starting a new project. npm, yarn, or pnpm? Does it really matter?"
+    },
+    {
+      "role": "assistant",
+      "content": "It matters more than you'd think, especially for monorepos:\n\n**pnpm** (recommended):\n- Fastest install times (content-addressable storage)\n- Strict dependency resolution (catches phantom deps)\n- Excellent monorepo support (`pnpm-workspace.yaml`)\n- Disk efficient (shared store across projects)\n- Drop-in replacement for npm\n\n**npm** (v10):\n- Default, works everywhere\n- Improved significantly (faster, workspaces)\n- Largest ecosystem compatibility\n- No phantom dependency protection\n\n**Yarn** (Berry/v4):\n- Plug'n'Play (PnP) - no node_modules\n- Zero-installs (commit deps to git)\n- PnP can break some packages\n- Declining market share\n\nFor new projects: **pnpm**. It's faster, stricter, and handles monorepos better. The migration from npm is trivial - just `pnpm import` to convert your lockfile."
+    }
+  ]
+}

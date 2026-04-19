@@ -1,0 +1,23 @@
+{
+  "id": "conv-116",
+  "domain": "systems",
+  "topic": "QUIC vs TCP for real-time game networking",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a multiplayer game server. QUIC or TCP for the networking protocol? Need low latency for real-time game state."
+    },
+    {
+      "role": "assistant",
+      "content": "For real-time game networking, neither TCP nor QUIC alone is ideal:\n\n**TCP**:\n- Reliable, ordered delivery\n- Head-of-line blocking (one lost packet stalls all data)\n- ~1 RTT connection setup (after handshake)\n- Good for: chat, inventory, login\n\n**QUIC**:\n- Multiplexed streams (no head-of-line blocking between streams)\n- 0-RTT connection resumption\n- Built-in encryption (TLS 1.3)\n- UDP-based but reliable per-stream\n- Good for: independent data channels\n\n**UDP (raw)** — What most competitive games actually use:\n- No reliability guarantee (you implement what you need)\n- No head-of-line blocking\n- Lowest possible latency\n- You handle packet loss, ordering, congestion\n\n**For real-time game state updates**: Raw **UDP** with a custom reliability layer. Use libraries like:\n- **ENet** — Reliable UDP with channels (classic, used by many games)\n- **laminar** (Rust) — UDP networking for games\n- **GameNetworkingSockets** (Valve) — Steam's networking library\n\nPattern: UDP for game state (position, input), TCP/QUIC for reliable data (chat, inventory, matchmaking)."
+    },
+    {
+      "role": "user",
+      "content": "We're building in Rust. What crate handles this well?"
+    },
+    {
+      "role": "assistant",
+      "content": "Rust game networking crates:\n\n**1. `quinn`** (QUIC implementation):\n- Most mature QUIC library in Rust\n- Good for games that want QUIC's multiplexing\n- Used by Cloudflare, Deno\n- Slightly higher overhead than raw UDP\n\n**2. `laminar`**:\n- Purpose-built for game networking\n- Virtual connections over UDP\n- Configurable reliability per packet:\n  - Unreliable (fire-and-forget, like raw UDP)\n  - Reliable ordered (like TCP)\n  - Reliable unordered\n  - Sequenced (latest-only, drop older)\n- Simple API:\n```rust\nlet packet = Packet::unreliable(addr, game_state_bytes);\nsocket.send(packet)?;\n```\n\n**3. `renet`** (recommended for games):\n- Higher-level game networking library\n- Client-server architecture\n- Multiple channels with different reliability\n- Connection management, heartbeat, timeout\n- Integrates with Bevy game engine\n\n**4. `bevy_replicon`** (if using Bevy):\n- ECS replication over the network\n- Automatic entity/component sync\n- Server-authoritative by default\n\nFor a Rust game server: **renet** for the networking layer, or **bevy_replicon** if you're using Bevy."
+    }
+  ]
+}

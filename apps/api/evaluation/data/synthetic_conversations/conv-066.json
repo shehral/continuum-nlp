@@ -1,0 +1,23 @@
+{
+  "id": "conv-066",
+  "domain": "ml",
+  "topic": "vLLM vs TGI vs Triton for LLM serving",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to self-host Llama 3.3 70B for our product. What inference server: vLLM, TGI (Text Generation Inference), or NVIDIA Triton?"
+    },
+    {
+      "role": "assistant",
+      "content": "All three are production-grade. Differences:\n\n**vLLM**:\n- PagedAttention — best memory efficiency for batch serving\n- Highest throughput for concurrent users\n- Simple API (OpenAI-compatible)\n- Speculative decoding support\n- Most popular for LLM-specific serving\n\n**TGI** (Hugging Face):\n- Production-tested at Hugging Face scale\n- Flash Attention, quantization (GPTQ, AWQ, GGUF)\n- Streaming support, structured output\n- Docker-first deployment\n- Good for HF model hub integration\n\n**NVIDIA Triton**:\n- General purpose (not LLM-specific)\n- TensorRT-LLM backend for NVIDIA GPUs\n- Multi-model serving, dynamic batching\n- Best for mixed workloads (LLM + CV + embeddings)\n- Most complex to configure\n\nFor serving just Llama 70B: **vLLM**. For multi-model serving on NVIDIA GPUs: **Triton + TensorRT-LLM**."
+    },
+    {
+      "role": "user",
+      "content": "We have 4x A100 80GB. Can vLLM do tensor parallelism across them?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, vLLM supports tensor parallelism out of the box:\n\n```bash\npython -m vllm.entrypoints.openai.api_server \\\n  --model meta-llama/Llama-3.3-70B-Instruct \\\n  --tensor-parallel-size 4 \\\n  --gpu-memory-utilization 0.9 \\\n  --max-model-len 8192\n```\n\n4x A100 80GB = 320GB VRAM total. Llama 70B in FP16 needs ~140GB, so you have headroom for:\n- Larger context windows (up to 128k with proper rope scaling)\n- KV cache for many concurrent users\n- Or run quantized (AWQ/GPTQ) and serve on 2 GPUs, use other 2 for a separate model\n\nExpected throughput with 4x A100: ~2000-4000 tokens/sec for batch inference, depending on batch size and sequence length.\n\nvLLM's OpenAI-compatible API means your application code uses the standard OpenAI SDK — just point it at your vLLM server URL."
+    }
+  ]
+}

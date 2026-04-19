@@ -1,0 +1,15 @@
+{
+  "id": "conv-184",
+  "domain": "systems",
+  "topic": "Debugging production Rust panics",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our Rust service panics in production occasionally but the backtraces are unhelpful (optimized away). How do we get better debugging info?"
+    },
+    {
+      "role": "assistant",
+      "content": "Improving Rust production debugging:\n\n**1. Keep debug info in release builds**:\n```toml\n# Cargo.toml\n[profile.release]\ndebug = 1          # Line tables only (minimal size increase)\npanic = \"abort\"     # Or \"unwind\" if you need backtraces\n```\n`debug = 1` adds ~10-20% to binary size but gives line numbers in backtraces.\n\n**2. Install a panic hook**:\n```rust\nuse std::panic;\n\nfn main() {\n    panic::set_hook(Box::new(|info| {\n        let backtrace = std::backtrace::Backtrace::force_capture();\n        eprintln!(\"PANIC: {info}\\n{backtrace}\");\n        // Send to error tracking (Sentry, etc.)\n    }));\n}\n```\n\n**3. Use `color-eyre` or `anyhow` for better error reporting**:\n```rust\nuse color_eyre::eyre::Result;\ncolor_eyre::install()?;  // Installs panic + error hooks\n```\nGives colorized backtraces with source context.\n\n**4. Sentry integration**:\n```rust\nlet _guard = sentry::init(\"https://key@sentry.io/project\");\n```\nCaptures panics and errors with full context.\n\n**5. Core dumps** (for post-mortem analysis):\n```bash\nulimit -c unlimited  # Enable core dumps\ncoredumpctl debug     # Analyze with GDB/LLDB\n```\n\n**6. `RUST_BACKTRACE=1`** environment variable enables backtraces at runtime (even without `debug = 1`, though less useful)."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-120",
+  "domain": "mobile",
+  "topic": "Biometric authentication on mobile",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to add Face ID / fingerprint login to our React Native app. How do we implement biometric auth securely?"
+    },
+    {
+      "role": "assistant",
+      "content": "Biometric auth in React Native:\n\n**Library**: `react-native-biometrics` or `expo-local-authentication`\n\n**Two approaches**:\n\n**1. Simple biometric gate** (unlock app with biometrics):\n```typescript\nimport * as LocalAuthentication from 'expo-local-authentication';\n\nconst result = await LocalAuthentication.authenticateAsync({\n  promptMessage: 'Authenticate to continue',\n  fallbackLabel: 'Use passcode',\n});\nif (result.success) {\n  // Unlock the app, retrieve stored credentials\n}\n```\n\n**2. Cryptographic biometric auth** (more secure):\n- Generate a key pair in the device's secure enclave\n- Private key requires biometric to access\n- Sign a challenge from your server with the private key\n- Server verifies signature with public key\n\nApproach 2 is more secure because the biometric check happens at the hardware level, not just in your app code.\n\n**Storage**: Use `react-native-keychain` or `expo-secure-store` to store credentials in the device's secure enclave (Keychain on iOS, Keystore on Android)."
+    },
+    {
+      "role": "user",
+      "content": "We want the cryptographic approach. How does it work with our JWT auth backend?"
+    },
+    {
+      "role": "assistant",
+      "content": "Cryptographic biometric auth + JWT flow:\n\n**Registration** (one-time):\n1. User logs in normally (email/password → JWT)\n2. App generates RSA key pair in secure enclave:\n```typescript\nimport ReactNativeBiometrics from 'react-native-biometrics';\nconst { publicKey } = await rnBiometrics.createKeys();\n```\n3. Send `publicKey` to backend, associate with user account\n4. Backend stores: `{user_id, public_key, device_id}`\n\n**Biometric login** (subsequent):\n1. App requests a challenge from backend: `GET /auth/biometric/challenge → {nonce: \"abc123\"}`\n2. User authenticates with biometrics, signing the nonce:\n```typescript\nconst { signature } = await rnBiometrics.createSignature({\n  promptMessage: 'Sign in',\n  payload: nonce,\n});\n```\n3. Send `{nonce, signature, device_id}` to backend\n4. Backend verifies signature with stored public key\n5. Backend issues JWT (same as normal login)\n\n**Security properties**:\n- Private key never leaves secure enclave\n- Biometric required to sign (hardware-enforced)\n- Nonce prevents replay attacks\n- Compromise of server DB doesn't expose biometric data\n- Revoking: delete the public key from server\n\nThis is the same approach Apple Pay and banking apps use."
+    }
+  ]
+}

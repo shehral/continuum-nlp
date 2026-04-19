@@ -1,0 +1,15 @@
+{
+  "id": "conv-046",
+  "domain": "security",
+  "topic": "mTLS vs API keys for service auth",
+  "messages": [
+    {
+      "role": "user",
+      "content": "How should our microservices authenticate with each other? Currently using shared API keys but that feels insecure."
+    },
+    {
+      "role": "assistant",
+      "content": "API keys are the weakest option for service-to-service. Better approaches:\n\n**mTLS (Mutual TLS)**:\n- Both sides present certificates\n- Strongest security (cryptographic identity)\n- No secrets to rotate (cert-based)\n- Built into service meshes (Istio, Linkerd)\n- Complex certificate management\n\n**JWT/OAuth2 (machine-to-machine)**:\n- Service gets tokens from auth server (client_credentials grant)\n- Tokens have claims, scopes, expiry\n- Central auth server manages access\n- Easier than mTLS to implement\n\n**SPIFFE/SPIRE**:\n- Identity framework for microservices\n- Issues short-lived certificates automatically\n- Works with both mTLS and JWT\n- CNCF project, growing adoption\n\nFor most teams: **JWT with machine-to-machine auth** (Auth0 or Keycloak). For high-security environments: **mTLS via service mesh**."
+    }
+  ]
+}

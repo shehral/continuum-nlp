@@ -1,0 +1,23 @@
+{
+  "id": "conv-019",
+  "domain": "mobile",
+  "topic": "Expo vs bare React Native workflow",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Already have a react native app using bare workflow. Should we migrate to expo? Or is it too late?"
+    },
+    {
+      "role": "assistant",
+      "content": "It's not too late - Expo has a migration path for bare RN apps:\n\n**Why migrate**:\n- EAS Build/Submit (CI/CD for mobile)\n- OTA updates without app store review\n- Expo Modules API (cleaner native module integration)\n- expo-router for file-based navigation\n- Better DX overall\n\n**Migration approach**:\n1. Install `expo` package: `npx install-expo-modules`\n2. Gradually adopt Expo packages (replace react-native-camera with expo-camera, etc.)\n3. Move to EAS Build when ready\n\nYou don't need to rewrite - it's incremental. Many teams run hybrid: Expo SDK packages + their own native modules."
+    },
+    {
+      "role": "user",
+      "content": "We use react-native-firebase heavily. Compatible with Expo?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, `react-native-firebase` (rnfirebase) works with Expo since Expo SDK 50+ with custom dev clients. The key is using **EAS Build** (not Expo Go) since Firebase requires native modules.\n\nSetup:\n1. `npx expo install @react-native-firebase/app`\n2. Add config plugins in `app.json`\n3. Build with `eas build` (not `expo start`)\n\nAll Firebase services work: Auth, Firestore, Cloud Messaging (FCM), Analytics, Crashlytics, Remote Config.\n\nThe only gotcha: you can't use Expo Go for development anymore since Firebase needs native code. Use `npx expo run:ios` or `npx expo run:android` for local development, or EAS development builds."
+    }
+  ]
+}

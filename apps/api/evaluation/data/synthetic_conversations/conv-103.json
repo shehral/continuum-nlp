@@ -1,0 +1,23 @@
+{
+  "id": "conv-103",
+  "domain": "web-development",
+  "topic": "Auth.js (NextAuth) vs Clerk vs Lucia for auth",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need auth for our Next.js app. Auth.js (next-auth), Clerk, or Lucia? Need OAuth (Google, GitHub) + email/password."
+    },
+    {
+      "role": "assistant",
+      "content": "Three different approaches:\n\n**Auth.js v5 (NextAuth)**:\n- Free, open-source, self-hosted\n- OAuth providers, credentials, magic links\n- JWT or database sessions\n- You own the data\n- More setup work, occasional rough edges\n- Works with any database (via adapters)\n\n**Clerk**:\n- Managed auth service (hosted UI, user management)\n- Beautiful pre-built components (<SignIn/>, <UserButton/>)\n- 10k MAU free, $0.02/MAU after\n- OAuth, email/password, passkeys, MFA\n- No backend auth code to write\n- Vendor lock-in\n\n**Lucia**:\n- Lightweight auth library (not a service)\n- Full control, minimal abstraction\n- You implement everything but get helpers\n- Great for learning, custom auth flows\n- Smaller community\n\nFor shipping fast: **Clerk** (zero auth code, pre-built UI).\nFor full control + free: **Auth.js v5** (most popular, good ecosystem).\nFor custom auth flows: **Lucia** (maximum flexibility)."
+    },
+    {
+      "role": "user",
+      "content": "We want to own our data and not pay per user. Auth.js it is. Any gotchas?"
+    },
+    {
+      "role": "assistant",
+      "content": "Auth.js v5 gotchas to be aware of:\n\n1. **Session strategy**: Choose JWT (stateless) or Database (server-side) upfront. JWT is simpler but harder to revoke.\n\n2. **Middleware edge runtime**: Auth.js middleware runs in the Edge Runtime. Some database adapters don't work there. Use JWT strategy for middleware.\n\n3. **NEXTAUTH_SECRET**: Must match any backend services that verify tokens. If your API is separate (FastAPI, Express), share the secret.\n\n4. **Credential provider security**: Auth.js doesn't provide email verification or password reset flows out of the box. You need to build those.\n\n5. **Session callback**: To add custom data (role, org) to the session:\n```typescript\ncallbacks: {\n  session({ session, token }) {\n    session.user.role = token.role;\n    return session;\n  },\n  jwt({ token, user }) {\n    if (user) token.role = user.role;\n    return token;\n  },\n}\n```\n\n6. **TypeScript types**: Extend types for custom session fields:\n```typescript\ndeclare module \"next-auth\" {\n  interface Session { user: { role: string } & DefaultSession[\"user\"] }\n}\n```\n\nDespite the gotchas, Auth.js is solid for production. The docs have improved significantly in v5."
+    }
+  ]
+}

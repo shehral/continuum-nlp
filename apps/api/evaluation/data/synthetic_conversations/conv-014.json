@@ -1,0 +1,23 @@
+{
+  "id": "conv-014",
+  "domain": "security",
+  "topic": "JWT vs session-based auth",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Implementing auth for our API. JWT tokens or session-based? API serves both a web frontend and mobile app."
+    },
+    {
+      "role": "assistant",
+      "content": "For an API serving both web and mobile:\n\n**JWT (JSON Web Tokens)**:\n- Stateless: no server-side session storage needed\n- Works naturally with mobile (stored in keychain/keystore)\n- Can include claims (user role, permissions)\n- Harder to revoke (need a blocklist or short expiry)\n\n**Session-based**:\n- Server stores session data (usually Redis)\n- Easy to revoke (delete the session)\n- Better for web (httpOnly cookies)\n- Requires sticky sessions or shared session store\n\nCommon pattern: **JWT for mobile, session cookies for web**, both backed by the same auth service."
+    },
+    {
+      "role": "user",
+      "content": "We're using nextauth (Auth.js v5) for the web side. Does that change things?"
+    },
+    {
+      "role": "assistant",
+      "content": "Auth.js v5 supports both JWT and database sessions. For your setup:\n\n**Recommended**: Use Auth.js with JWT strategy for both web and mobile:\n- Web: Auth.js stores JWT in an httpOnly cookie automatically\n- Mobile: Your API issues JWTs that the mobile app stores in secure storage\n- Backend: Verify the JWT signature on every request (stateless, fast)\n\nKey settings in Auth.js:\n```js\nsession: { strategy: 'jwt' },\njwt: { maxAge: 30 * 24 * 60 * 60 } // 30 days\n```\n\nFor the SECRET_KEY: make sure `NEXTAUTH_SECRET` on the frontend matches `SECRET_KEY` on your backend so JWT verification works cross-service.\n\nAdd refresh token rotation for mobile (access token: 15 min, refresh token: 30 days)."
+    }
+  ]
+}

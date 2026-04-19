@@ -1,0 +1,23 @@
+{
+  "id": "conv-008",
+  "domain": "ml",
+  "topic": "Choosing a vector database",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a vector DB for our semantic search feature. Looking at pinecone, weaviate, and qdrant. We have about 2M documents to embed."
+    },
+    {
+      "role": "assistant",
+      "content": "For 2M documents, all three can handle it. Key differences:\n\n**Pinecone**:\n- Fully managed, zero ops\n- Fast and reliable\n- Expensive at scale ($70+/month for 2M vectors)\n- No self-hosted option\n\n**Weaviate**:\n- Open-source, can self-host\n- Built-in vectorization (integrates with OpenAI, Cohere, HuggingFace)\n- GraphQL API\n- Hybrid search (vector + BM25) built-in\n\n**Qdrant**:\n- Open-source, Rust-based (very fast)\n- Simple REST/gRPC API\n- Filtering during search (not post-search)\n- Lowest memory footprint\n\nWhat's your infrastructure preference - managed or self-hosted?"
+    },
+    {
+      "role": "user",
+      "content": "self-hosted ideally, we're cost-conscious. Running on AWS. Also need to support filtering - like search within a specific user's documents only."
+    },
+    {
+      "role": "assistant",
+      "content": "For self-hosted with filtering, **Qdrant** is the best fit:\n\n- Rust-based = low memory footprint for 2M vectors\n- Payload filtering happens *during* search (not after), so filtered queries are fast\n- Docker deployment is trivial: `docker run -p 6333:6333 qdrant/qdrant`\n- Supports HNSW indexes with quantization for memory reduction\n- User-scoped search: add `user_id` as a payload field, filter at query time\n\nFor 2M vectors at 768 dimensions with quantization, you're looking at ~3-4GB RAM. Very manageable on a t3.medium.\n\nAlternative worth considering: **pgvector** if you're already on PostgreSQL. Not as fast as Qdrant for pure vector search, but eliminates a separate service."
+    }
+  ]
+}

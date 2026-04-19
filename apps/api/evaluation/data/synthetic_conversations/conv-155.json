@@ -1,0 +1,15 @@
+{
+  "id": "conv-155",
+  "domain": "mobile",
+  "topic": "KMM shared logic with Swift and Kotlin UI",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Using Kotlin Multiplatform Mobile (KMM) to share business logic. But our iOS devs find KMM generated code hard to use from Swift. Tips?"
+    },
+    {
+      "role": "assistant",
+      "content": "Common pain points and solutions:\n\n**1. Kotlin sealed classes appear as multiple types in Swift**:\n- Use SKIE (Swift-Kotlin Interface Enhancer by Touchlab)\n- Generates proper Swift enums from Kotlin sealed classes\n- Also handles Kotlin coroutines -> Swift async/await\n\n**2. Coroutines/Flows don't map to Swift async**:\n- Without SKIE: Use `KMP-NativeCoroutines` library to bridge\n- With SKIE: Automatic bridging to Swift async/await and AsyncSequence\n\n**3. Generics limitations**:\n- Kotlin generics don't fully translate to Obj-C/Swift\n- Workaround: Use concrete types in public API, generics internally\n\n**4. Module naming**:\n- Shared module appears as `shared` in Swift\n- Configure with `baseName` in Gradle for better naming\n\nThe biggest QoL improvement: install **SKIE**. It transforms the Swift interop from painful to pleasant. Kotlin coroutines become Swift async, sealed classes become enums, and generics work properly."
+    }
+  ]
+}

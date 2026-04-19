@@ -1,0 +1,23 @@
+{
+  "id": "conv-050",
+  "domain": "backend",
+  "topic": "Supabase vs Firebase for BaaS",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a new project and want to move fast. Firebase or Supabase? Building a social app with real-time features."
+    },
+    {
+      "role": "assistant",
+      "content": "Both are great for rapid development. Key differences:\n\n**Supabase**:\n- PostgreSQL underneath (real relational DB)\n- Open-source (can self-host)\n- Row-level security for fine-grained auth\n- Real-time subscriptions via Postgres changes\n- Edge Functions (Deno)\n- SQL is your query language\n\n**Firebase**:\n- Firestore (NoSQL document DB)\n- Google-backed, mature ecosystem\n- Excellent real-time sync\n- Cloud Functions (Node.js)\n- Better for offline-first mobile apps\n- NoSQL can get messy for relational data\n\nFor a social app (users, posts, comments, likes, follows): **Supabase**. Social graphs are inherently relational - modeling follows and feeds in Firestore is painful. PostgreSQL handles this naturally."
+    },
+    {
+      "role": "user",
+      "content": "We want to use React Native for the mobile app. Supabase has good RN support?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, Supabase has official React Native support:\n\n```bash\nnpm install @supabase/supabase-js\n```\n\n```typescript\nimport { createClient } from '@supabase/supabase-js'\nconst supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)\n\n// Auth\nconst { data } = await supabase.auth.signInWithOAuth({ provider: 'google' })\n\n// Real-time\nsupabase.channel('posts').on('postgres_changes',\n  { event: 'INSERT', schema: 'public', table: 'posts' },\n  (payload) => console.log('New post:', payload)\n).subscribe()\n\n// Queries\nconst { data: posts } = await supabase\n  .from('posts')\n  .select('*, author:users(name, avatar), comments(count)')\n  .order('created_at', { ascending: false })\n```\n\nSupabase also works great with Expo. For auth, use `@supabase/auth-helpers` with deep linking for OAuth flows on mobile.\n\nThe real-time subscription system works well for social features like live comment updates and notification badges."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-097",
+  "domain": "ml",
+  "topic": "Guardrails for LLM outputs",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're deploying an LLM-powered chatbot for customer support. Need guardrails to prevent it from saying harmful things or hallucinating. What tools exist?"
+    },
+    {
+      "role": "assistant",
+      "content": "Several guardrail frameworks have emerged:\n\n**NeMo Guardrails** (NVIDIA):\n- Colang language for defining conversational rails\n- Topic control (keep bot on-topic)\n- Hallucination detection\n- Jailbreak prevention\n- Works with any LLM\n\n**Guardrails AI**:\n- Python framework for validating LLM output structure\n- RAIL spec for defining output schemas\n- Validators: no profanity, no PII, factual consistency\n- Auto-retry on validation failure\n\n**LlamaGuard** (Meta):\n- Safety classifier (is this response safe?)\n- Input AND output filtering\n- Runs as a separate model\n- Customizable safety categories\n\n**Rebuff**:\n- Prompt injection detection specifically\n- Multi-layer defense (heuristics + LLM-based + canary tokens)\n\nFor customer support: **NeMo Guardrails** for conversation control + **LlamaGuard** for safety classification. Belt and suspenders."
+    },
+    {
+      "role": "user",
+      "content": "Can NeMo Guardrails work with our existing FastAPI backend?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, NeMo Guardrails integrates as a Python library:\n\n```python\nfrom nemoguardrails import RailsConfig, LLMRails\n\nconfig = RailsConfig.from_path(\"config/\")\nrails = LLMRails(config)\n\n# In your FastAPI endpoint\n@app.post(\"/chat\")\nasync def chat(message: str):\n    response = await rails.generate_async(\n        messages=[{\"role\": \"user\", \"content\": message}]\n    )\n    return response\n```\n\nConfig files define rails:\n```colang\ndefine user ask about competitors\n    \"What about [competitor]?\"\n    \"Is [competitor] better?\"\n\ndefine bot refuse competitor discussion\n    \"I can only help with our products. Let me assist you with that instead.\"\n\ndefine flow competitor deflection\n    user ask about competitors\n    bot refuse competitor discussion\n```\n\nYou can define rails for:\n- Topic boundaries (only discuss your product)\n- PII prevention (don't ask for or repeat SSN, credit cards)\n- Hallucination checks (verify against your knowledge base)\n- Toxicity filtering\n\nThe overhead is ~100-200ms per request (runs a small classification model internally)."
+    }
+  ]
+}

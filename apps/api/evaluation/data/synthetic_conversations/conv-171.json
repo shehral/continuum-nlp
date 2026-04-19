@@ -1,0 +1,15 @@
+{
+  "id": "conv-171",
+  "domain": "ml",
+  "topic": "Synthetic data generation for ML training",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We don't have enough training data for our classification model. Can we use synthetic data? How?"
+    },
+    {
+      "role": "assistant",
+      "content": "Synthetic data can significantly boost model performance when real data is scarce:\n\n**Approaches**:\n\n**1. LLM-generated text data**:\n- Use GPT-4/Claude to generate training examples\n- Prompt: \"Generate 50 examples of customer complaints about shipping delays, varying tone and specificity\"\n- Works well for text classification, NER, sentiment\n- Quality: 70-90% as good as human-written data\n\n**2. Data augmentation** (transform existing data):\n- NLP: synonym replacement, back-translation, random insertion/deletion\n- CV: rotation, flipping, color jitter, cutout, mixup\n- Libraries: `nlpaug`, `albumentations`, `AugLy` (Meta)\n\n**3. SMOTE and variants** (for tabular data):\n- Synthetic Minority Over-sampling Technique\n- Creates new samples by interpolating between existing minority class samples\n- `imblearn` library in Python\n\n**4. GANs / Diffusion Models** (for images):\n- Generate photorealistic training images\n- Expensive to train but powerful\n- Stable Diffusion for domain-specific image generation\n\nFor text classification with limited data: **LLM-generated examples** + **data augmentation** on real examples. This combo can turn 100 real examples into a 5000-example training set with good diversity."
+    }
+  ]
+}

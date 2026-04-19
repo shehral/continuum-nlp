@@ -1,0 +1,15 @@
+{
+  "id": "conv-045",
+  "domain": "mobile",
+  "topic": "Realm vs SQLite for local mobile storage",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need local storage in our react native app. Realm or SQLite? Storing user data that syncs with backend."
+    },
+    {
+      "role": "assistant",
+      "content": "Key distinction:\n\n**Realm** (now part of MongoDB Atlas Device Sync):\n- Object database (not relational)\n- Built-in sync with MongoDB Atlas\n- Reactive queries (live objects, auto-update UI)\n- MongoDB acquired it, future uncertain with Atlas focus\n- Heavier SDK\n\n**SQLite** (via `expo-sqlite` or `react-native-sqlite-storage`):\n- Relational, standard SQL\n- No built-in sync (you implement it)\n- Lightweight and universal\n- Better tooling (DB browsers, query tools)\n- More control\n\n**WatermelonDB** (SQLite-based, worth considering):\n- Built for React Native specifically\n- Lazy loading, background sync\n- Handles sync logic for you\n- SQLite under the hood\n\nSince you need sync: **WatermelonDB** gives you SQLite's reliability with built-in sync patterns."
+    }
+  ]
+}

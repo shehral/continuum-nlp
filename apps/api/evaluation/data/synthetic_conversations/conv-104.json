@@ -1,0 +1,23 @@
+{
+  "id": "conv-104",
+  "domain": "backend",
+  "topic": "PostgREST vs Hasura vs Supabase for instant API",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Have a postgressql database and need a REST API quickly. PostgREST, Hasura, or Supabase? Don't want to write CRUD endpoints by hand."
+    },
+    {
+      "role": "assistant",
+      "content": "All three generate APIs from your Postgres schema:\n\n**PostgREST**:\n- Pure REST API from Postgres tables/views\n- Single binary, no dependencies\n- JWT auth + Row Level Security\n- No GraphQL, no real-time\n- Lightest weight option\n\n**Hasura**:\n- Instant GraphQL + REST from Postgres\n- Subscriptions (real-time via WebSocket)\n- Remote schemas (federate multiple data sources)\n- Actions (custom business logic)\n- Free self-hosted, paid cloud\n\n**Supabase**:\n- PostgREST under the hood + auth + storage + real-time + edge functions\n- Full BaaS (Backend-as-a-Service)\n- JS/Python client libraries\n- Dashboard for DB management\n- More than just an API layer\n\nFor just a REST API: **PostgREST** (simplest, fastest).\nFor GraphQL + real-time: **Hasura**.\nFor full backend: **Supabase** (batteries included)."
+    },
+    {
+      "role": "user",
+      "content": "We just need REST endpoints for a mobile app. PostgREST looks perfect. How do we secure it?"
+    },
+    {
+      "role": "assistant",
+      "content": "PostgREST security relies heavily on Postgres's built-in features:\n\n**1. JWT Authentication**:\n```bash\n# PostgREST config\ndb-uri = \"postgres://authenticator:pass@localhost/mydb\"\njwt-secret = \"your-256-bit-secret\"\ndb-anon-role = \"anon\"\n```\n\nClients send JWT in `Authorization: Bearer <token>` header. PostgREST sets `request.jwt.claims` in Postgres.\n\n**2. Row Level Security (RLS)**:\n```sql\nALTER TABLE todos ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY \"Users see own todos\" ON todos\n  FOR SELECT USING (user_id = current_setting('request.jwt.claims')::json->>'sub');\n\nCREATE POLICY \"Users insert own todos\" ON todos\n  FOR INSERT WITH CHECK (user_id = current_setting('request.jwt.claims')::json->>'sub');\n```\n\n**3. Roles**:\n- `anon` role: unauthenticated access (read-only public data)\n- `authenticated` role: logged-in users (RLS filters per user)\n- DB functions for complex logic\n\n**4. Input validation**:\n- Postgres CHECK constraints and triggers\n- Views with `INSTEAD OF` triggers for complex validation\n\nPostgREST delegates ALL security to Postgres. This is actually a strength — Postgres RLS is battle-tested and centralized. No security logic scattered across API handlers."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-131",
+  "domain": "backend",
+  "topic": "Database migration strategies for zero-downtime",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We need to do a breaking schema change (rename a column) without downtime. How?"
+    },
+    {
+      "role": "assistant",
+      "content": "Zero-downtime schema migrations follow the **expand-contract** pattern:\n\n**Step 1: Expand** - Add new column, backfill, add trigger to sync\n**Step 2: Migrate code** - App reads from new column, writes to both\n**Step 3: Contract** - Remove old column and trigger\n\nEach step is a separate deployment. At no point is the running application broken."
+    },
+    {
+      "role": "user",
+      "content": "That's 3 PRs for one column rename. Isn't there a tool to automate this?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, several tools help:\n\n**1. `reshape`** (Rust, for Postgres) - Automates expand-contract migrations using temporary views\n**2. `pgroll`** (Xata, for Postgres) - Similar, uses views for zero-downtime\n**3. `gh-ost`** (GitHub, for MySQL) - Creates shadow table, syncs via binlog\n**4. `pg-osc`** (for Postgres) - Online schema change inspired by gh-ost\n\n**Framework-level**:\n- Django: `django-pg-zero-downtime-migrations`\n- Rails: `strong_migrations` gem\n- SQLAlchemy/Alembic: No built-in support - use reshape or manual expand-contract\n\nFor your setup: **pgroll** or **reshape** automates the expand-contract pattern."
+    }
+  ]
+}

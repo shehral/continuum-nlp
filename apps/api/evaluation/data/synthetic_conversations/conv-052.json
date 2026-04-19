@@ -1,0 +1,31 @@
+{
+  "id": "conv-052",
+  "domain": "web-development",
+  "topic": "SolidJS vs React for performance-critical dashboard",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a real-time trading dashboard that updates hundreds of elements per second. React re-renders are killing us. Looked at SolidJS — is it production-ready?"
+    },
+    {
+      "role": "assistant",
+      "content": "SolidJS is absolutely production-ready and purpose-built for your use case:\n\n- **Fine-grained reactivity** — updates only the exact DOM node that changed, no virtual DOM diffing\n- **No re-renders** — components run once, signals update individual bindings\n- **1.5KB runtime** — fraction of React's size\n- **JSX syntax** — looks like React, so your team can transition quickly\n\nFor a trading dashboard with hundreds of updates/sec, Solid's signal-based reactivity means updating a price cell touches *only* that text node. React would re-render the component tree and diff the vDOM."
+    },
+    {
+      "role": "user",
+      "content": "What about the ecosystem? We use a lot of React libraries — recharts, tanstack table, etc."
+    },
+    {
+      "role": "assistant",
+      "content": "Ecosystem is Solid's biggest gap:\n\n- **Charts**: Use `solid-chartjs` or `uPlot` (framework-agnostic, blazing fast for real-time). No recharts equivalent.\n- **Tables**: `@tanstack/solid-table` exists — TanStack is framework-agnostic.\n- **UI components**: `Kobalte` (like Radix for Solid), `solid-ui` (like shadcn)\n- **Routing**: `@solidjs/router` is mature\n- **State**: Built-in signals + stores, no external library needed\n\nFor a trading dashboard, `uPlot` is actually better than recharts anyway — it handles 100k+ data points without breaking a sweat. The ecosystem gap matters less for specialized apps."
+    },
+    {
+      "role": "user",
+      "content": "Interesting. Can we incrementally adopt it or is it all-or-nothing?"
+    },
+    {
+      "role": "assistant",
+      "content": "Unfortunately it's mostly all-or-nothing. Solid and React aren't interoperable — you can't use React components inside Solid or vice versa (different rendering models).\n\nOptions:\n1. **Full rewrite** in Solid (risky for production trading app)\n2. **Micro-frontend** approach — Solid for the real-time dashboard module, React for everything else, loaded in iframes or web components\n3. **Optimize React first** — React Compiler (React 19+) auto-memoizes, `useSyncExternalStore` for external data, virtualized lists with TanStack Virtual\n\nHonestly, I'd try option 3 first. React Compiler + proper virtualization + `memo` on the right components might solve your perf issues without a rewrite."
+    }
+  ]
+}

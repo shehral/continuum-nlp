@@ -1,0 +1,23 @@
+{
+  "id": "conv-068",
+  "domain": "ml",
+  "topic": "MLflow vs DVC for model versioning",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need to version our ML models and datasets. MLflow Model Registry or DVC? Team of 6 ML engineers."
+    },
+    {
+      "role": "assistant",
+      "content": "They solve overlapping but different problems:\n\n**MLflow Model Registry**:\n- Model versioning with staging → production lifecycle\n- Experiment tracking (metrics, params, artifacts)\n- Model serving (MLflow Serve, SageMaker, Databricks)\n- Centralized server (self-hosted or Databricks)\n- Less opinionated about data versioning\n\n**DVC (Data Version Control)**:\n- Git-like versioning for datasets AND models\n- Stores data in S3/GCS/Azure, tracks pointers in git\n- Pipeline DAGs (dvc.yaml) for reproducible training\n- No server needed (uses git + remote storage)\n- Better for data versioning specifically\n\n**Recommendation**: Use BOTH.\n- **DVC** for dataset versioning and reproducible pipelines\n- **MLflow** for experiment tracking and model registry\n\nThey complement each other. DVC manages the data → MLflow tracks experiments → MLflow Registry manages model promotion."
+    },
+    {
+      "role": "user",
+      "content": "That's two tools to maintain. Is there a single tool that does everything?"
+    },
+    {
+      "role": "assistant",
+      "content": "A few all-in-one options:\n\n1. **Weights & Biases (W&B)** — Experiment tracking + artifact versioning + model registry + dataset visualization. The closest to \"one tool for everything.\" $50/user/month.\n\n2. **ClearML** — Open-source, self-hosted. Experiment tracking, data management, pipeline orchestration, model serving. Free.\n\n3. **Neptune.ai** — Experiment tracking + model registry. Good UI. $49/user/month.\n\n4. **Databricks Unity Catalog** — If you're on Databricks, it unifies data, model, and feature versioning.\n\nFor a team of 6 on a budget: **ClearML** (self-hosted, free, covers 80% of what you need).\nFor best UX and willing to pay: **W&B** (the industry standard for ML teams)."
+    }
+  ]
+}

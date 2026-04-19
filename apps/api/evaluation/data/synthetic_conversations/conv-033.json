@@ -1,0 +1,15 @@
+{
+  "id": "conv-033",
+  "domain": "security",
+  "topic": "Argon2 vs bcrypt for password hashing",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Implementing password hashing. bcrypt or argon2? Our backend is Python (FastAPI)."
+    },
+    {
+      "role": "assistant",
+      "content": "**Argon2** (specifically Argon2id) is the modern recommendation:\n\n**Argon2id**:\n- Winner of the Password Hashing Competition (2015)\n- Memory-hard (resistant to GPU/ASIC attacks)\n- Configurable memory, time, and parallelism\n- OWASP recommended as first choice\n- `argon2-cffi` package for Python\n\n**bcrypt**:\n- Battle-tested (20+ years)\n- Not memory-hard (GPU attacks more feasible)\n- 72-byte password limit\n- `bcrypt` package for Python\n\nFor a new project: **Argon2id**. bcrypt is fine if you already use it - no need to migrate. But for new code, Argon2id is strictly better.\n\n```python\nfrom argon2 import PasswordHasher\nph = PasswordHasher()\nhash = ph.hash(\"password123\")\nassert ph.verify(hash, \"password123\")\n```"
+    }
+  ]
+}

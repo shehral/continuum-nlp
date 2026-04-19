@@ -1,0 +1,23 @@
+{
+  "id": "conv-076",
+  "domain": "data-engineering",
+  "topic": "Apache Iceberg vs Delta Lake for data lakehouse",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a data lakehouse on S3. Apache Iceberg or Delta Lake? We use Spark for processing."
+    },
+    {
+      "role": "assistant",
+      "content": "Both are open table formats for lakehouses. Key differences:\n\n**Apache Iceberg**:\n- Engine-agnostic (Spark, Flink, Trino, DuckDB, Snowflake, BigQuery)\n- Partition evolution (change partitioning without rewriting data)\n- Hidden partitioning (users write queries, engine handles partitioning)\n- Schema evolution with full type promotion\n- Growing fastest, most cloud vendor support\n\n**Delta Lake**:\n- Databricks-created, tightly integrated with Spark\n- ACID transactions, time travel, Z-ordering\n- Delta Sharing for cross-org data sharing\n- Liquid clustering (replaces traditional partitioning)\n- Best experience on Databricks\n\nIf you use Databricks: **Delta Lake** (native integration).\nIf multi-engine or not on Databricks: **Apache Iceberg** (engine-agnostic, wider support)."
+    },
+    {
+      "role": "user",
+      "content": "We're on AWS EMR, not Databricks. Iceberg then?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, **Iceberg on AWS** is the recommended path:\n\n- **EMR** has native Iceberg support (spark.sql.catalog)\n- **Athena** queries Iceberg tables directly (serverless SQL)\n- **Glue** catalog serves as the Iceberg metastore\n- **Redshift Spectrum** can read Iceberg tables\n\nSetup with Spark on EMR:\n```python\nspark.sql(\"\"\"CREATE TABLE catalog.db.events (\n    event_id BIGINT,\n    user_id BIGINT,\n    event_type STRING,\n    ts TIMESTAMP\n) USING iceberg\nPARTITIONED BY (days(ts))\nLOCATION 's3://my-lake/events'\n\"\"\")\n```\n\nIceberg's killer feature for lakehouses: **partition evolution**. Start with daily partitioning, switch to hourly later without rewriting any data. Delta Lake requires a full rewrite for partition changes.\n\nAWS is betting heavily on Iceberg — it's the default table format across their analytics services now."
+    }
+  ]
+}

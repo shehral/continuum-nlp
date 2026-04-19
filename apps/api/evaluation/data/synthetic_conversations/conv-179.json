@@ -1,0 +1,15 @@
+{
+  "id": "conv-179",
+  "domain": "backend",
+  "topic": "Webhook delivery reliability",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We need to send webhooks to our customers. How do we make delivery reliable? Retries, ordering, exactly-once?"
+    },
+    {
+      "role": "assistant",
+      "content": "Reliable webhook delivery is harder than it looks:\n\n**Core requirements**:\n1. **At-least-once delivery**: Retry on failure\n2. **Signature verification**: Customers verify webhooks are from you\n3. **Ordering**: Events should arrive in order (or customers handle reordering)\n4. **Observability**: Customers can see delivery status and replay failed webhooks\n\n**Build or buy?**\n\n**Buy** (recommended for most teams):\n- **Svix** - Open-source webhook delivery service. Retries, signatures, dashboard, SDKs. Self-host or managed.\n- **Hookdeck** - Managed webhook infrastructure. Retries, queuing, debugging.\n\n**Build** (if you must):\n```\nEvent → Queue (SQS/Redis) → Webhook Worker → HTTP POST to customer\n                                    ↓ (failure)\n                              Retry with exponential backoff\n                                    ↓ (max retries)\n                              Dead letter queue → Alert\n```\n\n**Key implementation details**:\n- Sign payloads with HMAC-SHA256 (include timestamp to prevent replay)\n- Retry schedule: 30s, 5m, 30m, 2h, 12h (5 retries over 14.5 hours)\n- Idempotency key in each webhook so customers can deduplicate\n- 5-second timeout on delivery attempts\n- Disable webhooks after N consecutive failures (re-enable manually)\n\nFor most teams: use **Svix** (self-hosted is free). Webhook delivery is a solved problem."
+    }
+  ]
+}

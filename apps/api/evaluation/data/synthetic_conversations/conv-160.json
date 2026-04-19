@@ -1,0 +1,15 @@
+{
+  "id": "conv-160",
+  "domain": "systems",
+  "topic": "Exploring memory-mapped I/O for database storage",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a storage engine. Should I use mmap or explicit read/write for file I/O? I see both approaches in real databases."
+    },
+    {
+      "role": "assistant",
+      "content": "This is one of the most debated topics in database engineering:\n\n**mmap (memory-mapped I/O)**:\n- OS manages page cache (less code to write)\n- Random access feels like accessing memory\n- Used by: LMDB, early MongoDB, SQLite (optional), RocksDB (optional)\n\n**Explicit read/write (pread/pwrite)**:\n- Full control over I/O scheduling\n- Can implement custom buffer pool\n- Predictable performance under pressure\n- Used by: PostgreSQL, MySQL/InnoDB, LevelDB, most production databases\n\n**Why most production databases avoid mmap**:\n1. **No control over eviction** - OS evicts pages based on LRU, database knows better\n2. **No control over write ordering** - Critical for crash safety (WAL before data pages)\n3. **TLB shootdowns** at scale cause latency spikes\n4. **Read-ahead** may read unnecessary pages\n5. **Memory pressure** can cause the OS to evict hot pages\n\nAndy Pavlo's 2022 paper \"Are You Sure You Want to Use MMAP\" formalized these issues.\n\n**For a learning project**: mmap is fine and simpler. For production: explicit I/O with a buffer pool."
+    }
+  ]
+}

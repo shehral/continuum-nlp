@@ -1,0 +1,15 @@
+{
+  "id": "conv-174",
+  "domain": "cloud-architecture",
+  "topic": "Choosing between SQS, SNS, and EventBridge",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Confused about when to use SQS vs SNS vs EventBridge. They all seem to pass messages between services?"
+    },
+    {
+      "role": "assistant",
+      "content": "They serve different purposes:\n\n**SQS** (Simple Queue Service) - **Point-to-point queue**:\n- One producer, one consumer (or consumer group)\n- Messages persist until consumed\n- Guaranteed delivery with retry/DLQ\n- Best for: work queues, async job processing\n- Example: \"Process this image\", \"Send this email\"\n\n**SNS** (Simple Notification Service) - **Pub/sub fan-out**:\n- One producer, MANY consumers\n- Messages delivered immediately and not persisted\n- Best for: notifications, fan-out to multiple systems\n- Example: \"Order placed\" -> notify email service AND analytics AND inventory\n\n**EventBridge** - **Event router with rules**:\n- Content-based routing (filter events by any field)\n- Schema registry, event replay\n- SaaS integrations (Stripe, Twilio send events directly)\n- Best for: complex event-driven architectures\n- Example: Route events by type, amount, region to different consumers\n\n**Common patterns**:\n- SNS -> SQS: Fan-out + durable consumption (SNS distributes, SQS buffers per consumer)\n- EventBridge -> SQS: Smart routing + durable consumption\n- SQS alone: Simple job queue"
+    }
+  ]
+}

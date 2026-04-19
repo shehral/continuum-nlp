@@ -1,0 +1,15 @@
+{
+  "id": "conv-191",
+  "domain": "devops",
+  "topic": "Container registry: ECR vs GitHub Container Registry vs Harbor",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Where should we store our Docker images? ECR, GitHub Container Registry, or self-hosted Harbor?"
+    },
+    {
+      "role": "assistant",
+      "content": "Container registry comparison:\n\n**Amazon ECR**:\n- Native AWS integration (ECS, EKS, Lambda auto-pull)\n- $0.10/GB/month storage + data transfer\n- Image scanning (Basic free, Enhanced with Inspector)\n- Lifecycle policies for cleanup\n- Best for: AWS-deployed workloads\n\n**GitHub Container Registry (ghcr.io)**:\n- Free for public images, included in GitHub plans for private\n- Tight GitHub Actions integration\n- Same auth as GitHub (GITHUB_TOKEN works)\n- No image scanning built-in\n- Best for: open-source, GitHub-centric workflows\n\n**Harbor** (self-hosted):\n- CNCF graduated project\n- Vulnerability scanning (Trivy integrated)\n- Replication across registries\n- RBAC, audit logging\n- You manage the infrastructure\n- Best for: air-gapped environments, compliance requirements\n\nFor most teams: **ECR** if on AWS (native integration saves hassle), **ghcr.io** if GitHub-centric and not on AWS.\n\nPro tip: Use **ECR pull-through cache** to mirror public images (Docker Hub, ghcr.io) through ECR. Avoids Docker Hub rate limits and adds a cache layer."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-039",
+  "domain": "backend",
+  "topic": "gRPC vs REST for service-to-service",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We have microservices that communicate a lot. Currently REST but latency is adding up. Should we switch to gRPC?"
+    },
+    {
+      "role": "assistant",
+      "content": "gRPC is a strong choice for service-to-service communication:\n\n**gRPC advantages over REST**:\n- Binary Protocol Buffers (protobuf) vs JSON: 3-10x smaller payloads\n- HTTP/2 multiplexing: multiple requests over one connection\n- Bidirectional streaming\n- Code generation: client/server stubs from .proto files\n- Strongly typed contracts\n\n**gRPC disadvantages**:\n- Harder to debug (binary, not human-readable)\n- Browser support needs grpc-web proxy\n- More complex setup than REST\n- Proto file management across services\n\nPattern: **gRPC internal** (service-to-service) + **REST external** (client-facing API). This is what Google, Netflix, and most large-scale systems do."
+    },
+    {
+      "role": "user",
+      "content": "We're on Node.js. Is gRPC well-supported?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, gRPC in Node has matured:\n\n**Options**:\n1. **`@grpc/grpc-js`** - Pure JS implementation, no native deps\n2. **`nice-grpc`** - Modern wrapper with better TypeScript support and middleware\n3. **`ts-proto`** - Best code generation for TypeScript (generates idiomatic TS, not Java-like stubs)\n4. **Connect (Buf)** - Modern alternative: gRPC + gRPC-Web + REST from same proto, uses standard HTTP\n\nRecommended: **Connect** (from Buf). It's the modern evolution of gRPC:\n- Works with standard `fetch()` (no special gRPC client needed)\n- Generates TypeScript-native clients\n- Supports both HTTP/2 (gRPC) and HTTP/1.1 (JSON)\n- Works in browsers without a proxy\n\nConnect gives you gRPC performance for internal services and REST-like simplicity for external clients, all from one `.proto` file."
+    }
+  ]
+}

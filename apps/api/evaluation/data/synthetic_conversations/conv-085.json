@@ -1,0 +1,23 @@
+{
+  "id": "conv-085",
+  "domain": "systems",
+  "topic": "Memory allocators: jemalloc vs mimalloc vs tcmalloc",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our Go service has high memory usage and GC pauses. Someone mentioned switching the allocator. jemalloc? mimalloc? tcmalloc?"
+    },
+    {
+      "role": "assistant",
+      "content": "Go has its own runtime and garbage collector — you can't easily swap the memory allocator like you can in C/C++/Rust. Go's allocator is tightly integrated with its GC.\n\n**For Go specifically**, address high memory/GC differently:\n\n1. **GOMEMLIMIT** (Go 1.19+) — Set a soft memory limit. GC triggers more aggressively near the limit.\n2. **GOGC** — Tune GC frequency (default 100). Lower = more frequent GC, less memory.\n3. **sync.Pool** — Reuse allocations for hot paths\n4. **Arena allocation** (experimental) — Bulk allocate/free without GC pressure\n5. **Reduce allocations** — Use `go tool pprof` to find allocation hotspots\n\n```bash\nGOMEMLIMIT=4GiB GOGC=50 ./myservice\n```\n\nIf you're considering jemalloc/mimalloc/tcmalloc, you might want a non-GC language:\n- **Rust** with jemalloc (`#[global_allocator]`) — common for services needing predictable latency\n- **C++** with tcmalloc (Google) or mimalloc (Microsoft) — easy swap via `LD_PRELOAD`"
+    },
+    {
+      "role": "user",
+      "content": "Interesting. We actually have a Rust sidecar that IS using the default allocator. Would jemalloc help there?"
+    },
+    {
+      "role": "assistant",
+      "content": "For Rust services, switching from the system allocator can help significantly:\n\n**jemalloc**:\n- Better for long-running services with varied allocation sizes\n- Less fragmentation than glibc malloc\n- Predictable performance under high concurrency\n- Used by Firefox, Redis, Facebook services\n```rust\n#[global_allocator]\nstatic GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;\n```\n\n**mimalloc** (Microsoft):\n- Best for allocation-heavy workloads\n- 10-20% faster than jemalloc for many patterns\n- Lower memory overhead for small allocations\n- Simpler design\n```rust\n#[global_allocator]\nstatic GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;\n```\n\n**tcmalloc** (Google):\n- Per-thread caches reduce contention\n- Great profiling tools (heap profiler)\n- Best for multi-threaded servers\n\nFor a Rust sidecar service: try **mimalloc** first (easiest to add, good default). Benchmark against jemalloc. The difference can be 5-20% in throughput for allocation-heavy services."
+    }
+  ]
+}

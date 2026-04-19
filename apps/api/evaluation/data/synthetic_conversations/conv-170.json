@@ -1,0 +1,15 @@
+{
+  "id": "conv-170",
+  "domain": "backend",
+  "topic": "API versioning strategies",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our public API needs versioning. URL path (/api/v1/), header, or query param? What's best practice?"
+    },
+    {
+      "role": "assistant",
+      "content": "Three main approaches:\n\n**URL path versioning** (`/api/v1/users`):\n- Most common, most visible\n- Easy to route (nginx, load balancer)\n- Easy for consumers to understand\n- Used by: Stripe, GitHub, Twilio\n- Downside: version is part of the URL, harder to share code between versions\n\n**Header versioning** (`Accept: application/vnd.myapi.v1+json`):\n- Cleaner URLs\n- Content negotiation\n- Used by: GitHub (also supports this), Azure\n- Downside: harder to test (need custom headers)\n\n**Query parameter** (`/api/users?version=1`):\n- Simplest to implement\n- Easy to test in browser\n- Used by: Google, Amazon\n- Downside: looks less clean, can be accidentally cached wrong\n\n**Recommendation**: **URL path versioning** (`/api/v2/`). It's the most widely understood, easiest to route, and simplest for API consumers. Stripe does this and they have one of the most developer-friendly APIs.\n\n**Pro tip**: Don't create v2 until you must. Use backwards-compatible changes (additive) as long as possible. When you do version, support v1 for at least 12-24 months."
+    }
+  ]
+}

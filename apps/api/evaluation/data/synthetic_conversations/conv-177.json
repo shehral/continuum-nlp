@@ -1,0 +1,15 @@
+{
+  "id": "conv-177",
+  "domain": "web-development",
+  "topic": "Micro-frontends: worth the complexity?",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our frontend monolith is getting hard to manage with 4 teams. Should we adopt micro-frontends?"
+    },
+    {
+      "role": "assistant",
+      "content": "Micro-frontends solve organizational problems, not technical ones:\n\n**Worth it when**:\n- 4+ independent teams working on the same frontend\n- Teams need to deploy independently\n- Different teams want different frameworks/versions\n- Clear domain boundaries in the UI\n\n**Not worth it when**:\n- Single team (just use a well-organized monolith)\n- Shared UI that's tightly integrated\n- Performance is critical (micro-FEs add overhead)\n\n**Approaches**:\n1. **Module Federation** (Webpack/Vite) - Share components at runtime. Most popular.\n2. **Single-SPA** - Framework-agnostic, mount/unmount apps. More complex.\n3. **iframe isolation** - Simplest but worst UX (no shared styling, poor performance).\n4. **Route-based splitting** - Different apps for different routes behind a reverse proxy. Simplest to implement.\n\nFor 4 teams: start with **route-based splitting**. Team A owns `/dashboard/*`, Team B owns `/admin/*`, etc. Each route is its own Next.js app. A reverse proxy (nginx/Cloudflare) routes traffic. No shared runtime complexity.\n\nIf you need shared components: publish a design system package, don't use Module Federation unless route-based splitting is insufficient."
+    }
+  ]
+}

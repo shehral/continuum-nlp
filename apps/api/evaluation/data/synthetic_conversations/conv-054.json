@@ -1,0 +1,23 @@
+{
+  "id": "conv-054",
+  "domain": "web-development",
+  "topic": "Qwik framework for resumability",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Heard about Qwik framework and its 'resumability' concept. Is it actually better than React Server Components for performance?"
+    },
+    {
+      "role": "assistant",
+      "content": "Qwik's approach is fundamentally different from RSC:\n\n**Qwik (Resumability)**:\n- Serializes application state into HTML at build/SSR time\n- Browser *resumes* execution instead of *replaying* it (no hydration)\n- JS loads lazily per interaction — click a button, only that handler downloads\n- O(1) startup time regardless of app size\n\n**React Server Components**:\n- Server components send zero JS but client components still hydrate\n- Better than traditional React but still has hydration cost\n- Client components download and execute on load\n\nQwik's theoretical advantage: a massive app with 1000 components loads as fast as one with 10. RSC still scales with the number of *client* components."
+    },
+    {
+      "role": "user",
+      "content": "Sounds amazing. Why isn't everyone using it?"
+    },
+    {
+      "role": "assistant",
+      "content": "Several reasons Qwik hasn't taken over:\n\n1. **Learning curve** — The `$` suffix convention (`component$`, `useSignal$`) and serialization constraints are unfamiliar\n2. **Ecosystem** — Can't use most React libraries. Much smaller component ecosystem\n3. **React inertia** — Teams already invested in React/Next.js won't rewrite\n4. **Diminishing returns** — For most apps, RSC + streaming is \"good enough\". Qwik's advantage matters most for huge apps on slow networks\n5. **Team size** — Builder.io (creators) is small compared to Meta (React) and Vercel (Next.js)\n\nQwik is genuinely innovative but it's a niche choice in 2026. Worth watching, but I'd only pick it for specific scenarios: massive public-facing apps where every KB of JS matters (e-commerce, media sites)."
+    }
+  ]
+}

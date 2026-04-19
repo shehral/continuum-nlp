@@ -1,0 +1,15 @@
+{
+  "id": "conv-040",
+  "domain": "data-engineering",
+  "topic": "Snowflake vs BigQuery for data warehouse",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Choosing a cloud data warehouse. Snowflake or BigQuery? We're on GCP but open to multi-cloud."
+    },
+    {
+      "role": "assistant",
+      "content": "Since you're on GCP:\n\n**BigQuery** (GCP native):\n- Serverless (no cluster management)\n- Pay per query (scan-based pricing) or slots (flat-rate)\n- Native GCP integrations (Pub/Sub, Dataflow, Looker)\n- ML built-in (BQML) - train models with SQL\n- Streaming inserts for real-time data\n\n**Snowflake**:\n- Multi-cloud (runs on GCP, AWS, Azure)\n- Separate compute/storage (scale independently)\n- Time travel and data sharing features\n- Credit-based pricing (virtual warehouses)\n- Better for cross-cloud data sharing\n\nFor GCP-native: BigQuery is simpler and cheaper (no egress costs). For multi-cloud future: Snowflake avoids GCP lock-in.\n\nBigQuery's serverless model means zero ops - you just write SQL. Snowflake requires managing virtual warehouse sizes."
+    }
+  ]
+}

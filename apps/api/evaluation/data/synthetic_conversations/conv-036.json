@@ -1,0 +1,23 @@
+{
+  "id": "conv-036",
+  "domain": "devops",
+  "topic": "Datadog vs Grafana stack for observability",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need observability for our services - logs, metrics, traces. Datadog or self-hosted Grafana/Prometheus/Loki stack?"
+    },
+    {
+      "role": "assistant",
+      "content": "Classic build vs buy decision:\n\n**Datadog**:\n- All-in-one: metrics, logs, traces, APM, RUM\n- Zero setup, great UI\n- AI-powered alerting\n- Expensive at scale ($15-25/host/month + log ingestion)\n- Vendor lock-in\n\n**Grafana Stack (self-hosted)**:\n- Prometheus (metrics) + Loki (logs) + Tempo (traces) + Grafana (dashboards)\n- Free and open-source\n- Full control\n- Significant ops overhead (need to manage, scale, upgrade)\n- ~2-4 weeks to set up properly\n\n**Middle ground**: **Grafana Cloud** - managed Grafana stack, generous free tier (10k metrics, 50GB logs), cheaper than Datadog.\n\nWhat's your team's ops capacity?"
+    },
+    {
+      "role": "user",
+      "content": "Small team, don't want to manage infra for observability. But Datadog pricing scares me."
+    },
+    {
+      "role": "assistant",
+      "content": "**Grafana Cloud** is your best bet then:\n\n- Free tier: 10,000 metrics, 50GB logs, 50GB traces/month\n- Pro tier: $29/month for 20k metrics + more logs\n- Fraction of Datadog's cost\n- Same Grafana dashboards you'd build self-hosted\n- OpenTelemetry (OTel) compatible - no vendor lock-in\n\nStack with Grafana Cloud:\n1. **Alloy** (Grafana's OTel collector) - runs as a sidecar/daemonset\n2. Ships metrics to Grafana Mimir (managed Prometheus)\n3. Ships logs to Grafana Loki\n4. Ships traces to Grafana Tempo\n5. Dashboards in Grafana Cloud\n\nInstrument your services with **OpenTelemetry SDKs** - this way you can switch to any backend (Datadog, Honeycomb, self-hosted) without changing application code."
+    }
+  ]
+}

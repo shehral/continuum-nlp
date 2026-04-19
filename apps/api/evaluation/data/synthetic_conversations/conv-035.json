@@ -1,0 +1,15 @@
+{
+  "id": "conv-035",
+  "domain": "systems",
+  "topic": "tokio vs async-std in Rust",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Writing a Rust network service. tokio or async-std for the async runtime?"
+    },
+    {
+      "role": "assistant",
+      "content": "**Tokio** in 2026, without question:\n\n**Tokio**:\n- De facto standard async runtime for Rust\n- 95%+ of async Rust libraries are built on it\n- Mature, battle-tested at scale (Discord, Cloudflare, AWS)\n- Rich ecosystem: tokio-postgres, tonic (gRPC), axum, hyper\n- Multi-threaded by default\n\n**async-std**:\n- Aimed to be a simpler alternative\n- Development has significantly slowed\n- Smaller ecosystem\n- Some libraries only support tokio\n\nThe ecosystem lock-in to tokio is so strong that choosing async-std means fighting compatibility issues constantly. Libraries like `reqwest`, `sqlx`, `tonic` all assume tokio.\n\nFor your network service, use **tokio + axum** (HTTP) or **tokio + tonic** (gRPC)."
+    }
+  ]
+}

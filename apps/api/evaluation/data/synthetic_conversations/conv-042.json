@@ -1,0 +1,23 @@
+{
+  "id": "conv-042",
+  "domain": "devops",
+  "topic": "Nix vs Docker for dev environments",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Team keeps having 'works on my machine' problems. Docker for dev environments? Or I've heard Nix is good too."
+    },
+    {
+      "role": "assistant",
+      "content": "Both solve reproducibility but differently:\n\n**Docker (Dev Containers)**:\n- Run development inside containers\n- VS Code Remote Containers / devcontainers.json\n- Identical env for everyone\n- Overhead: container startup time, file sync perf\n- Familiar to most developers\n\n**Nix / devbox / devenv**:\n- Declarative package management\n- No containers - native speed\n- `nix develop` gives you exact versions of all tools\n- Steeper learning curve\n- devbox/devenv wrap Nix with a simpler interface\n\n**Simplest option**: **devbox** by Jetify. It uses Nix under the hood but with a friendly CLI:\n```bash\ndevbox init\ndevbox add nodejs@22 python@3.12 postgresql@16\ndevbox shell  # instant, correct versions\n```"
+    },
+    {
+      "role": "user",
+      "content": "devbox looks interesting but I worry about adoption. Everyone already knows docker."
+    },
+    {
+      "role": "assistant",
+      "content": "Fair point. The pragmatic approach:\n\n**Dev Containers** (Docker-based) with `.devcontainer/devcontainer.json`:\n```json\n{\n  \"image\": \"mcr.microsoft.com/devcontainers/typescript-node:22\",\n  \"features\": {\n    \"ghcr.io/devcontainers/features/python:1\": { \"version\": \"3.12\" },\n    \"ghcr.io/devcontainers/features/docker-in-docker:2\": {}\n  },\n  \"postCreateCommand\": \"pnpm install\"\n}\n```\n\n- Works in VS Code (one click) and GitHub Codespaces\n- `Dockerfile` or pre-built images\n- Team just opens the project and gets the right environment\n- No new tools to learn\n\nThe file system performance issue on macOS is real though. Use **Docker Desktop's VirtioFS** or mount `node_modules` as a named volume to avoid the slowness."
+    }
+  ]
+}

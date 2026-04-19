@@ -1,0 +1,23 @@
+{
+  "id": "conv-038",
+  "domain": "web-development",
+  "topic": "Playwright vs Cypress for E2E testing",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Setting up E2E testing. Playwright or Cypress? We have a Next.js app with complex user flows."
+    },
+    {
+      "role": "assistant",
+      "content": "In 2026, **Playwright** is the better choice for most teams:\n\n**Playwright**:\n- Multi-browser: Chromium, Firefox, WebKit (Safari)\n- Auto-wait (no flaky `.wait()` calls)\n- Parallel execution out of the box\n- API testing + UI testing in same framework\n- Codegen: record interactions → generate tests\n- Trace viewer for debugging\n\n**Cypress**:\n- Excellent developer experience and time-travel debugging\n- Component testing (test React components in isolation)\n- Cypress Cloud for CI dashboard\n- Single-browser (Chromium-based, Firefox partial)\n- Slower parallel execution\n\nFor Next.js specifically, Playwright has better support for testing Server Components and API routes."
+    },
+    {
+      "role": "user",
+      "content": "We need to test auth flows with OAuth. Can playwright handle that?"
+    },
+    {
+      "role": "assistant",
+      "content": "Yes, Playwright handles OAuth well:\n\n**Approach 1: Bypass OAuth in tests** (recommended):\n- Set up a test user with known credentials\n- Use `page.context().addCookies()` to inject session cookies\n- Skip the OAuth provider UI entirely\n\n**Approach 2: Automate the OAuth flow**:\n```typescript\n// Save auth state after first login\nawait page.goto('/login');\nawait page.click('text=Sign in with Google');\n// Fill in test account credentials on Google's page\nawait page.fill('input[type=\"email\"]', 'test@example.com');\nawait page.storageState({ path: 'auth.json' });\n\n// Reuse in other tests\nconst context = await browser.newContext({ storageState: 'auth.json' });\n```\n\nPlaywright's `storageState` feature saves cookies + localStorage after login and reuses them across tests. Login once, run all tests authenticated. Works great with Auth.js/NextAuth."
+    }
+  ]
+}

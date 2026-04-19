@@ -1,0 +1,23 @@
+{
+  "id": "conv-022",
+  "domain": "web-development",
+  "topic": "Vite vs Turbopack for frontend bundling",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our webpack build takes 45 seconds for HMR updates. Looking at Vite or Turbopack. Which is better?"
+    },
+    {
+      "role": "assistant",
+      "content": "Both are massive improvements over Webpack. Context matters:\n\n**Vite**:\n- Framework-agnostic (React, Vue, Svelte, etc.)\n- ESM-based dev server (no bundling in dev)\n- Rollup for production builds\n- Mature, stable, huge plugin ecosystem\n- Sub-second HMR\n\n**Turbopack**:\n- Next.js specific (default bundler in Next.js 16)\n- Rust-based incremental computation\n- Designed for massive apps (HMR doesn't degrade with size)\n- Less mature but rapidly improving\n\nAre you using Next.js?"
+    },
+    {
+      "role": "user",
+      "content": "No, plain React with react-router. Currently CRA (create-react-app) which uses webpack."
+    },
+    {
+      "role": "assistant",
+      "content": "CRA is deprecated - definitely migrate. For plain React + React Router, **Vite** is the clear choice:\n\n```bash\nnpm create vite@latest my-app -- --template react-ts\n```\n\nMigration from CRA to Vite:\n1. Replace `react-scripts` with `vite` and `@vitejs/plugin-react`\n2. Move `index.html` to root (Vite uses it as entry point)\n3. Update env vars from `REACT_APP_*` to `VITE_*`\n4. Update imports (Vite uses ESM)\n\nExpect: 45-second HMR → sub-100ms HMR. Production builds will also be faster (Rollup vs Webpack).\n\nTurbopack isn't an option for you since it's Next.js-only. Vite is the standard for non-Next React apps in 2026."
+    }
+  ]
+}

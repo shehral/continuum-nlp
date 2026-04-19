@@ -1,0 +1,23 @@
+{
+  "id": "conv-101",
+  "domain": "web-development",
+  "topic": "React 19 features and migration from React 18",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We're on React 18. Should we upgrade to React 19? What's actually new?"
+    },
+    {
+      "role": "assistant",
+      "content": "React 19 is a significant release. Key features:\n\n**1. React Compiler** (biggest change):\n- Auto-memoizes components, eliminating need for `useMemo`, `useCallback`, `React.memo`\n- Compile-time optimization → less manual performance work\n- Opt-in per file/directory\n\n**2. Actions**:\n- `useActionState` — handle form submission state\n- `useFormStatus` — pending states for form submits\n- `useOptimistic` — optimistic UI updates\n\n**3. `use()` hook**:\n- Read promises and context in render\n- `use(promise)` replaces some Suspense patterns\n- `use(Context)` replaces `useContext`\n\n**4. Server Components** (stable):\n- No longer experimental\n- `'use server'` directive for server actions\n\n**5. Document Metadata**:\n- `<title>`, `<meta>`, `<link>` work in any component (no react-helmet needed)\n\n**6. ref as prop**:\n- No more `forwardRef` wrapper needed"
+    },
+    {
+      "role": "user",
+      "content": "The compiler sounds great. Is it safe to enable? Any breaking changes?"
+    },
+    {
+      "role": "assistant",
+      "content": "The compiler is safe but has requirements:\n\n**Breaking changes in React 19**:\n- `forwardRef` deprecated (use ref as regular prop)\n- `PropTypes` removed (use TypeScript)\n- `defaultProps` for function components removed\n- `act()` moved to `react` package (not `react-dom/test-utils`)\n- Legacy context API removed\n- String refs removed\n\n**React Compiler requirements**:\n- Code must follow Rules of React (pure rendering, no side effects in render)\n- ESLint plugin checks compatibility: `eslint-plugin-react-compiler`\n- Enable gradually:\n```javascript\n// babel.config.js\nmodule.exports = {\n  plugins: [\n    ['babel-plugin-react-compiler', {\n      sources: (filename) => filename.includes('src/components'),\n    }],\n  ],\n};\n```\n\n**Migration path**:\n1. Run `npx react-codemod upgrade` for automated fixes\n2. Enable `eslint-plugin-react-compiler` to find issues\n3. Enable compiler on safe directories first\n4. Expand gradually\n\nMost well-typed TypeScript React 18 apps upgrade with minimal changes. The biggest issue is libraries that haven't updated yet."
+    }
+  ]
+}

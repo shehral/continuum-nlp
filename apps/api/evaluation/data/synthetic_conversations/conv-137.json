@@ -1,0 +1,23 @@
+{
+  "id": "conv-137",
+  "domain": "data-engineering",
+  "topic": "Real-time analytics with Apache Druid vs ClickHouse",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need sub-second analytics on billions of rows. ClickHouse or Apache Druid? Powering user-facing dashboards."
+    },
+    {
+      "role": "assistant",
+      "content": "Both handle billions of rows with sub-second queries:\n\n**ClickHouse**: Simpler architecture, standard SQL, best for internal analytics/BI.\n**Apache Druid**: Purpose-built for user-facing analytics, pre-aggregation, better multi-tenant isolation, handles thousands of concurrent queries.\n\n**For user-facing dashboards**: Druid is designed for this.\n**For internal analytics**: ClickHouse is simpler."
+    },
+    {
+      "role": "user",
+      "content": "It's user-facing with thousands of users. But Druid sounds complex."
+    },
+    {
+      "role": "assistant",
+      "content": "Druid has 5 node types in production (Coordinator, Overlord, Broker, Historical, MiddleManager) plus ZooKeeper and a metadata DB. ClickHouse production = 1 node type.\n\n**Reducing Druid complexity**: Imply (managed Druid), Helm chart for K8s, single-server dev mode.\n\n**Honest assessment**: If <100 concurrent users, ClickHouse with materialized views handles it fine. Druid's advantages kick in at 1000+ concurrent queries and single-digit millisecond p99 requirements.\n\nFor most startup-scale dashboards: **ClickHouse** (simpler) + materialized views for pre-aggregation. Switch to Druid when concurrency demands it."
+    }
+  ]
+}

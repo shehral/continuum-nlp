@@ -1,0 +1,23 @@
+{
+  "id": "conv-143",
+  "domain": "ml",
+  "topic": "Prompt engineering vs fine-tuning vs RAG decision framework",
+  "messages": [
+    {
+      "role": "user",
+      "content": "When should I use prompt engineering vs fine-tuning vs RAG? We keep going back and forth."
+    },
+    {
+      "role": "assistant",
+      "content": "Decision framework:\n\n**Prompt Engineering** (try first): Fastest, zero cost. Best for formatting, tone, reasoning.\n**RAG**: Add your own knowledge without training. Best for Q&A over documents, factual grounding.\n**Fine-tuning**: Teach new behaviors. Best for domain-specific style, consistent formatting.\n\n**Decision tree**:\n1. Can prompting solve it? -> Stop here\n2. Needs access to specific documents? -> RAG\n3. Needs specific behavior prompting can't achieve? -> Fine-tune\n4. Needs both? -> RAG + fine-tuned model"
+    },
+    {
+      "role": "user",
+      "content": "We're building a customer support bot that needs our docs AND a specific tone. So RAG + fine-tuning?"
+    },
+    {
+      "role": "assistant",
+      "content": "Try **RAG + careful prompt engineering** first. Only fine-tune if prompting can't nail the tone. Modern models follow system prompts extremely well.\n\nFine-tune only if:\n- System prompt can't capture the nuance\n- You want a smaller/cheaper model to match GPT-4 quality on your task\n- You have 500+ example conversations\n\nStart with RAG + prompting. Collect real conversations. If quality isn't sufficient, fine-tune with collected examples."
+    }
+  ]
+}

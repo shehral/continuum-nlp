@@ -1,0 +1,15 @@
+{
+  "id": "conv-154",
+  "domain": "backend",
+  "topic": "Exploring WebTransport vs WebSocket for real-time",
+  "messages": [
+    {
+      "role": "user",
+      "content": "WebTransport is supposed to replace WebSockets. Should we use it for our real-time features?"
+    },
+    {
+      "role": "assistant",
+      "content": "WebTransport is based on HTTP/3 (QUIC) and offers features WebSockets can't:\n\n**WebTransport advantages**:\n- Multiple independent streams (no head-of-line blocking)\n- Unreliable datagrams (like UDP in the browser)\n- Better congestion control\n- Faster connection setup (0-RTT with QUIC)\n- Native multiplexing\n\n**WebSocket advantages**:\n- Universal browser support (100%)\n- Simpler API\n- Huge ecosystem (Socket.io, ws, etc.)\n- Works with any HTTP server\n- Proxy/CDN support is mature\n\n**WebTransport browser support** (2026): Chrome, Edge. Firefox and Safari partial.\n\n**When to use WebTransport**:\n- Multiplayer games (unreliable datagrams for game state)\n- Video streaming (multiple quality tracks)\n- Multiple independent real-time channels\n\n**When to stick with WebSockets**:\n- Chat applications\n- Notifications\n- Dashboard updates\n- Anything that needs 100% browser support\n\nFor most real-time features: **WebSockets** are still the pragmatic choice. WebTransport is exciting but the ecosystem and browser support aren't there yet."
+    }
+  ]
+}

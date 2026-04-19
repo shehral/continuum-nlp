@@ -1,0 +1,23 @@
+{
+  "id": "conv-078",
+  "domain": "data-engineering",
+  "topic": "dbt vs SQLMesh for SQL transformations",
+  "messages": [
+    {
+      "role": "user",
+      "content": "We use dbt for our SQL transforms in Snowflake. A coworker mentioned SQLMesh as a modern alternative. Worth switching?"
+    },
+    {
+      "role": "assistant",
+      "content": "SQLMesh is interesting but switching has tradeoffs:\n\n**SQLMesh advantages over dbt**:\n- Virtual environments — test changes without creating physical tables\n- Incremental by default (dbt requires opt-in `is_incremental()` macro)\n- Column-level lineage (not just table-level)\n- Plan/apply workflow (like Terraform) — see changes before deploying\n- Built-in CI/CD (no dbt Cloud needed)\n- SQLGlot-powered SQL transpilation (write once, run on any warehouse)\n\n**dbt advantages**:\n- Massive community, thousands of packages\n- dbt Cloud (managed scheduler, IDE, docs hosting)\n- More integrations (Fivetran, Airbyte trigger dbt runs)\n- More tutorials, examples, hiring pool\n- Semantic layer (MetricFlow)\n\nSQLMesh is technically superior in several areas but dbt's ecosystem is 10x larger."
+    },
+    {
+      "role": "user",
+      "content": "The virtual environments sound amazing. Our dbt CI creates full copies of tables which is slow and expensive."
+    },
+    {
+      "role": "assistant",
+      "content": "That's exactly SQLMesh's killer feature. How it works:\n\n**dbt CI** (Slim CI):\n- Creates physical tables in a PR schema\n- Full table scans for testing\n- Snowflake credits consumed for every PR\n- Teardown needed after PR merge\n\n**SQLMesh Virtual Environments**:\n- Creates *views* pointing to existing production tables for unchanged models\n- Only materializes tables that actually changed\n- 90% less compute for CI\n- Automatic cleanup\n\nMigration from dbt:\n- SQLMesh can read dbt projects (`sqlmesh init --dbt`)\n- Converts dbt models to SQLMesh format\n- Preserves refs, macros, tests\n\nIf CI cost is a real pain point, SQLMesh's virtual environments alone could justify the switch. But evaluate the ecosystem gap carefully — check that your dbt packages and integrations have SQLMesh equivalents."
+    }
+  ]
+}

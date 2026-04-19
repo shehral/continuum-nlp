@@ -1,0 +1,15 @@
+{
+  "id": "conv-178",
+  "domain": "backend",
+  "topic": "Implementing CQRS pattern",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our API has complex reads (joins across 5 tables) that are slow. Writes are simple. Should we implement CQRS?"
+    },
+    {
+      "role": "assistant",
+      "content": "CQRS (Command Query Responsibility Segregation) separates read and write models:\n\n**Your situation** (complex reads, simple writes) is a textbook CQRS case.\n\n**Simple CQRS** (no event sourcing needed):\n1. **Write model**: Simple tables optimized for writes (normalized)\n2. **Read model**: Denormalized views/tables optimized for queries\n3. **Sync**: Postgres triggers, materialized views, or CDC\n\n**Implementation options** (simplest to most complex):\n\n**Level 1: Materialized views** (start here):\n```sql\nCREATE MATERIALIZED VIEW dashboard_view AS\n  SELECT u.name, o.total, p.name as product, ...\n  FROM users u\n  JOIN orders o ON ...\n  JOIN products p ON ...\n  JOIN ...;\n\nREFRESH MATERIALIZED VIEW CONCURRENTLY dashboard_view;\n```\nRefresh on a schedule (every 30s) or after writes. Simplest CQRS.\n\n**Level 2: Separate read tables** (updated by triggers or app code)\n**Level 3: Separate read database** (ClickHouse, ElasticSearch for complex queries)\n**Level 4: Event sourcing + projections** (full CQRS)\n\nStart with materialized views. They solve most complex read problems without architectural changes."
+    }
+  ]
+}

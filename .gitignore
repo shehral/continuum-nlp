@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+*.egg-info/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.Python
+*.so
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Data snapshots — populated graph + postgres dumps for demo.
+# Contains real decision data; do not commit.
+data/snapshots/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+coverage/
+coverage.xml
+
+# Misc
+*.bak
+*.zip
+tmp/
+.cache/
+
+# Claude Code
+.claude/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Obsidian
+.obsidian/
+
+# Personal/local files
+progress.txt
+prd.json
+CLAUDE.md
+
+# Internal docs (kept private - planning, reviews, security audits)
+docs/
+
+# Research papers
+paper/
+
+# Lock files (optional - uncomment if you want to track these)
+# pnpm-lock.yaml
+
+# Archive — out-of-scope original-Continuum code, kept for reference
+_archive/
+
+# Heavy GIFs from prior version + Playwright artifacts — never commit.
+media/
+apps/web/public/media/
+apps/web/test-results/

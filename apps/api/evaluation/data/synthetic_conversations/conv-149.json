@@ -1,0 +1,23 @@
+{
+  "id": "conv-149",
+  "domain": "devops",
+  "topic": "Feature flags: LaunchDarkly vs Unleash vs Flagsmith",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Want to add feature flags. LaunchDarkly, Unleash, or Flagsmith? 20-person team."
+    },
+    {
+      "role": "assistant",
+      "content": "**LaunchDarkly**: Most mature, real-time streaming, A/B testing. Expensive ($10+/seat/month).\n**Unleash** (open-source): Self-hosted free, or cloud $80/month. Good SDK coverage, GitOps-friendly.\n**Flagsmith** (open-source): Self-hosted free, or cloud $45/month. Flags + remote config.\n\nFor 20 people: Budget-conscious -> Unleash self-hosted. Simplest setup -> Flagsmith cloud. Best-in-class -> LaunchDarkly."
+    },
+    {
+      "role": "user",
+      "content": "We already have Postgres and Redis. Unleash self-hosted sounds appealing."
+    },
+    {
+      "role": "assistant",
+      "content": "Unleash self-hosted is straightforward - single Docker command pointing at your existing Postgres.\n\nClient SDK integration is simple: initialize with your Unleash URL and API token, then check flags with `is_enabled('feature-name')`.\n\nKey features to use:\n- **Gradual rollout** - Release to 5% -> 25% -> 50% -> 100%\n- **User ID strategy** - Enable for specific users\n- **Environment toggles** - Different states per environment\n- **Metrics** - See evaluation counts\n\nSelf-hosted Unleash + existing Postgres = $0/month for full feature flag capability."
+    }
+  ]
+}

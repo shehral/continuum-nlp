@@ -1,0 +1,15 @@
+{
+  "id": "conv-156",
+  "domain": "mobile",
+  "topic": "App Store review optimization",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our iOS app keeps getting rejected during App Store review. Common reasons and how to avoid them?"
+    },
+    {
+      "role": "assistant",
+      "content": "Most common rejection reasons and fixes:\n\n**1. Guideline 2.1 - Performance: App Completeness**\n- Broken links, placeholder content, crash logs\n- Fix: Thorough QA on the exact build submitted. Test on oldest supported device.\n\n**2. Guideline 4.3 - Design: Spam**\n- App too similar to existing apps or your own other apps\n- Fix: Ensure unique value proposition, distinct UI\n\n**3. Guideline 5.1.1 - Data Collection**\n- Privacy nutrition labels don't match actual data collection\n- Fix: Audit all SDKs (Firebase, analytics, ads) for data they collect. Update labels.\n\n**4. Guideline 3.1.1 - In-App Purchase**\n- Using external payment for digital goods\n- Fix: Use StoreKit for digital content. Physical goods/services can use external payment.\n\n**5. Guideline 2.5.1 - Only use public APIs**\n- Using private/undocumented APIs\n- Fix: Audit dependencies. Some older RN libraries use private APIs.\n\n**Pre-submission checklist**:\n- Test on oldest supported iOS version\n- Fill out all App Privacy details accurately\n- Provide demo account credentials for review team\n- Include clear description of all features\n- Test IAP in sandbox environment"
+    }
+  ]
+}

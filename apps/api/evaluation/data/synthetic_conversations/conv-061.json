@@ -1,0 +1,23 @@
+{
+  "id": "conv-061",
+  "domain": "devops",
+  "topic": "Terraform vs OpenTofu after BSL license change",
+  "messages": [
+    {
+      "role": "user",
+      "content": "HashiCorp changed Terraform to BSL license. Should we switch to OpenTofu? We're worried about vendor lock-in."
+    },
+    {
+      "role": "assistant",
+      "content": "The BSL change mainly affects companies building competing products. For end users:\n\n**Stay on Terraform if**:\n- You're using Terraform to manage YOUR infrastructure\n- You want HashiCorp's commercial support (Terraform Cloud/Enterprise)\n- You need the latest features immediately\n- BSL doesn't affect your use case (it doesn't for most companies)\n\n**Switch to OpenTofu if**:\n- You're building a product that competes with HashiCorp\n- You philosophically prefer open-source (MPL-2.0 license)\n- You want community-governed development\n- You're concerned about future license changes\n\nOpenTofu is a drop-in replacement — same HCL syntax, same providers. Migration: change `terraform` to `tofu` in your commands."
+    },
+    {
+      "role": "user",
+      "content": "Has OpenTofu diverged from Terraform at all? Any features one has that the other doesn't?"
+    },
+    {
+      "role": "assistant",
+      "content": "They've started diverging:\n\n**OpenTofu additions**:\n- State encryption (not in Terraform OSS)\n- Early variable/locals evaluation\n- `removed` block for safe resource removal\n- Client-side state encryption at rest\n\n**Terraform additions**:\n- Stacks (orchestrate multiple configurations)\n- Improved `terraform test` framework\n- HCP Terraform (cloud platform) integration\n- Provider-defined functions\n\nMost providers work with both. The registry is diverging — OpenTofu has its own registry at registry.opentofu.org.\n\nPractical advice: if you're starting fresh, either is fine. If you're already on Terraform and the BSL doesn't affect you, the switching cost isn't worth it yet. Monitor the divergence — it'll matter more in 2-3 years."
+    }
+  ]
+}

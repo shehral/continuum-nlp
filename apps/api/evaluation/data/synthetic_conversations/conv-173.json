@@ -1,0 +1,15 @@
+{
+  "id": "conv-173",
+  "domain": "systems",
+  "topic": "Exploring WebAssembly System Interface (WASI)",
+  "messages": [
+    {
+      "role": "user",
+      "content": "WASI keeps coming up. What is it and when would I use it over Docker containers?"
+    },
+    {
+      "role": "assistant",
+      "content": "WASI (WebAssembly System Interface) lets WASM run outside the browser:\n\n**WASI gives WebAssembly**:\n- File system access (sandboxed)\n- Network access (capability-based)\n- Environment variables\n- Standard I/O\n\n**WASI vs Docker containers**:\n- **Startup time**: WASI ~1ms vs Docker ~100ms-1s\n- **Size**: WASI module ~1-10MB vs Docker image ~100MB-1GB\n- **Security**: WASI is sandboxed by default (capability-based). Docker needs careful configuration.\n- **Portability**: WASI runs on any WASI runtime (Wasmtime, Wasmer, WasmEdge). No Linux dependency.\n\n**When WASI makes sense**:\n- Serverless functions (sub-millisecond cold starts)\n- Plugin systems (run user code safely)\n- Edge computing (tiny footprint)\n- Portable CLI tools\n\n**When Docker is better**:\n- Complex applications with many dependencies\n- Existing container ecosystem (Kubernetes, registries)\n- Need full OS capabilities\n- Your language doesn't compile to WASM well\n\nThe famous quote: \"If WASM+WASI existed in 2008, we wouldn't have needed to create Docker\" - Solomon Hykes (Docker co-founder).\n\nWASI is most impactful for: serverless (Fermyon Spin, Cloudflare Workers) and plugin systems (Envoy proxy filters, database extensions)."
+    }
+  ]
+}

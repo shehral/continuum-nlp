@@ -1,0 +1,23 @@
+{
+  "id": "conv-058",
+  "domain": "backend",
+  "topic": "Bun vs Node vs Deno runtime choice",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Starting a new TS backend. Should I use Node, Deno, or Bun? Bun's speed claims are impressive."
+    },
+    {
+      "role": "assistant",
+      "content": "Current state of JS runtimes in 2026:\n\n**Node.js 24 LTS**:\n- Most mature, largest ecosystem (npm)\n- Native TypeScript support (--experimental-strip-types → stable in 24)\n- Best library compatibility\n- Slower than Bun for some operations\n\n**Bun**:\n- Fastest runtime (2-5x faster starts, faster I/O)\n- Built-in bundler, test runner, package manager\n- npm compatible (most packages work)\n- SQLite built-in\n- Some npm packages still have compatibility issues\n\n**Deno 2**:\n- Security-first (permissions model)\n- npm compatibility added in Deno 2\n- Built-in formatter, linter, test runner\n- Web Standards APIs (fetch, Web Crypto)\n- TypeScript native\n\nFor production backends: **Node.js** is still the safest bet. For new projects where you control all deps: **Bun** is compelling."
+    },
+    {
+      "role": "user",
+      "content": "We'll deploy on cloudflare workers eventually. Does that affect the choice?"
+    },
+    {
+      "role": "assistant",
+      "content": "CF Workers use the **workerd** runtime (V8 isolates), not Node/Bun/Deno. So the runtime choice matters more for local dev and non-Workers deployments.\n\nFor Workers compatibility:\n- Write to **Web Standards APIs** (fetch, Request, Response, crypto)\n- Avoid Node-specific APIs (fs, path, child_process) unless using Workers' Node compat mode\n- **Hono** framework works across all runtimes including Workers\n\nPractical approach:\n1. Develop with **Bun** locally (fast starts, great DX)\n2. Use **Hono** as the framework (runtime-agnostic)\n3. Deploy to **Workers** using `wrangler`\n4. Keep a Node.js fallback for anything Workers can't handle\n\nBun's speed advantage is mostly in local development and CI. In Workers, the runtime is fixed — your code runs on workerd regardless."
+    }
+  ]
+}

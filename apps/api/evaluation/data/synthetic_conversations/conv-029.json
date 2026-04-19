@@ -1,0 +1,23 @@
+{
+  "id": "conv-029",
+  "domain": "ml",
+  "topic": "Fine-tuning vs RAG for domain-specific chatbot",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a customer support chatbot trained on our docs. Should I fine-tune a model or use RAG? We have about 500 pages of documentation."
+    },
+    {
+      "role": "assistant",
+      "content": "For 500 pages of docs, **RAG is the clear winner**:\n\n**RAG (Retrieval-Augmented Generation)**:\n- No training needed (just embed and index docs)\n- Easy to update (re-embed changed docs)\n- Answers are grounded in actual documents\n- Can cite sources\n- Works with any base model (GPT-4, Claude, Llama)\n\n**Fine-tuning**:\n- Teaches the model a specific *style* or *behavior*\n- Doesn't reliably teach factual knowledge\n- Expensive to retrain when docs change\n- Risk of hallucination (model may confuse trained facts)\n\nFine-tuning is for: changing how the model responds (tone, format, domain vocabulary). RAG is for: making the model answer questions about specific documents. You want RAG."
+    },
+    {
+      "role": "user",
+      "content": "What's the stack look like? We have a python backend already."
+    },
+    {
+      "role": "assistant",
+      "content": "RAG stack for Python:\n\n**Embedding**: OpenAI `text-embedding-3-small` or open-source `sentence-transformers` (all-MiniLM-L6-v2 or BGE-small)\n\n**Vector Store**: pgvector (if you have Postgres), Qdrant, or ChromaDB (simplest for prototyping)\n\n**Chunking**: LangChain's RecursiveCharacterTextSplitter or LlamaIndex's SentenceSplitter (500-1000 token chunks with 100 token overlap)\n\n**LLM**: Claude or GPT-4 for generation. Use the AI SDK or LangChain for orchestration.\n\n**Pipeline**:\n1. Chunk docs → embed → store in vector DB\n2. User asks question → embed query → find top-5 relevant chunks\n3. Inject chunks into system prompt → LLM generates grounded answer\n\nFor 500 pages, the entire index fits in a few hundred MB. ChromaDB can even run in-memory."
+    }
+  ]
+}

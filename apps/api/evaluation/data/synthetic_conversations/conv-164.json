@@ -1,0 +1,23 @@
+{
+  "id": "conv-164",
+  "domain": "ml",
+  "topic": "AI agents: LangGraph vs CrewAI vs AutoGen",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Want to build an AI agent that can browse the web, write code, and query databases. LangGraph, CrewAI, or AutoGen?"
+    },
+    {
+      "role": "assistant",
+      "content": "Agent frameworks serve different patterns:\n\n**LangGraph** (LangChain team):\n- Graph-based orchestration (nodes = steps, edges = transitions)\n- Most flexible, most control\n- Human-in-the-loop checkpoints\n- Streaming support\n- Steepest learning curve\n- Best for: custom agent architectures, production systems\n\n**CrewAI**:\n- Role-based multi-agent system (define agent roles, tasks, tools)\n- Simpler API than LangGraph\n- Agents collaborate via delegation\n- Good for: multi-step workflows with specialized agents\n- Less control over execution flow\n\n**AutoGen** (Microsoft):\n- Multi-agent conversation framework\n- Agents talk to each other in a chat\n- Code execution sandbox built-in\n- Good for: code generation, research tasks\n- Less structured than LangGraph\n\nFor your use case (web browse + code + database):\n- **LangGraph** if you want precise control over the agent's decision tree\n- **CrewAI** if you want to define agents like \"researcher browses web, developer writes code, DBA queries database\""
+    },
+    {
+      "role": "user",
+      "content": "We want production-grade with good error handling. LangGraph then?"
+    },
+    {
+      "role": "assistant",
+      "content": "LangGraph for production is the right call. Key patterns:\n\n**1. State management**: Define typed state that flows through the graph\n**2. Conditional edges**: Route based on tool results or LLM decisions\n**3. Checkpointing**: Save state at each step for recovery and human review\n**4. Tool integration**: Use LangChain tools or custom functions\n\nFor your tools:\n- **Web browsing**: `playwright` tool (programmatic browser) or `tavily` (search API)\n- **Code execution**: Sandboxed via `e2b` (cloud sandbox) or Docker\n- **Database queries**: SQLAlchemy tool with query validation\n\n**Important for production**:\n- Add timeout on each tool call (web browsing can hang)\n- Validate LLM-generated SQL before execution (prevent injection)\n- Rate limit tool calls (prevent infinite loops)\n- Log every step for debugging\n- Add human approval for destructive actions (database writes)\n\nLangGraph's checkpointing is critical — if a step fails, you resume from the checkpoint instead of restarting the entire agent."
+    }
+  ]
+}

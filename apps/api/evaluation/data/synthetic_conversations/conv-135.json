@@ -1,0 +1,23 @@
+{
+  "id": "conv-135",
+  "domain": "devops",
+  "topic": "Monorepo CI optimization with Turborepo",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our monorepo CI takes 25 minutes. Using Turborepo but builds still run everything. What are we doing wrong with our turbofile?"
+    },
+    {
+      "role": "assistant",
+      "content": "Common Turborepo CI mistakes:\n\n**1. Missing `outputs`** - Turbo can't cache without knowing what to cache\n**2. Not using remote caching** - `npx turbo build test lint --remote-only`\n**3. Not filtering to affected packages** - `npx turbo build --filter=...[HEAD~1]`\n**4. Tasks running sequentially** that could be parallel - lint doesn't depend on build\n**5. No `.turbo/` in `.gitignore`**"
+    },
+    {
+      "role": "user",
+      "content": "We're not using remote caching. How do we set it up?"
+    },
+    {
+      "role": "assistant",
+      "content": "Remote caching options:\n\n**Vercel Remote Cache** (simplest): `npx turbo login && npx turbo link`. In CI, set TURBO_TOKEN and TURBO_TEAM environment variables.\n\n**Self-hosted**: turborepo-remote-cache Docker image, or S3-compatible storage.\n\n**Impact estimate** for your 25-minute CI:\n- With remote cache + affected filter: 3-8 minutes\n- Cache hit (no code changes in package): <30 seconds\n\nThe `--filter=...[HEAD~1]` combined with remote caching is the biggest win. Only changed packages build, and they hit cache if another developer already built them."
+    }
+  ]
+}

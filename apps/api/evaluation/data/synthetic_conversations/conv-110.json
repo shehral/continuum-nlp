@@ -1,0 +1,23 @@
+{
+  "id": "conv-110",
+  "domain": "devops",
+  "topic": "Kubernetes cost optimization",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Our EKS bill is $8k/month. We have 20 nodes but utilization seems low. How do we optimize?"
+    },
+    {
+      "role": "assistant",
+      "content": "K8s cost optimization has several levers:\n\n**1. Right-size pods** (biggest impact)\n- Install **Vertical Pod Autoscaler (VPA)** in recommendation mode\n- Most teams over-request by 2-5x\n- If a pod requests 1CPU/1GB but uses 200m/256MB, you're wasting 80%\n- Use VPA recommendations to set accurate requests\n\n**2. Cluster autoscaling**\n- **Karpenter** (AWS) > Cluster Autoscaler\n- Karpenter picks optimal instance types, consolidates nodes\n- Spot instances for non-critical workloads (60-90% savings)\n```yaml\napiVersion: karpenter.sh/v1\nkind: NodePool\nspec:\n  template:\n    spec:\n      requirements:\n        - key: karpenter.sh/capacity-type\n          values: [\"spot\", \"on-demand\"]\n```\n\n**3. ARM instances (Graviton)**\n- 20% cheaper than x86 equivalents\n- Most workloads work on ARM\n- Multi-arch images: `docker buildx build --platform linux/amd64,linux/arm64`\n\n**4. Dev/staging optimization**\n- Downscale non-prod at night (scale to 0 pods)\n- Use smaller node types for non-prod\n\n**5. Visibility**\n- **Kubecost** (open-source) — per-pod, per-namespace cost attribution\n- **OpenCost** — CNCF project for K8s cost monitoring"
+    },
+    {
+      "role": "user",
+      "content": "Karpenter sounds great. How much can we realistically save?"
+    },
+    {
+      "role": "assistant",
+      "content": "Based on typical EKS optimizations on an $8k/month bill:\n\n**Karpenter + Spot instances**: 40-60% savings on compute\n- Karpenter automatically picks cheapest instance types\n- Spot for stateless workloads (API servers, workers): 60-90% off\n- Keep on-demand for databases, stateful workloads\n- Estimated savings: **$2,400-3,600/month**\n\n**Right-sizing pods** (VPA recommendations): 20-40% savings\n- Typical over-provisioning wastes 2-5x resources\n- Better requests → fewer nodes needed → Karpenter deprovisions idle nodes\n- Estimated savings: **$1,600-3,200/month** (overlaps with Karpenter)\n\n**Graviton (ARM)**: Additional 20% on remaining compute\n- Estimated savings: **$500-800/month**\n\n**Non-prod scheduling**: Scale dev/staging to zero at night/weekends\n- 66% of hours are off-hours\n- Estimated savings: **$500-1,000/month** on non-prod\n\n**Realistic total savings**: $4,000-6,000/month (50-75% reduction)\nTarget bill: **$2,000-4,000/month**\n\nImplement in order: Karpenter first (biggest impact, least risk), then right-sizing, then Spot, then Graviton."
+    }
+  ]
+}

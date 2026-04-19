@@ -1,0 +1,23 @@
+{
+  "id": "conv-021",
+  "domain": "backend",
+  "topic": "Redis vs Memcached for caching",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need a caching layer for our API. Redis or memcached? Mostly caching API responses and session data."
+    },
+    {
+      "role": "assistant",
+      "content": "**Redis** in almost every case. The only reason to pick Memcached is extreme simplicity for pure key-value caching.\n\n**Redis** advantages:\n- Data structures: strings, hashes, lists, sets, sorted sets, streams\n- Persistence (RDB/AOF) - survives restarts\n- Pub/sub for real-time features\n- Lua scripting for atomic operations\n- TTL per key (automatic expiry)\n- Cluster mode for horizontal scaling\n\n**Memcached** advantages:\n- Slightly faster for simple GET/SET (~5-10%)\n- Multi-threaded (Redis is mostly single-threaded)\n- Simpler to operate\n- Lower memory overhead per key\n\nFor API response caching + sessions, Redis is the standard. You'll likely want Redis for rate limiting, queues, and pub/sub later anyway."
+    },
+    {
+      "role": "user",
+      "content": "We're on AWS. ElastiCache Redis or self-managed?"
+    },
+    {
+      "role": "assistant",
+      "content": "**ElastiCache Redis** for production, definitely. Self-managing Redis is not worth the ops burden.\n\nAlternatives to consider:\n- **ElastiCache Serverless** - Auto-scales, pay per use. Great if your traffic is bursty.\n- **Upstash** - Serverless Redis with a generous free tier. REST API option for edge functions.\n- **Dragonfly** - Redis-compatible but multi-threaded. 25x throughput. Drop-in replacement.\n\nFor your use case (API caching + sessions), ElastiCache Redis with a `cache.t4g.small` ($25/month) is plenty to start. Enable cluster mode later if you need to scale."
+    }
+  ]
+}

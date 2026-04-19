@@ -1,0 +1,23 @@
+{
+  "id": "conv-140",
+  "domain": "web-development",
+  "topic": "Server-sent events vs WebSockets for real-time updates",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Need real-time updates in our Next.js app. SSE or WebSockets? It's one-directional - server pushes updates to client."
+    },
+    {
+      "role": "assistant",
+      "content": "For one-directional server -> client updates, **SSE** is the better choice:\n\n**SSE**: Built into browser (EventSource API), works through proxies/CDNs/load balancers, automatic reconnection, simple HTTP.\n**WebSockets**: Bidirectional, binary support, requires WebSocket-aware infrastructure, no auto-reconnect.\n\nFor your use case: SSE is simpler, more reliable, and easier to deploy. SSE is what ChatGPT, Claude, and most AI chat interfaces use for streaming."
+    },
+    {
+      "role": "user",
+      "content": "How do I implement SSE with Next.js App Router + FastAPI backend?"
+    },
+    {
+      "role": "assistant",
+      "content": "FastAPI SSE uses StreamingResponse with `text/event-stream` media type. The generator yields `data: {json}\\n\\n` formatted events.\n\nThe Next.js client uses the native EventSource API in a useEffect hook. EventSource handles reconnection automatically - if the connection drops, it reconnects and sends the Last-Event-ID header so the server can resume.\n\nKey points:\n- Set `Cache-Control: no-cache` and `Connection: keep-alive` headers\n- Use `'use client'` directive for the component\n- Clean up with `eventSource.close()` in the useEffect cleanup function"
+    }
+  ]
+}

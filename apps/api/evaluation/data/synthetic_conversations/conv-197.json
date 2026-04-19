@@ -1,0 +1,15 @@
+{
+  "id": "conv-197",
+  "domain": "backend",
+  "topic": "Exploring Effect-TS for TypeScript error handling",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Someone on our team is evangelizing Effect-TS for our Node.js backend. Is it worth the learning curve?"
+    },
+    {
+      "role": "assistant",
+      "content": "Effect-TS is a powerful but complex library for building robust TypeScript applications:\n\n**What Effect provides**:\n- Typed errors (errors in the type signature, not just thrown)\n- Dependency injection (no runtime DI framework needed)\n- Structured concurrency (like Rust's tokio or Go's goroutines)\n- Resource management (guaranteed cleanup)\n- Retries, timeouts, scheduling built-in\n- Observability (tracing, metrics, logging) integrated\n\n**The tradeoff**:\n```typescript\n// Without Effect\nasync function getUser(id: string): Promise<User> {\n  const res = await fetch(`/api/users/${id}`);\n  if (!res.ok) throw new Error('Failed');\n  return res.json();\n}\n\n// With Effect\nconst getUser = (id: string): Effect.Effect<User, HttpError | ParseError, HttpClient> =>\n  pipe(\n    HttpClient.get(`/api/users/${id}`),\n    Effect.flatMap(res => parseUser(res.body)),\n  );\n```\n\nEffect version: errors are in the type system, dependencies are tracked, everything is composable.\n\n**Worth it if**: Building a complex backend where reliability matters (financial systems, data pipelines). Team is willing to invest 2-4 weeks learning.\n\n**Not worth it if**: Simple CRUD APIs, small team, fast-shipping startup, team doesn't enjoy functional programming patterns.\n\nHonest take: Effect is excellent engineering but has a significant learning curve. For most teams, TypeScript + Zod + explicit error handling is sufficient."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "conv-125",
+  "domain": "cloud-architecture",
+  "topic": "Edge computing patterns with Cloudflare Workers",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Want to move some of our API logic to the edge using CF Workers. What patterns work well?"
+    },
+    {
+      "role": "assistant",
+      "content": "Cloudflare Workers excel at specific patterns:\n\n**Great at the edge**:\n1. **API gateway / routing**\n2. **Auth at the edge** - Verify JWTs before hitting origin\n3. **A/B testing**\n4. **Personalization** - Geolocation-based content\n5. **Rate limiting** - Using Workers KV or Durable Objects\n6. **Response transformation**\n\n**Data layer for Workers**:\n- **KV** - Global key-value, eventually consistent\n- **D1** - SQLite at the edge\n- **Durable Objects** - Strongly consistent, stateful\n- **R2** - S3-compatible storage"
+    },
+    {
+      "role": "user",
+      "content": "The auth at edge pattern interests me. We use JWT. How would that work?"
+    },
+    {
+      "role": "assistant",
+      "content": "JWT verification at the Cloudflare edge:\n\nThe Worker intercepts all requests, extracts the Bearer token, verifies the JWT using the Web Crypto API (no npm packages needed), and adds user context headers (X-User-ID, X-User-Role) before forwarding to your origin.\n\n**Benefits**:\n- Invalid requests rejected at the edge (never hit your origin)\n- Reduced load on your API servers\n- Lower latency for auth checks\n- Origin trusts X-User-ID header (only Workers can set it)\n\n**Security**: Ensure your origin only accepts requests from Cloudflare (use authenticated origin pulls or check CF-Connecting-IP)."
+    }
+  ]
+}

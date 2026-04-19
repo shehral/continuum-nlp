@@ -1,0 +1,15 @@
+{
+  "id": "conv-193",
+  "domain": "backend",
+  "topic": "Idempotency in API design",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Users sometimes double-click our submit button and create duplicate orders. How do we make our API idempotent?"
+    },
+    {
+      "role": "assistant",
+      "content": "Idempotency ensures repeated requests produce the same result:\n\n**Pattern: Idempotency Key**\n\nClient sends a unique key with each request:\n```\nPOST /api/orders\nIdempotency-Key: 550e8400-e29b-41d4-a716-446655440000\n```\n\n**Server implementation** (FastAPI + Redis):\n```python\nasync def create_order(request: OrderRequest, idempotency_key: str = Header()):\n    # Check if we've seen this key before\n    cached = await redis.get(f\"idempotency:{idempotency_key}\")\n    if cached:\n        return json.loads(cached)  # Return same response\n    \n    # Process the order\n    order = await process_order(request)\n    \n    # Cache the response (24 hour TTL)\n    await redis.setex(\n        f\"idempotency:{idempotency_key}\",\n        86400,\n        json.dumps(order)\n    )\n    return order\n```\n\n**Client-side**:\n```typescript\nconst idempotencyKey = crypto.randomUUID();\n\n// Both clicks send the same key\nawait fetch('/api/orders', {\n  method: 'POST',\n  headers: { 'Idempotency-Key': idempotencyKey },\n  body: JSON.stringify(order),\n});\n```\n\n**Additional protections**:\n- Disable button after first click (UX)\n- Database unique constraint on idempotency_key (belt + suspenders)\n- Return 409 Conflict if key was used with different request body\n\nThis is how Stripe handles it. Every POST endpoint accepts an `Idempotency-Key` header."
+    }
+  ]
+}

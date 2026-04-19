@@ -1,0 +1,23 @@
+{
+  "id": "conv-018",
+  "domain": "ml",
+  "topic": "LangChain vs LlamaIndex for RAG pipeline",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Building a RAG system for our internal docs. LangChain or LlamaIndex? We need to search across confluence, notion, and github repos."
+    },
+    {
+      "role": "assistant",
+      "content": "Both have evolved significantly. Current state:\n\n**LangChain**:\n- General-purpose LLM framework (agents, chains, tools)\n- RAG is one of many use cases\n- 700+ integrations including Confluence and Notion loaders\n- Can be over-engineered for simple RAG\n- LangSmith for observability\n\n**LlamaIndex**:\n- Purpose-built for RAG and data retrieval\n- Better abstractions for indexing, retrieval, and synthesis\n- Built-in support for multi-source queries\n- Simpler API for RAG-specific tasks\n- LlamaHub for data connectors\n\nFor multi-source RAG (Confluence + Notion + GitHub), **LlamaIndex** is the more natural fit. Its `VectorStoreIndex` + `QueryEngine` pattern is cleaner than LangChain's chain-based approach for this use case."
+    },
+    {
+      "role": "user",
+      "content": "What about using the AI SDK from vercel instead? We're already in the ts/node ecosystem."
+    },
+    {
+      "role": "assistant",
+      "content": "The Vercel AI SDK is great for the *frontend/API layer* but doesn't replace LlamaIndex/LangChain for the RAG pipeline itself:\n\n- **AI SDK**: Handles streaming, chat UI (useChat), tool calling, model routing\n- **LlamaIndex/LangChain**: Handles document ingestion, chunking, embedding, retrieval\n\nYou'd typically use both:\n1. LlamaIndex (Python) for the RAG pipeline backend\n2. AI SDK (TypeScript) for the chat frontend and streaming\n\nOr if you want to stay pure TypeScript, **LlamaIndex.TS** exists but is less mature than the Python version. Another option: use the AI SDK's tool calling to build RAG from scratch with a vector DB like Qdrant or pgvector."
+    }
+  ]
+}
