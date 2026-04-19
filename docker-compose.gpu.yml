@@ -1,0 +1,14 @@
+# GPU passthrough overlay — apply alongside docker-compose.yml on hosts that
+# have NVIDIA Container Toolkit installed (i.e. the GCP T4 instance, not Macs).
+#
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+#
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
