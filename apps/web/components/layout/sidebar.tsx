@@ -36,10 +36,10 @@ import {
 const navigation = [
   { name: "Ask", href: "/ask", icon: MessageSquare, live: true },
   { name: "Knowledge Graph", href: "/graph", icon: Network, live: true },
+  { name: "Decisions", href: "/decisions", icon: ClipboardList, live: true },
 ]
 
 const disabledNavigation = [
-  { name: "Decisions list", href: "/decisions", icon: ClipboardList },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Add Knowledge", href: "/add", icon: Brain },
   { name: "Projects", href: "/projects", icon: Folder },
