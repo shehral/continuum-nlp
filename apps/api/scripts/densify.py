@@ -50,17 +50,18 @@ def main() -> int:
             s.run("MATCH ()-[r:SIMILAR_TO]->() DELETE r").consume()
 
             # Symmetric kNN with raw cosine. For each decision we compute its
-            # top-K nearest *across all peers* (not just lexicographically-greater
-            # ones), then dedupe so each pair is stored once. This avoids the
-            # asymmetric "low-id decisions get neighbors, high-id decisions
-            # don't" pattern of the earlier implementation, and produces a
-            # graph where every node's degree is bounded by 2K (own picks +
-            # peers who picked it).
+            # top-K nearest *across all peers* (not just lexicographically
+            # greater ones), then dedupe so each pair is stored once. Avoids
+            # the asymmetric "low-id decisions get neighbors, high-id ones
+            # don't" pattern of the earlier implementation, and bounds every
+            # node's degree by 2K (own picks + peers who picked it).
             #
-            # gds.similarity.cosine returns raw cosine in [-1, 1], unlike
-            # neo4j's built-in vector.similarity.cosine which returns
-            # (1 + cos) / 2 in [0, 1]. We deliberately use the raw form so
-            # the threshold is interpretable.
+            # Neo4j Community ships the built-in vector.similarity.cosine,
+            # which returns (1 + raw_cos) / 2 in [0, 1] -- not raw cosine.
+            # We convert in-Cypher via `2 * sim - 1` so the threshold and
+            # stored .similarity property are both raw cosine in [-1, 1].
+            # (gds.similarity.cosine would let us skip the conversion but
+            # requires the GDS plugin, which isn't deployed here.)
             result = s.run(
                 """
                 MATCH (d:DecisionTrace) WHERE d.embedding IS NOT NULL
@@ -69,14 +70,13 @@ def main() -> int:
                 UNWIND decisions AS d2
                 WITH d1, d2 WHERE d1.id <> d2.id
                 WITH d1, d2,
-                     gds.similarity.cosine(d1.embedding, d2.embedding) AS sim
+                     2 * vector.similarity.cosine(d1.embedding, d2.embedding) - 1 AS sim
                 WHERE sim >= $min_sim
                 WITH d1, d2, sim
                 ORDER BY sim DESC
                 WITH d1, collect({d2: d2, sim: sim})[0..$k] AS top
                 UNWIND top AS t
                 WITH d1, t.d2 AS d2, t.sim AS sim
-                // Order endpoints canonically so MERGE deduplicates each pair.
                 WITH CASE WHEN d1.id < d2.id THEN d1 ELSE d2 END AS lo,
                      CASE WHEN d1.id < d2.id THEN d2 ELSE d1 END AS hi,
                      sim
