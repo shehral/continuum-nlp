@@ -213,8 +213,14 @@ class ApiClient {
     include_entity_relations?: boolean
     source_filter?: "claude_logs" | "interview" | "manual" | "unknown"
     project_filter?: string
+    page_size?: number
   }): Promise<GraphData> {
     const params = new URLSearchParams()
+    // Demo corpus is 386 decisions; request 500 (backend cap) so a single
+    // fetch returns the whole graph. Without this the default (page_size=100)
+    // renders a truncated subset and "navigate to similar decision" in the
+    // side panel silently fails when the target is outside the first 100.
+    params.append("page_size", String(options?.page_size ?? 500))
     if (options?.include_similarity !== undefined)
       params.append("include_similarity", String(options.include_similarity))
     if (options?.include_temporal !== undefined)
@@ -225,8 +231,7 @@ class ApiClient {
       params.append("source_filter", options.source_filter)
     if (options?.project_filter)
       params.append("project_filter", options.project_filter)
-    const query = params.toString()
-    return this.fetch<GraphData>(`/api/graph${query ? `?${query}` : ""}`)
+    return this.fetch<GraphData>(`/api/graph?${params.toString()}`)
   }
 
   async getDecisionSources(): Promise<Record<string, number>> {

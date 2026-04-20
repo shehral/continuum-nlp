@@ -1645,16 +1645,20 @@ function KnowledgeGraphInner({
                               <button
                                 key={related.id}
                                 onClick={() => {
-                                  // Find and select the related decision node
                                   const relatedNode = nodes.find((n) => n.id === related.id)
                                   if (relatedNode) {
                                     setSelectedNode(relatedNode)
                                     setFocusedNodeId(relatedNode.id)
                                     centerOnNode(relatedNode)
+                                  } else {
+                                    // Safety net: node wasn't in the rendered graph
+                                    // (e.g., filtered out). Open the decision detail.
+                                    window.location.href = `/decisions/${related.id}`
                                   }
                                 }}
                                 className="w-full text-left p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition-colors group"
                                 role="listitem"
+                                title="Click to center the graph on this decision"
                               >
                                 <div className="flex items-start justify-between gap-2">
                                   <p className="text-xs text-slate-200 line-clamp-2 group-hover:text-white">
