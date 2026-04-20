@@ -20,9 +20,16 @@ import { cn } from "@/lib/utils"
 export default function DecisionsListPage() {
   const [query, setQuery] = useState("")
 
+  // API caps `limit` at 100, so fetch 4 pages and concat to cover the 386
+  // decisions in the demo graph.
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["decisions-list-all"],
-    queryFn: () => api.getDecisions(500, 0), // 386 decisions in graph; fetch all
+    queryFn: async () => {
+      const pages = await Promise.all(
+        [0, 100, 200, 300].map((offset) => api.getDecisions(100, offset))
+      )
+      return pages.flat()
+    },
     staleTime: 5 * 60 * 1000,
   })
 
