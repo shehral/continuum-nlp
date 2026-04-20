@@ -82,6 +82,9 @@ paper/
 # Archive — out-of-scope original-Continuum code, kept for reference
 _archive/
 
+# Claude Code project memory (internal AI-assistant context, not for submission)
+CLAUDE.md
+
 # Heavy GIFs from prior version + Playwright artifacts — never commit.
 media/
 apps/web/public/media/
