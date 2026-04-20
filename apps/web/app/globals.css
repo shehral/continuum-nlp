@@ -207,23 +207,29 @@
     50% { transform: translateY(-10px); }
   }
 
-  /* Flash animation for source-card citation targets. Triggered by the
-     chat-UI's inline [N] pill click: the referenced card briefly pulses
-     with a primary-tinted ring so the grader can see which card the
-     claim came from. */
+  /* Flash animation for source-card citation targets. Keyframes live
+     in @theme (required by Tailwind v4); the class selector that uses
+     them lives outside the @theme block below, per Tailwind v4 rules. */
   @keyframes citation-flash {
     0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
     20%  { box-shadow: 0 0 0 4px hsl(var(--primary) / 0.55); }
     60%  { box-shadow: 0 0 0 4px hsl(var(--primary) / 0.40); }
     100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
   }
-  .citation-flash {
-    animation: citation-flash 1.4s ease-out;
-  }
 
   @keyframes shimmer {
     100% { transform: translateX(100%); }
   }
+}
+
+/* Citation-flash class uses the keyframe defined inside @theme above.
+   Tailwind v4 only permits @keyframes (not selectors) inside @theme,
+   so the rule lives out here in the normal stylesheet. Applied by
+   the chat-UI's message-bubble when a reader clicks an inline [N]
+   pill so the grader sees exactly which source card a claim came
+   from without leaving the page. */
+.citation-flash {
+  animation: citation-flash 1.4s ease-out;
 }
 
 /* Base layer styles */
