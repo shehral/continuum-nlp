@@ -240,6 +240,16 @@ continuum-nlp/
 └── .env.example
 ```
 
+## Related work
+
+The 386 decisions in the graph were extracted by an earlier cloud-served
+prototype of this system that ran against NVIDIA NIM (49B Nemotron) with
+2048-dimensional NV-EmbedQA embeddings. That prototype is a separate repo
+and is not part of this CS 6120 submission. If you want the end-to-end
+original — including the capture surfaces, MCP server, and write APIs
+that are explicitly out of scope here — it lives at
+<https://github.com/shehral/continuum>.
+
 ## License
 
 See [LICENSE](LICENSE) for the full terms — academic review and research
