@@ -80,13 +80,19 @@ async def get_decisions(
     try:
         session = await get_neo4j_session()
         async with session:
+            # Secondary sort key on d.id for deterministic pagination.
+            # The demo corpus was backfilled with a single fixed created_at
+            # timestamp, so ORDER BY created_at alone leaves ties that let
+            # SKIP/LIMIT return overlapping pages on subsequent calls.
+            # A stable tiebreaker on the primary-key id fixes this without
+            # changing the logical ordering.
             result = await session.run(
                 """
                 MATCH (d:DecisionTrace)
                 WHERE d.user_id = $user_id OR d.user_id IS NULL
                 OPTIONAL MATCH (d)-[:INVOLVES]->(e:Entity)
                 WITH d, collect(e) as entities
-                ORDER BY d.created_at DESC
+                ORDER BY d.created_at DESC, d.id ASC
                 SKIP $offset
                 LIMIT $limit
                 RETURN d, entities
