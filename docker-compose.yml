@@ -41,8 +41,9 @@ services:
       NEO4J_apoc_export_file_enabled: "true"
       NEO4J_apoc_import_file_enabled: "true"
       NEO4J_apoc_import_file_use__neo4j__config: "true"
-      NEO4J_dbms_memory_heap_initial__size: 512m
-      NEO4J_dbms_memory_heap_max__size: 1G
+      # Bumped from 512m/1G — the cypher snapshot restore OOMs at 1 GB heap.
+      NEO4J_dbms_memory_heap_initial__size: 2G
+      NEO4J_dbms_memory_heap_max__size: 4G
     ports:
       - "127.0.0.1:7475:7474"  # HTTP - host 7475
       - "127.0.0.1:7688:7687"  # Bolt - host 7688

@@ -24,9 +24,10 @@ venv/
 .env.local
 .env.*.local
 
-# Data snapshots — populated graph + postgres dumps for demo.
-# Contains real decision data; do not commit.
-data/snapshots/
+# Data snapshots are committed for full reproducibility — they contain only
+# extractions from synthetic conversations (no PII). 20 MB cypher + ~8 KB SQL.
+# Uncomment to exclude from a future fork:
+# data/snapshots/
 
 # IDE
 .idea/
