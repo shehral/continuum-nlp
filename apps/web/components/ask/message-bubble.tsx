@@ -1,10 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { cn } from "@/lib/utils"
-import type { AskMessage, AskSubgraph } from "@/lib/api"
+import type { AskMessage } from "@/lib/api"
 import { SourceCards } from "./source-cards"
 
 interface MessageBubbleProps {
@@ -155,15 +154,46 @@ export function MessageBubble({ message, index }: MessageBubbleProps) {
                     ? message.sources.citation_ids[n - 1]
                     : undefined
                 if (decisionId) {
-                  const label = `Citation ${n}: open decision ${decisionId.slice(0, 8)}`
-                  const preview = message.sources.nodes.find(
+                  const sourceNode = message.sources.nodes.find(
                     (node) => node.id === decisionId
-                  )?.data?.trigger
+                  )
+                  const preview = sourceNode?.data?.trigger
+                  const tooltip = preview
+                    ? `[${n}] ${preview}  —  click to jump to the source card; shift-click to open the full trace`
+                    : `Citation ${n}`
+
+                  const onCiteClick = (
+                    evt: React.MouseEvent<HTMLAnchorElement>
+                  ) => {
+                    // Shift-click (or ctrl/cmd-click) still opens the full
+                    // decision trace in a new page — power-user escape hatch.
+                    if (evt.shiftKey || evt.metaKey || evt.ctrlKey) {
+                      window.open(`/decisions/${decisionId}`, "_blank")
+                      evt.preventDefault()
+                      return
+                    }
+                    evt.preventDefault()
+                    const target = document.getElementById(`cite-${n}`)
+                    if (!target) {
+                      // Card isn't in this message's strip for some reason —
+                      // fall through to full trace so the claim is still verifiable.
+                      window.location.href = `/decisions/${decisionId}`
+                      return
+                    }
+                    target.scrollIntoView({ behavior: "smooth", block: "center" })
+                    target.classList.add("citation-flash")
+                    window.setTimeout(
+                      () => target.classList.remove("citation-flash"),
+                      1400
+                    )
+                  }
+
                   return (
-                    <Link
-                      href={`/decisions/${decisionId}`}
-                      title={preview ? `[${n}] ${preview}` : label}
-                      aria-label={label}
+                    <a
+                      href={`#cite-${n}`}
+                      onClick={onCiteClick}
+                      title={tooltip}
+                      aria-label={tooltip}
                       className={cn(
                         "inline-flex mx-0.5 px-1.5 py-[1px]",
                         "align-super text-[0.72em] font-medium font-mono no-underline",
@@ -173,7 +203,7 @@ export function MessageBubble({ message, index }: MessageBubbleProps) {
                       )}
                     >
                       {children}
-                    </Link>
+                    </a>
                   )
                 }
               }

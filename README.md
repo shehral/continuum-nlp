@@ -90,7 +90,7 @@ The snapshots in `data/snapshots/` are committed to the repo for full
 reproducibility:
 
 - `continuum-nlp-final.cypher` (20 MB) — the entire knowledge graph: 386
-  decisions, 847 entities, 1,271 INVOLVES edges, 2,840 SIMILAR\_TO edges,
+  decisions, 847 entities, 1,271 INVOLVES edges, 1,562 SIMILAR\_TO edges,
   768-d embeddings, and the vector + fulltext indexes. Restoring this dump
   gives you exactly the graph the live demo serves.
 - `continuum-nlp-postgres.sql` (~8 KB) — Postgres user/auth tables.
@@ -187,11 +187,14 @@ The numbers in Table 5 of the report come from
 writes machine-readable results to `/tmp/continuum_eval_results.json`:
 
 ```bash
+# The script is a package module, so run it from apps/api/ with PYTHONPATH=.
+cd apps/api
+
 # Against your local stack
-API_BASE=http://localhost:8000 python -m scripts.eval_retrieval
+API_BASE=http://localhost:8000 PYTHONPATH=. python -m scripts.eval_retrieval
 
 # Against the live demo (default)
-python -m scripts.eval_retrieval
+PYTHONPATH=. python -m scripts.eval_retrieval
 ```
 
 Ground truth per query is built programmatically from entity-presence in the
@@ -232,11 +235,13 @@ continuum-nlp/
 │       ├── app/      ask, graph, decisions/[id], plus auth pages
 │       ├── components/ ask, graph, landing, layout, ui
 │       └── e2e/      Playwright specs
-├── data/snapshots/   Graph dump (not committed)
+├── data/snapshots/   Graph dump (committed, ~20 MB cypher)
 ├── docker-compose.yml
 └── .env.example
 ```
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+See [LICENSE](LICENSE) for the full terms — academic review and research
+collaboration only; no redistribution, no derivative works, no commercial
+use without explicit written permission.

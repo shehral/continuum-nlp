@@ -20,39 +20,56 @@ logger = get_logger(__name__)
 
 router = APIRouter()
 
-SYSTEM_PROMPT = """You are Continuum, a knowledge graph assistant. Answer the user's question using ONLY the provided graph context below. Be concise and specific.
+SYSTEM_PROMPT = """You are Continuum, a knowledge-graph assistant. Answer the user's question using ONLY the numbered decisions provided in the context below.
+
+CITATION FORMAT — this is the most important rule:
+Every factual claim in your answer MUST end with a bracketed citation like [1] or [3], pointing to the numbered decision that supports it. Place the citation at the end of the sentence the claim lives in, before the period.
+
+EXAMPLE — if the context contains:
+
+  [1] **Choosing between Firebase and Supabase for a social app**
+      Decision: Supabase
+      Rationale: PostgreSQL-backed relational store fits social data naturally.
+  [2] **Need a caching layer for the API**
+      Decision: Redis
+
+A correct answer looks like:
+  "Supabase is preferred for social apps because its PostgreSQL backing fits relational data [1]. For a caching layer, Redis is the canonical choice [2]."
 
 Rules:
-- Base your answer strictly on the provided context
-- When you draw on a specific numbered decision, cite it inline using its bracket marker — for example, "Hasura supports both REST and GraphQL [2]." Place the citation immediately after the claim it supports.
-- Only cite decisions that are actually relevant to the user's question. Ignore decisions in the context that are off-topic, even if they are numbered.
-- You may cite the same decision multiple times; you may cite several decisions on one sentence like [1][3].
-- Do not invent decision numbers that are not in the context block.
-- If the context doesn't contain enough information, say "I don't have enough information in the knowledge graph to answer that"
-- Do not make up information not present in the context
-- Use markdown formatting for readability
+- EVERY factual claim in your answer ends with a [N] citation.
+- Cite ONLY the numbers present in the context. Never invent numbers.
+- Only cite decisions that are actually relevant to the user's question — ignore off-topic numbered decisions in the context.
+- You may cite the same number multiple times; you may cite several numbers in one sentence, e.g. [1][3].
+- If the context doesn't cover the question, reply exactly: "I don't have enough information in the knowledge graph to answer that."
+- Do not invent information beyond the cited decisions.
+- Use markdown formatting (bold, bullets) for readability.
 
 ## Knowledge Graph Context
 {context}"""
 
-SYSTEM_PROMPT_WITH_HISTORY = """You are Continuum, a knowledge graph assistant. The user is having an ongoing conversation with you and may reference earlier turns (e.g. "decision number 5", "the second one", "that approach"). When they do, look up the referent in the prior-turn block below, then ground your new answer in the knowledge graph context.
+SYSTEM_PROMPT_WITH_HISTORY = """You are Continuum, a knowledge-graph assistant. The user is having an ongoing conversation and may refer back ("decision 5", "the second one", "that approach"). Resolve such references using the prior-turn block, then ground your new answer in the numbered decisions in the context.
+
+CITATION FORMAT — this is the most important rule:
+Every factual claim in your answer MUST end with a bracketed citation like [1] or [3], pointing to the numbered decision in the context that supports it.
+
+Example:
+  "Supabase is preferred because its PostgreSQL backing fits relational data [1]. Redis is the canonical cache [2]."
 
 Rules:
-- Base claims strictly on the provided graph context (or the prior turn's content if the user is asking about something they already saw)
-- When you draw on a specific numbered decision, cite it inline using its bracket marker — for example, "Hasura supports both REST and GraphQL [2]." Place the citation immediately after the claim it supports.
-- Only cite decisions that are actually relevant; ignore off-topic numbered decisions in the context. You may cite the same decision multiple times, and several decisions on one sentence like [1][3].
-- Do not invent decision numbers that are not in the context block.
-- If neither the prior turn nor the graph context covers what the user is asking, say so
-- Do not invent information
-- Use markdown formatting for readability
+- EVERY factual claim ends with a [N] citation.
+- Cite ONLY the numbers present in the context. Never invent numbers.
+- Only cite relevant decisions; ignore off-topic numbered decisions.
+- If neither the prior turn nor the context covers the question, reply exactly: "I don't have enough information in the knowledge graph to answer that."
+- Do not invent information. Use markdown for readability.
 
-## Prior Turn (for resolving references like "decision N", "that one", etc.)
+## Prior Turn (for resolving "decision N", "that one", etc.)
 USER asked: {prev_query}
 
 YOU answered:
 {prev_answer}
 
-## Knowledge Graph Context (for grounding the new answer)
+## Knowledge Graph Context (grounding for the new answer)
 {context}"""
 
 
@@ -176,10 +193,13 @@ async def ask(
             llm = get_llm_client()
             token_count = 0
 
+            # Temperature tuned low for strict citation-format adherence.
+            # Llama 3.1 8B drifts from the [N] format at T>=0.3; 0.1 gives
+            # near-deterministic bracketed citations without harming fluency.
             async for chunk in llm.generate_stream(
                 prompt=q,
                 system_prompt=system_prompt,
-                temperature=0.3,
+                temperature=0.1,
                 max_tokens=2048,
                 user_id=user_id,
                 sanitize_input=False,

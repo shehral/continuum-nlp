@@ -207,6 +207,20 @@
     50% { transform: translateY(-10px); }
   }
 
+  /* Flash animation for source-card citation targets. Triggered by the
+     chat-UI's inline [N] pill click: the referenced card briefly pulses
+     with a primary-tinted ring so the grader can see which card the
+     claim came from. */
+  @keyframes citation-flash {
+    0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+    20%  { box-shadow: 0 0 0 4px hsl(var(--primary) / 0.55); }
+    60%  { box-shadow: 0 0 0 4px hsl(var(--primary) / 0.40); }
+    100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+  }
+  .citation-flash {
+    animation: citation-flash 1.4s ease-out;
+  }
+
   @keyframes shimmer {
     100% { transform: translateX(100%); }
   }

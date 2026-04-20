@@ -23,6 +23,12 @@ interface SourceCardsProps {
  * Editorial citation strip. Shaped like coordinate plates: uppercase mono
  * kickers, bracketed id fragments, thin rule lines. Seed nodes get an active
  * violet "★ seed" tag; decision cards are clickable and link to /decisions/[id].
+ *
+ * Decision cards get a visible [N] badge whose number matches the inline
+ * [N] citations emitted in the LLM answer above. Each card also mounts
+ * an `id="cite-N"` anchor so inline citation pills can scroll to it and
+ * trigger a brief "flash" highlight — verifying a hallucination claim
+ * stays on one page.
  */
 export function SourceCards({ sources }: SourceCardsProps) {
   const ordered = [...sources.nodes].sort((a, b) => {
@@ -33,6 +39,12 @@ export function SourceCards({ sources }: SourceCardsProps) {
 
   const displayNodes = ordered.slice(0, 10)
   const total = sources.nodes.length
+
+  // Canonical [N] -> decision_id mapping as published by the backend in
+  // the SSE `context` event. Build the reverse for quick card lookup.
+  const citationIds = sources.citation_ids ?? []
+  const decisionIdToCite = new Map<string, number>()
+  citationIds.forEach((id, i) => decisionIdToCite.set(id, i + 1))
 
   return (
     <div className="w-full">
@@ -60,6 +72,7 @@ export function SourceCards({ sources }: SourceCardsProps) {
             const isDecision = node.type === "decision"
             const isSeed = Boolean(node.is_seed)
             const entityType = !isDecision ? node.data.entity_type || "concept" : undefined
+            const citeNumber = isDecision ? decisionIdToCite.get(node.id) : undefined
 
             const title = isDecision
               ? node.data.decision || node.data.trigger || "Decision"
@@ -74,12 +87,17 @@ export function SourceCards({ sources }: SourceCardsProps) {
 
             const card = (
               <motion.div
+                // Anchor so inline [N] pills can scrollIntoView here.
+                // We also expose the cite number on a data attribute so
+                // the message-bubble flash logic can target it.
+                id={citeNumber ? `cite-${citeNumber}` : undefined}
+                data-cite={citeNumber}
                 variants={{
                   hidden: { opacity: 0, y: 8 },
                   visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
                 }}
                 className={cn(
-                  "relative shrink-0 w-64 border bg-background/60 backdrop-blur-sm px-4 py-3 transition-all",
+                  "relative shrink-0 w-64 border bg-background/60 backdrop-blur-sm px-4 py-3 transition-all scroll-mt-24",
                   "group/card",
                   isSeed
                     ? "border-primary/60 shadow-[0_0_28px_-10px_hsl(var(--primary)/0.45)]"
@@ -91,6 +109,19 @@ export function SourceCards({ sources }: SourceCardsProps) {
                     : "cursor-default"
                 )}
               >
+                {citeNumber !== undefined && (
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "absolute -top-2 -left-2 h-6 min-w-[1.6rem] px-1.5 flex items-center justify-center",
+                      "font-mono text-[11px] font-medium text-primary-foreground",
+                      "bg-primary rounded-md border border-primary/70 shadow-sm",
+                      "tabular-nums"
+                    )}
+                  >
+                    [{citeNumber}]
+                  </span>
+                )}
                 {/* Corner bracket detail */}
                 <span
                   aria-hidden
