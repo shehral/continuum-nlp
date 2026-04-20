@@ -4,6 +4,12 @@ A small GraphRAG question-answering app over a knowledge graph of architectural
 decisions extracted from 200 synthetic developer–AI conversations. Built for
 CS 6120 (NLP, Spring 2026, Northeastern San Jose).
 
+**Final report:** [`final_report.pdf`](final_report.pdf) — ~16 pages covering
+motivation, methodology, evaluation (R_subgraph 0.73, MRR 0.81), and the
+CS 6120 grading rubric.
+**Live demo (when up):** <http://34.57.46.203:3000>
+**Full prior artefact (out of scope here):** <https://github.com/shehral/continuum>
+
 The whole serving stack — Llama 3.1 8B (answer generation), `nomic-embed-text`
 (embeddings, 768-d), Neo4j, FastAPI, Next.js — runs locally via Docker on a
 single GPU. No cloud LLM calls at inference time. The 386 decisions in the
