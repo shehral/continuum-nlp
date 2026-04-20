@@ -132,9 +132,11 @@ async def ask(
             if prev_q and prev_a:
                 system_prompt = SYSTEM_PROMPT_WITH_HISTORY.format(
                     prev_query=prev_q,
-                    # Truncate prev_a in the prompt the same way we truncate
-                    # in retrieval — keeps the LLM's context budget stable.
-                    prev_answer=prev_a[:1500],
+                    # Cap at 4000 chars (~1000 tokens). Llama 3.1 8B has 8192
+                    # context; this leaves ample room for the graph context
+                    # and the new query. Higher cap prevents the model from
+                    # losing track of items deeper in a numbered list.
+                    prev_answer=prev_a[:4000],
                     context=context_text,
                 )
             else:
