@@ -429,15 +429,23 @@ class GraphRAGService:
         user_id: str,
         top_k: int = 5,
         depth: int = DEFAULT_HOP_DEPTH,
+        prev_query: str | None = None,
+        prev_answer: str | None = None,
         session=None,
     ) -> tuple[dict, str, list[str]]:
         """Full RAG pipeline: retrieve -> expand -> serialize.
 
         Args:
-            query: User question.
+            query: Current user question.
             user_id: Scoping user ID.
             top_k: Number of seed nodes to expand.
             depth: K-hop traversal depth.
+            prev_query: The user's previous turn, if any. Used to enrich
+                retrieval so follow-ups like "tell me more about #5" still
+                surface relevant nodes.
+            prev_answer: The assistant's previous answer text. Truncated and
+                folded into the retrieval query so semantically related nodes
+                resurface.
             session: Optional Neo4j session.
 
         Returns:
@@ -448,10 +456,24 @@ class GraphRAGService:
             session = await get_neo4j_session()
             close_session = True
 
+        # Build the retrieval query: when there's a prior turn, fold it in so
+        # the embedding picks up the topical thread the user is following up
+        # on. Cap the prior answer to 800 chars to keep the embedding focused.
+        if prev_query or prev_answer:
+            parts = []
+            if prev_query:
+                parts.append(prev_query.strip())
+            if prev_answer:
+                parts.append(prev_answer.strip()[:800])
+            parts.append(query.strip())
+            retrieval_query = "\n\n".join(parts)
+        else:
+            retrieval_query = query
+
         try:
             # Step 1: Hybrid retrieval
             fused_ids = await self.hybrid_retrieve(
-                query, user_id, session=session
+                retrieval_query, user_id, session=session
             )
             seed_ids = fused_ids[:top_k]
 

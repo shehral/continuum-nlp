@@ -32,6 +32,24 @@ Rules:
 ## Knowledge Graph Context
 {context}"""
 
+SYSTEM_PROMPT_WITH_HISTORY = """You are Continuum, a knowledge graph assistant. The user is having an ongoing conversation with you and may reference earlier turns (e.g. "decision number 5", "the second one", "that approach"). When they do, look up the referent in the prior-turn block below, then ground your new answer in the knowledge graph context.
+
+Rules:
+- Base claims strictly on the provided graph context (or the prior turn's content if the user is asking about something they already saw)
+- Reference specific decisions, entities, and relationships
+- If neither the prior turn nor the graph context covers what the user is asking, say so
+- Do not invent information
+- Use markdown formatting for readability
+
+## Prior Turn (for resolving references like "decision N", "that one", etc.)
+USER asked: {prev_query}
+
+YOU answered:
+{prev_answer}
+
+## Knowledge Graph Context (for grounding the new answer)
+{context}"""
+
 
 def _sse_event(event: str, data: dict) -> str:
     """Format a Server-Sent Event."""
@@ -43,9 +61,17 @@ async def ask(
     q: str = Query(..., min_length=3, description="The question to ask"),
     depth: int = Query(default=2, ge=1, le=3, description="Graph traversal depth"),
     top_k: int = Query(default=5, ge=1, le=10, description="Number of seed nodes"),
+    prev_q: Optional[str] = Query(default=None, description="Previous user question (for follow-ups)"),
+    prev_a: Optional[str] = Query(default=None, max_length=4000, description="Previous assistant answer (for follow-ups)"),
     user_id: str = Depends(get_current_user_id),
 ):
-    """Ask a question and receive a streamed answer grounded in the knowledge graph."""
+    """Ask a question and receive a streamed answer grounded in the knowledge graph.
+
+    For follow-up questions, pass the prior turn via `prev_q` and `prev_a`. The
+    retrieval query will be enriched with that context so referential queries
+    like "tell me more about decision 5" still surface the right subgraph, and
+    the LLM will see the prior turn in its system prompt.
+    """
 
     async def event_stream():
         try:
@@ -56,6 +82,8 @@ async def ask(
                 user_id=user_id,
                 top_k=top_k,
                 depth=depth,
+                prev_query=prev_q,
+                prev_answer=prev_a,
             )
 
             # Reshape nodes to match frontend AskSourceNode contract
@@ -98,8 +126,19 @@ async def ask(
                 yield _sse_event("done", {"token_count": len(no_info_msg.split())})
                 return
 
-            # Step 3: Stream LLM response
-            system_prompt = SYSTEM_PROMPT.format(context=context_text)
+            # Step 3: Stream LLM response. Pick the prompt template based on
+            # whether the caller passed a prior turn — the conversational
+            # template gives the model the previous Q+A to resolve references.
+            if prev_q and prev_a:
+                system_prompt = SYSTEM_PROMPT_WITH_HISTORY.format(
+                    prev_query=prev_q,
+                    # Truncate prev_a in the prompt the same way we truncate
+                    # in retrieval — keeps the LLM's context budget stable.
+                    prev_answer=prev_a[:1500],
+                    context=context_text,
+                )
+            else:
+                system_prompt = SYSTEM_PROMPT.format(context=context_text)
             llm = get_llm_client()
             token_count = 0
 

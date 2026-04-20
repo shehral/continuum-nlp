@@ -59,11 +59,35 @@ export function ChatPanel() {
     const userMessage: AskMessage = { id: userMsgId, role: "user", content: query }
     const assistantMessage: AskMessage = { id: assistantMsgId, role: "assistant", content: "" }
 
-    setMessages((prev) => [...prev, userMessage, assistantMessage])
+    // Capture the prior turn (most recent assistant message + the user query
+    // that produced it) so the API can resolve referential follow-ups like
+    // "tell me more about decision 5". Computed BEFORE we append the new
+    // turn to state.
+    let prevQ: string | undefined
+    let prevA: string | undefined
+    setMessages((prev) => {
+      const lastAssistant = [...prev].reverse().find(
+        (m) => m.role === "assistant" && m.content.trim().length > 0
+      )
+      if (lastAssistant) {
+        const idx = prev.indexOf(lastAssistant)
+        const lastUser = idx > 0 ? prev[idx - 1] : null
+        if (lastUser && lastUser.role === "user") {
+          prevQ = lastUser.content
+          prevA = lastAssistant.content
+        }
+      }
+      return [...prev, userMessage, assistantMessage]
+    })
     setIsLoading(true)
 
     try {
       const params = new URLSearchParams({ q: query })
+      if (prevQ && prevA) {
+        params.set("prev_q", prevQ)
+        // Cap to 4000 chars to match the API's max_length on prev_a.
+        params.set("prev_a", prevA.slice(0, 4000))
+      }
       const response = await fetch(`${API_URL}/api/ask?${params}`)
       if (!response.ok) throw new Error(`API error: ${response.status}`)
 
