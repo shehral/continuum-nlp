@@ -4,9 +4,12 @@ A small GraphRAG question-answering app over a knowledge graph of architectural
 decisions extracted from 200 synthetic developer–AI conversations. Built for
 CS 6120 (NLP, Spring 2026, Northeastern San Jose).
 
-The whole stack — Llama 3.1 8B, `nomic-embed-text` embeddings, Neo4j, FastAPI,
-Next.js — runs locally via Docker on a single GPU. No cloud LLM calls at
-inference time.
+The whole serving stack — Llama 3.1 8B (answer generation), `nomic-embed-text`
+(embeddings, 768-d), Neo4j, FastAPI, Next.js — runs locally via Docker on a
+single GPU. No cloud LLM calls at inference time. The 386 decisions in the
+graph were extracted off-line by an upstream NVIDIA NIM Nemotron 49B pipeline
+(prior research project) and are served from a committed snapshot; the
+demo never re-extracts.
 
 ## What you can do
 
@@ -93,13 +96,16 @@ reproducibility:
 - `continuum-nlp-postgres.sql` (~8 KB) — Postgres user/auth tables.
 
 Both files contain only synthetic-conversation extractions — no PII. If you
-ever want to rebuild the graph from scratch from the 200 source
-conversations under `apps/api/evaluation/data/synthetic_conversations/`,
-the extraction pipeline lives in `apps/api/services/extractor.py` and
-`apps/api/services/entity_resolver.py`, but a one-command rebuild script
-is not yet packaged — re-extraction takes ≈ 30 minutes on a T4 and
-requires the Llama 3.1 8B model to be loaded in Ollama. The committed
-snapshot is the canonical artefact for grading.
+ever want to rebuild the graph from scratch from the 200 source conversations
+under `apps/api/evaluation/data/synthetic_conversations/`, the extraction
+implementation lives in `apps/api/services/extractor.py` and
+`apps/api/services/entity_resolver.py` (LLM is provider-pluggable via
+`LLM_PROVIDER`; defaults to Ollama with Llama 3.1 8B). A one-command rebuild
+script is not yet packaged — re-extraction takes ≈ 30 minutes on a T4. **Note**
+that the committed snapshot was originally produced by the upstream NIM 49B
+pipeline; re-extracting locally with Llama 3.1 8B will produce a slightly
+different graph due to model differences. The committed snapshot is the
+canonical artefact for grading and matches the live demo exactly.
 
 ### Public deploy (GCP, behind a static IP)
 
