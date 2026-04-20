@@ -12,7 +12,7 @@ inference time.
 
 - **`/ask`** — type a question, get a streamed answer grounded in the graph
   with clickable citations.
-- **`/graph`** — pan/zoom the full graph (1,233 nodes, 4,111 edges).
+- **`/graph`** — pan/zoom the full graph (1,233 nodes, 2,833 edges).
 - **`/decisions/[id]`** — open the source trace for any cited decision.
 
 That's it for the live demo. No login, no editing — read-only end to end.
@@ -22,7 +22,7 @@ That's it for the live demo. No login, no editing — read-only end to end.
 - 386 `DecisionTrace` nodes (5-field structured: trigger / context / options / decision / rationale)
 - 847 `Entity` nodes (technologies, patterns, concepts, systems, persons)
 - 1,271 `INVOLVES` edges (decision ↔ entity)
-- 2,840 `SIMILAR_TO` edges (k-NN cosine over 768-d nomic-embed-text vectors, K=8)
+- 1,562 `SIMILAR_TO` edges (symmetric k-NN, raw cosine ≥ 0.75 over 768-d nomic-embed-text vectors, K=8)
 - Average decision confidence 0.945, top entity by degree is PostgreSQL (46 decisions)
 
 ## Run it locally
