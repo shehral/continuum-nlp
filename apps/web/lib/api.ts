@@ -148,6 +148,12 @@ export interface AskSubgraph {
   nodes: AskSourceNode[]
   edges: { source: string; target: string; relationship: string }[]
   seed_ids: string[]
+  /**
+   * Citation-order decision IDs. `citation_ids[i]` is the decision the LLM
+   * should resolve when emitting `[i+1]` in its answer. Used by the chat UI
+   * to render inline clickable citations.
+   */
+  citation_ids?: string[]
 }
 
 export interface AskMessage {

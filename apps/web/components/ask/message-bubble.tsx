@@ -1,14 +1,80 @@
 "use client"
 
+import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { cn } from "@/lib/utils"
-import type { AskMessage } from "@/lib/api"
+import type { AskMessage, AskSubgraph } from "@/lib/api"
 import { SourceCards } from "./source-cards"
 
 interface MessageBubbleProps {
   message: AskMessage
   index: number
+}
+
+/**
+ * Rewrite bare `[N]` (and `[N][M]` clusters) the LLM emitted into the
+ * markdown inline-link syntax `[[N]](#cite-N)`. A custom `a` renderer
+ * below intercepts `#cite-N` hrefs and turns them into clickable
+ * superscript citations that deep-link to the corresponding decision.
+ *
+ * Two guards:
+ * - Skip numbers outside the available citation range so we don't
+ *   hallucinate links for tokens like `[2024]` in a year reference.
+ * - Don't match inside fenced code blocks (``` ... ```), inline code
+ *   (`...`), or existing markdown links `[text](url)`.
+ */
+function injectCitationLinks(
+  content: string,
+  citationIds: readonly string[] | undefined
+): string {
+  if (!citationIds || citationIds.length === 0) return content
+  const maxN = citationIds.length
+
+  // Split the content on code-fence boundaries and only process the
+  // prose regions. Each odd-indexed segment is a fenced code block and
+  // left untouched.
+  const fenceParts = content.split(/(```[\s\S]*?```)/g)
+
+  for (let fi = 0; fi < fenceParts.length; fi++) {
+    if (fi % 2 === 1) continue
+
+    // Inline-code segments next (single-backtick spans).
+    const codeParts = fenceParts[fi].split(/(`[^`\n]*`)/g)
+    for (let ci = 0; ci < codeParts.length; ci++) {
+      if (ci % 2 === 1) continue
+      const region = codeParts[ci]
+
+      // Walk manually so we can avoid matching `[N]` when it is already
+      // part of a markdown link (e.g. `[1](https://...)`) or when N is
+      // out of range.
+      let out = ""
+      let i = 0
+      while (i < region.length) {
+        const m = region.slice(i).match(/\[(\d+)\]/)
+        if (!m) {
+          out += region.slice(i)
+          break
+        }
+        const bracketStart = i + (m.index ?? 0)
+        const bracketEnd = bracketStart + m[0].length
+        out += region.slice(i, bracketStart)
+
+        const n = parseInt(m[1], 10)
+        const alreadyLinked = region[bracketEnd] === "("
+        if (!alreadyLinked && n >= 1 && n <= maxN) {
+          out += `[${m[0]}](#cite-${n})`
+        } else {
+          out += m[0]
+        }
+        i = bracketEnd
+      }
+      codeParts[ci] = out
+    }
+    fenceParts[fi] = codeParts.join("")
+  }
+
+  return fenceParts.join("")
 }
 
 /**
@@ -74,8 +140,48 @@ export function MessageBubble({ message, index }: MessageBubbleProps) {
           "prose-blockquote:border-primary prose-blockquote:text-foreground/80"
         )}
       >
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {message.content}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: ({ href, children, ...props }) => {
+              if (
+                href &&
+                href.startsWith("#cite-") &&
+                message.sources?.citation_ids
+              ) {
+                const n = parseInt(href.slice("#cite-".length), 10)
+                const decisionId =
+                  Number.isFinite(n) && n >= 1 && n <= message.sources.citation_ids.length
+                    ? message.sources.citation_ids[n - 1]
+                    : undefined
+                if (decisionId) {
+                  const label = `Citation ${n}: open decision ${decisionId.slice(0, 8)}`
+                  const preview = message.sources.nodes.find(
+                    (node) => node.id === decisionId
+                  )?.data?.trigger
+                  return (
+                    <Link
+                      href={`/decisions/${decisionId}`}
+                      title={preview ? `[${n}] ${preview}` : label}
+                      aria-label={label}
+                      className={cn(
+                        "inline-flex mx-0.5 px-1.5 py-[1px]",
+                        "align-super text-[0.72em] font-medium font-mono no-underline",
+                        "rounded-md border border-primary/30 bg-primary/10 text-primary",
+                        "hover:bg-primary/20 hover:border-primary/60",
+                        "transition-colors"
+                      )}
+                    >
+                      {children}
+                    </Link>
+                  )
+                }
+              }
+              return <a href={href} {...props}>{children}</a>
+            },
+          }}
+        >
+          {injectCitationLinks(message.content, message.sources?.citation_ids)}
         </ReactMarkdown>
         {streaming && (
           <span className="ml-1 inline-block h-[1.1em] w-[2px] translate-y-[0.18em] animate-pulse bg-primary align-baseline" />

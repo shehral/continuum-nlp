@@ -24,7 +24,10 @@ SYSTEM_PROMPT = """You are Continuum, a knowledge graph assistant. Answer the us
 
 Rules:
 - Base your answer strictly on the provided context
-- Reference specific decisions, entities, and relationships from the context
+- When you draw on a specific numbered decision, cite it inline using its bracket marker — for example, "Hasura supports both REST and GraphQL [2]." Place the citation immediately after the claim it supports.
+- Only cite decisions that are actually relevant to the user's question. Ignore decisions in the context that are off-topic, even if they are numbered.
+- You may cite the same decision multiple times; you may cite several decisions on one sentence like [1][3].
+- Do not invent decision numbers that are not in the context block.
 - If the context doesn't contain enough information, say "I don't have enough information in the knowledge graph to answer that"
 - Do not make up information not present in the context
 - Use markdown formatting for readability
@@ -36,7 +39,9 @@ SYSTEM_PROMPT_WITH_HISTORY = """You are Continuum, a knowledge graph assistant. 
 
 Rules:
 - Base claims strictly on the provided graph context (or the prior turn's content if the user is asking about something they already saw)
-- Reference specific decisions, entities, and relationships
+- When you draw on a specific numbered decision, cite it inline using its bracket marker — for example, "Hasura supports both REST and GraphQL [2]." Place the citation immediately after the claim it supports.
+- Only cite decisions that are actually relevant; ignore off-topic numbered decisions in the context. You may cite the same decision multiple times, and several decisions on one sentence like [1][3].
+- Do not invent decision numbers that are not in the context block.
 - If neither the prior turn nor the graph context covers what the user is asking, say so
 - Do not invent information
 - Use markdown formatting for readability
@@ -77,7 +82,7 @@ async def ask(
         try:
             # Step 1: Retrieve context from the knowledge graph
             graph_rag = get_graph_rag_service()
-            subgraph, context_text, seed_ids = await graph_rag.retrieve_context(
+            subgraph, context_text, seed_ids, citation_ids = await graph_rag.retrieve_context(
                 query=q,
                 user_id=user_id,
                 top_k=top_k,
@@ -86,14 +91,21 @@ async def ask(
                 prev_answer=prev_a,
             )
 
-            # Reshape nodes to match frontend AskSourceNode contract
+            # Reshape nodes to match frontend AskSourceNode contract. Place
+            # citation-ordered decisions first (matching [1], [2], ... in the
+            # LLM context) so the chat-UI source cards line up with the
+            # inline markers the model emits. Remaining decisions then
+            # entities follow.
             seed_id_set = set(seed_ids)
-            shaped_nodes = []
-            for n in subgraph.get("nodes", []):
+            citation_id_list = list(citation_ids or [])
+            citation_id_set = set(citation_id_list)
+            nodes_by_id = {n.get("id", ""): n for n in subgraph.get("nodes", [])}
+
+            def shape(n: dict) -> dict:
                 node_id = n.get("id", "")
                 label = n.get("label", "")
                 node_type = "decision" if label == "DecisionTrace" else "entity"
-                shaped_nodes.append({
+                return {
                     "id": node_id,
                     "type": node_type,
                     "is_seed": node_id in seed_id_set,
@@ -107,13 +119,33 @@ async def ask(
                         "name": n.get("name"),
                         "entity_type": n.get("type"),
                     },
-                })
+                }
 
-            # Send context event with the reshaped subgraph
+            shaped_nodes: list[dict] = []
+            emitted: set[str] = set()
+            # Citation-ordered decisions first
+            for cid in citation_id_list:
+                n = nodes_by_id.get(cid)
+                if n is None or cid in emitted:
+                    continue
+                shaped_nodes.append(shape(n))
+                emitted.add(cid)
+            # Any remaining decisions (beyond MAX_CITATIONS) and then entities
+            for n in subgraph.get("nodes", []):
+                nid = n.get("id", "")
+                if nid in emitted:
+                    continue
+                shaped_nodes.append(shape(n))
+                emitted.add(nid)
+
+            # Send context event with the reshaped subgraph plus the
+            # [N] -> decision_id mapping so the frontend can render inline
+            # citations emitted by the LLM.
             yield _sse_event("context", {
                 "nodes": shaped_nodes,
                 "edges": subgraph.get("edges", []),
                 "seed_ids": list(seed_id_set),
+                "citation_ids": citation_id_list,
             })
 
             # Step 2: If no context, send a direct "no info" message

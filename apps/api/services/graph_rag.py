@@ -77,20 +77,40 @@ def rrf_fuse(
     return sorted(scores, key=lambda d: scores[d], reverse=True)
 
 
-def serialize_context(subgraph: dict) -> str:
+# Cap on citation-numbered decisions shown to the LLM. Matches the size of
+# the source-card strip on the chat UI so [N] markers emitted by the model
+# always resolve to a visible card.
+MAX_CITATIONS = 10
+
+
+def serialize_context(
+    subgraph: dict, seed_ids: list[str] | None = None
+) -> tuple[str, list[str]]:
     """Serialize a subgraph dict into structured text for LLM consumption.
+
+    Numbers up to ``MAX_CITATIONS`` decisions with bracketed indices
+    (``[1]``, ``[2]``, ...) so the LLM can emit inline citations the
+    frontend can resolve to source cards. Seed decisions are numbered
+    first (in ``seed_ids`` order), then remaining expansion decisions in
+    their arrival order.
 
     Args:
         subgraph: Dict with "nodes" and "edges" lists.
+        seed_ids: Optional list of seed node IDs controlling citation
+            ordering. When None, decisions are numbered in subgraph
+            arrival order.
 
     Returns:
-        Human-readable string describing decisions, entities, and relationships.
+        Tuple ``(context_string, citation_ids)`` where ``citation_ids[i]``
+        is the decision ID that index ``i+1`` in the context refers to
+        (i.e. the decision cited by ``[i+1]``). The frontend uses this
+        to render inline citations.
     """
     nodes = subgraph.get("nodes", [])
     edges = subgraph.get("edges", [])
 
     if not nodes and not edges:
-        return ""
+        return "", []
 
     parts: list[str] = []
 
@@ -111,12 +131,35 @@ def serialize_context(subgraph: dict) -> str:
         elif src in entity_by_id and tgt not in entity_by_id:
             decision_entities.setdefault(tgt, []).append(entity_by_id[src]["name"])
 
-    # Serialize decision nodes with their involved entities inline.
+    # Order decisions: seed decisions (in seed_ids order) first, then
+    # remaining expansion decisions in their arrival order. This is the
+    # canonical citation order shared with the frontend.
     decisions = [n for n in nodes if n.get("label") == "DecisionTrace"]
-    if decisions:
+    decision_by_id = {d.get("id"): d for d in decisions}
+    ordered_decisions: list[dict] = []
+    seed_set = set(seed_ids or [])
+    for sid in seed_ids or []:
+        d = decision_by_id.get(sid)
+        if d is not None:
+            ordered_decisions.append(d)
+    for d in decisions:
+        if d.get("id") not in seed_set:
+            ordered_decisions.append(d)
+
+    # Serialize decision nodes with their involved entities inline.
+    citation_ids: list[str] = []
+    if ordered_decisions:
         parts.append("## Decisions\n")
-        for d in decisions:
-            lines = [f"- **{d.get('trigger', 'Unknown trigger')}**"]
+        for i, d in enumerate(ordered_decisions):
+            # Only the first MAX_CITATIONS decisions get numbered index
+            # markers; later ones are still shown to the LLM but without
+            # citation numbers (the model is told it can only cite [1..N]).
+            if i < MAX_CITATIONS:
+                marker = f"[{i + 1}]"
+                citation_ids.append(d.get("id") or "")
+            else:
+                marker = "-"
+            lines = [f"{marker} **{d.get('trigger', 'Unknown trigger')}**"]
             decision_text = d.get("decision") or d.get("agent_decision", "")
             if decision_text:
                 lines.append(f"  Decision: {decision_text}")
@@ -147,7 +190,7 @@ def serialize_context(subgraph: dict) -> str:
             ename = e.get("name", "unnamed")
             parts.append(f"- [{etype}] {ename}")
 
-    return "\n".join(parts)
+    return "\n".join(parts), citation_ids
 
 
 class GraphRAGService:
@@ -468,7 +511,7 @@ class GraphRAGService:
         prev_query: str | None = None,
         prev_answer: str | None = None,
         session=None,
-    ) -> tuple[dict, str, list[str]]:
+    ) -> tuple[dict, str, list[str], list[str]]:
         """Full RAG pipeline: retrieve -> expand -> serialize.
 
         Args:
@@ -485,7 +528,9 @@ class GraphRAGService:
             session: Optional Neo4j session.
 
         Returns:
-            Tuple of (subgraph_dict, context_string, seed_ids).
+            Tuple of ``(subgraph_dict, context_string, seed_ids, citation_ids)``
+            where ``citation_ids[i]`` is the decision ID that the LLM should
+            resolve to when emitting ``[i+1]`` in its answer.
         """
         close_session = False
         if session is None:
@@ -515,17 +560,19 @@ class GraphRAGService:
 
             if not seed_ids:
                 logger.info("No results from hybrid retrieval")
-                return {"nodes": [], "edges": []}, "", []
+                return {"nodes": [], "edges": []}, "", [], []
 
             # Step 2: Subgraph expansion
             subgraph = await self.expand_subgraph(
                 seed_ids, depth=depth, session=session
             )
 
-            # Step 3: Serialize for LLM
-            context_str = serialize_context(subgraph)
+            # Step 3: Serialize for LLM (returns the citation-order list
+            # so the router can publish the matching [N] -> decision_id
+            # mapping to the frontend via the SSE context event).
+            context_str, citation_ids = serialize_context(subgraph, seed_ids)
 
-            return subgraph, context_str, seed_ids
+            return subgraph, context_str, seed_ids, citation_ids
         finally:
             if close_session:
                 await session.close()

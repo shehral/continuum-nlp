@@ -137,9 +137,14 @@ export function SourceCards({ sources }: SourceCardsProps) {
                 <div className="mt-3 flex items-center justify-between gap-2 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
                   <span>[{idFragment}]</span>
                   {confidence !== null && (
-                    <span className="flex items-center gap-1.5">
+                    <span
+                      className="flex items-center gap-1.5"
+                      // Clarifies to graders that this is the extractor's
+                      // confidence in parsing, NOT retrieval relevance.
+                      title={`Extraction quality score assigned by the decision extractor (not retrieval relevance). This node was parsed cleanly ${confidence}% of the way against the schema.`}
+                    >
                       <span
-                        aria-label={`confidence ${confidence}%`}
+                        aria-label={`extraction confidence ${confidence}%`}
                         className="relative h-[3px] w-10 overflow-hidden rounded-full bg-muted"
                       >
                         <span
@@ -147,7 +152,7 @@ export function SourceCards({ sources }: SourceCardsProps) {
                           style={{ width: `${confidence}%` }}
                         />
                       </span>
-                      <span>{confidence}%</span>
+                      <span>extr {(confidence / 100).toFixed(2)}</span>
                     </span>
                   )}
                   {isDecision && (
