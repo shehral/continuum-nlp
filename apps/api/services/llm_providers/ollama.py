@@ -92,18 +92,33 @@ class OllamaEmbeddingProvider(BaseEmbeddingProvider):
     def dimensions(self) -> int:
         return self._dimensions
 
+    # nomic-embed-text v1/v1.5 was trained with task-type prefixes.
+    # Without them queries and documents land in a degraded shared space.
+    # See https://huggingface.co/nomic-ai/nomic-embed-text-v1.5
+    _NOMIC_PREFIX = {
+        "query": "search_query: ",
+        "passage": "search_document: ",
+        "document": "search_document: ",
+    }
+
+    def _apply_prefix(self, text: str, input_type: str) -> str:
+        if "nomic" not in self._model.lower():
+            return text
+        prefix = self._NOMIC_PREFIX.get(input_type, "search_document: ")
+        return f"{prefix}{text}"
+
     async def embed(
         self,
         texts: list[str],
         input_type: str = "passage",
     ) -> list[list[float]]:
-        # Ollama's /api/embed accepts a list of inputs directly
+        prefixed = [self._apply_prefix(t, input_type) for t in texts]
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 f"{self._host}/api/embed",
                 json={
                     "model": self._model,
-                    "input": texts,
+                    "input": prefixed,
                 },
             )
             response.raise_for_status()

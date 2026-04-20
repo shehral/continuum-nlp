@@ -28,6 +28,27 @@ def _user_filter(alias: str = "node") -> str:
     return f"({alias}.user_id = $user_id OR {alias}.user_id IS NULL)"
 
 
+# Lucene reserved characters that must be escaped in fulltext queries to
+# avoid silent parse failures (which previously caused fulltext to return
+# nothing for queries like "C++ vs Rust" or "Redis (caching)").
+_LUCENE_SPECIALS = r'+-&|!(){}[]^"~*?:\/'
+
+
+def escape_lucene(query: str) -> str:
+    """Escape Lucene special characters in a free-text user query.
+
+    Returns a copy where each Lucene operator is preceded by a backslash so
+    Neo4j's db.index.fulltext.queryNodes treats them as literals rather than
+    syntax. Whitespace, alphanumerics and other punctuation pass through.
+    """
+    out = []
+    for ch in query:
+        if ch in _LUCENE_SPECIALS:
+            out.append("\\")
+        out.append(ch)
+    return "".join(out)
+
+
 def rrf_fuse(
     fulltext_ids: list[str],
     vector_ids: list[str],
@@ -147,14 +168,18 @@ class GraphRAGService:
         query: str,
         user_id: str,
         limit: int = 20,
-    ) -> list[str]:
+    ) -> tuple[list[str], list[str]]:
         """Run fulltext search across decision and entity indexes.
 
-        Returns list of node IDs ranked by fulltext score.
+        Returns (decision_ids, entity_ids) ranked by fulltext score. The two
+        lists are kept separate so the caller can prioritize decisions for
+        seed slots — entity hits make poor seeds because they carry no
+        decision text for the LLM to reason over.
         """
-        ids: list[str] = []
+        safe_query = escape_lucene(query)
+        decision_ids: list[str] = []
+        entity_ids: list[str] = []
 
-        # Search decisions
         result = await session.run(
             f"""
             CALL db.index.fulltext.queryNodes('decision_fulltext', $query)
@@ -164,12 +189,11 @@ class GraphRAGService:
             ORDER BY score DESC
             LIMIT $limit
             """,
-            parameters={"query": query, "user_id": user_id, "limit": limit},
+            parameters={"query": safe_query, "user_id": user_id, "limit": limit},
         )
         async for record in result:
-            ids.append(record["id"])
+            decision_ids.append(record["id"])
 
-        # Search entities (scoped to user's decisions)
         result = await session.run(
             """
             CALL db.index.fulltext.queryNodes('entity_fulltext', $query)
@@ -182,13 +206,12 @@ class GraphRAGService:
             ORDER BY score DESC
             LIMIT $limit
             """,
-            parameters={"query": query, "user_id": user_id, "limit": limit},
+            parameters={"query": safe_query, "user_id": user_id, "limit": limit},
         )
         async for record in result:
-            if record["id"] not in ids:
-                ids.append(record["id"])
+            entity_ids.append(record["id"])
 
-        return ids
+        return decision_ids, entity_ids
 
     async def _vector_search(
         self,
@@ -196,18 +219,18 @@ class GraphRAGService:
         query: str,
         user_id: str,
         limit: int = 20,
-    ) -> list[str]:
+    ) -> tuple[list[str], list[str]]:
         """Run vector search across decision and entity indexes.
 
-        Returns list of node IDs ranked by vector similarity.
+        Returns (decision_ids, entity_ids) ranked by vector similarity.
         """
         embedding = await self._embedding_service.embed_text(
             query, input_type="query"
         )
 
-        ids: list[str] = []
+        decision_ids: list[str] = []
+        entity_ids: list[str] = []
 
-        # Search decisions
         result = await session.run(
             f"""
             CALL db.index.vector.queryNodes('decision_embedding', $top_k, $embedding)
@@ -223,9 +246,8 @@ class GraphRAGService:
             },
         )
         async for record in result:
-            ids.append(record["id"])
+            decision_ids.append(record["id"])
 
-        # Search entities (scoped to user's decisions)
         result = await session.run(
             """
             CALL db.index.vector.queryNodes('entity_embedding', $top_k, $embedding)
@@ -244,10 +266,9 @@ class GraphRAGService:
             },
         )
         async for record in result:
-            if record["id"] not in ids:
-                ids.append(record["id"])
+            entity_ids.append(record["id"])
 
-        return ids
+        return decision_ids, entity_ids
 
     async def hybrid_retrieve(
         self,
@@ -258,74 +279,75 @@ class GraphRAGService:
     ) -> list[str]:
         """Run hybrid retrieval: fulltext + vector search fused with RRF.
 
+        Returns a single fused list with **decision IDs first, then entity IDs**.
+        Each modality's decision and entity hits are RRF-fused independently
+        within their type so that entity hits can never crowd out decisions
+        in the top-K seed budget. Entity seeds still survive (they expand
+        usefully through INVOLVES) but stay below the decision seeds.
+
         Falls back to fulltext-only if vector search fails (e.g. embedding
         service unavailable).
-
-        Args:
-            query: User search query.
-            user_id: Scoping user ID.
-            limit: Max results per search method.
-            session: Optional Neo4j session (created if not provided).
-
-        Returns:
-            Fused list of node IDs, best first.
         """
+        empty: tuple[list[str], list[str]] = ([], [])
+
         if session is not None:
-            # Caller-provided session: use it directly (no concurrency)
             try:
-                fulltext_ids = await self._fulltext_search(
+                ft_decisions, ft_entities = await self._fulltext_search(
                     session, query, user_id, limit
                 )
             except Exception as e:
                 logger.warning(f"Fulltext search failed: {e}")
-                fulltext_ids = []
+                ft_decisions, ft_entities = empty
 
             try:
-                vector_ids = await self._vector_search(
+                vec_decisions, vec_entities = await self._vector_search(
                     session, query, user_id, limit
                 )
             except Exception as e:
                 logger.warning(
                     f"Vector search failed, falling back to fulltext-only: {e}"
                 )
-                vector_ids = []
-
-            fused = rrf_fuse(fulltext_ids, vector_ids)
-            logger.info(
-                f"Hybrid retrieve: {len(fulltext_ids)} fulltext, "
-                f"{len(vector_ids)} vector, {len(fused)} fused"
-            )
-            return fused
-
-        # No session provided: create two separate sessions for concurrent use
-        # (Neo4j AsyncSession is NOT safe for concurrent use)
-        session_ft = await get_neo4j_session()
-        session_vec = await get_neo4j_session()
-        try:
+                vec_decisions, vec_entities = empty
+        else:
+            session_ft = await get_neo4j_session()
+            session_vec = await get_neo4j_session()
             try:
-                fulltext_ids, vector_ids = await asyncio.gather(
-                    self._fulltext_search(session_ft, query, user_id, limit),
-                    self._vector_search(session_vec, query, user_id, limit),
-                )
-            except Exception as e:
-                # Fallback: fulltext only
-                logger.warning(
-                    f"Vector search failed, falling back to fulltext-only: {e}"
-                )
-                fulltext_ids = await self._fulltext_search(
-                    session_ft, query, user_id, limit
-                )
-                vector_ids = []
+                try:
+                    (ft_decisions, ft_entities), (vec_decisions, vec_entities) = (
+                        await asyncio.gather(
+                            self._fulltext_search(session_ft, query, user_id, limit),
+                            self._vector_search(session_vec, query, user_id, limit),
+                        )
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Vector search failed, falling back to fulltext-only: {e}"
+                    )
+                    ft_decisions, ft_entities = await self._fulltext_search(
+                        session_ft, query, user_id, limit
+                    )
+                    vec_decisions, vec_entities = empty
+            finally:
+                await session_ft.close()
+                await session_vec.close()
 
-            fused = rrf_fuse(fulltext_ids, vector_ids)
-            logger.info(
-                f"Hybrid retrieve: {len(fulltext_ids)} fulltext, "
-                f"{len(vector_ids)} vector, {len(fused)} fused"
-            )
-            return fused
-        finally:
-            await session_ft.close()
-            await session_vec.close()
+        decision_fused = rrf_fuse(ft_decisions, vec_decisions)
+        entity_fused = rrf_fuse(ft_entities, vec_entities)
+        # Decisions before entities; dedupe in case an id somehow appears
+        # in both (it shouldn't with separate indexes, but be defensive).
+        seen: set[str] = set()
+        fused: list[str] = []
+        for nid in (*decision_fused, *entity_fused):
+            if nid not in seen:
+                seen.add(nid)
+                fused.append(nid)
+
+        logger.info(
+            f"Hybrid retrieve: ft=({len(ft_decisions)}d/{len(ft_entities)}e) "
+            f"vec=({len(vec_decisions)}d/{len(vec_entities)}e) "
+            f"-> {len(decision_fused)} decisions + {len(entity_fused)} entities"
+        )
+        return fused
 
     async def expand_subgraph(
         self,
@@ -356,24 +378,38 @@ class GraphRAGService:
             close_session = True
 
         try:
+            # Subgraph expansion is restricted to INVOLVES only. SIMILAR_TO
+            # edges (~2.8k post-densification) otherwise dominate the subgraph
+            # with low-signal decision-to-decision pairs, starving the LLM
+            # context of actual decision text.
+            #
+            # When the cap fires (max_nodes), we drop entity nodes first and
+            # keep seeds + every other DecisionTrace. This protects the
+            # information the LLM actually reasons over (decision text)
+            # against being silently truncated for popular hub entities like
+            # "PostgreSQL" (46 involved decisions) or "FastAPI".
             result = await session.run(
                 """
                 UNWIND $seed_ids AS seedId
                 MATCH (seed) WHERE seed.id = seedId
-                // Restrict expansion to INVOLVES only. SIMILAR_TO edges
-                // (2.8k post-densification) otherwise dominate the subgraph with
-                // low-signal decision→decision similarity pairs, starving the
-                // LLM context of actual decision text.
                 CALL apoc.path.subgraphAll(seed, {
                     maxLevel: $depth,
                     relationshipFilter: 'INVOLVES'
                 })
                 YIELD nodes, relationships
-                UNWIND nodes AS n
-                WITH COLLECT(DISTINCT n) AS allNodes,
-                     COLLECT(DISTINCT relationships) AS allRels
-                UNWIND allNodes AS node
-                WITH allNodes, allRels, node
+                WITH COLLECT(DISTINCT nodes) AS nodeLists,
+                     COLLECT(DISTINCT relationships) AS allRels,
+                     $seed_ids AS seedIds
+                UNWIND nodeLists AS nodeList
+                UNWIND nodeList AS node
+                WITH DISTINCT node, allRels, seedIds
+                WITH node, allRels,
+                     CASE
+                         WHEN node.id IN seedIds THEN 0
+                         WHEN HEAD(LABELS(node)) = 'DecisionTrace' THEN 1
+                         ELSE 2
+                     END AS rank
+                ORDER BY rank ASC
                 LIMIT $max_nodes
                 WITH COLLECT(node) AS limitedNodes, allRels
                 UNWIND allRels AS relList

@@ -27,10 +27,41 @@ def log(msg: str) -> None:
     print(f"[reembed] {msg}", flush=True)
 
 
+_NOMIC_DOC_PREFIX = "search_document: "
+
+
 def embed(client: ollama.Client, text: str) -> list[float]:
-    # ollama-py returns {'embedding': [...]}
-    resp = client.embeddings(model=EMBEDDING_MODEL, prompt=text)
+    # nomic-embed-text expects task-type prefixes (search_document: / search_query:)
+    # to land inputs in the right embedding subspace. Documents always use
+    # search_document: here; the API uses search_query: at retrieval time.
+    prefixed = (
+        f"{_NOMIC_DOC_PREFIX}{text}" if "nomic" in EMBEDDING_MODEL.lower() else text
+    )
+    resp = client.embeddings(model=EMBEDDING_MODEL, prompt=prefixed)
     return list(resp["embedding"])
+
+
+def _decision_text(r: dict) -> str:
+    """Build a richly-labeled embedding text for a decision.
+
+    Mirrors EmbeddingService.embed_decision() in the API service layer:
+    fields are labeled and newline-separated so the embedder can attend
+    to each section, and the options[] field (which carries the
+    comparative signal for queries like 'PostgREST vs Hasura') is
+    included instead of being silently dropped.
+    """
+    options = r.get("options") or []
+    if not isinstance(options, list):
+        options = [str(options)]
+    return "\n".join(
+        [
+            f"Decision Trigger: {r.get('trigger', '') or ''}",
+            f"Context: {r.get('context', '') or ''}",
+            f"Options Considered: {', '.join(options)}",
+            f"Final Decision: {r.get('decision', '') or ''}",
+            f"Rationale: {r.get('rationale', '') or ''}",
+        ]
+    ).strip()
 
 
 def reembed_decisions(driver, client) -> int:
@@ -38,16 +69,14 @@ def reembed_decisions(driver, client) -> int:
         result = s.run(
             "MATCH (d:DecisionTrace) "
             "RETURN d.id AS id, d.decision AS decision, d.context AS context, "
-            "       d.rationale AS rationale, d.trigger AS trigger"
+            "       d.rationale AS rationale, d.trigger AS trigger, d.options AS options"
         )
         rows = [dict(r) for r in result]
 
     log(f"embedding {len(rows)} decisions…")
     t0 = time.time()
     for i, r in enumerate(rows):
-        text = " ".join(
-            filter(None, [r.get("decision"), r.get("context"), r.get("rationale"), r.get("trigger")])
-        ).strip()
+        text = _decision_text(r)
         if not text:
             continue
         vec = embed(client, text)
@@ -71,7 +100,10 @@ def reembed_entities(driver, client) -> int:
     log(f"embedding {len(rows)} entities…")
     t0 = time.time()
     for i, r in enumerate(rows):
-        text = f"{r['name']} ({r['type']})" if r.get("type") else r["name"]
+        # Match the API service's embed_entity() format: "type: name".
+        text = (
+            f"{r['type']}: {r['name']}" if r.get("type") else r["name"]
+        )
         vec = embed(client, text)
         with driver.session() as s:
             s.run(
